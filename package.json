@@ -1,10 +1,10 @@
 {
   "name": "ui-elements",
-  "version": "0.0.1",
   "private": true,
+  "version": "0.0.0-development",
   "description": "web components library",
   "scripts": {
-    "bootstrap": "lerna bootstrap"
+    "bootstrap": "yarn --frozen-lockfile && npx lerna bootstrap"
   },
   "author": "poyoho",
   "license": "ISC",
@@ -29,7 +29,8 @@
     "access": "public"
   },
   "files": [
-    "dist"
+    "packages",
+    "lib"
   ],
   "main": "index.ts",
   "devDependencies": {
