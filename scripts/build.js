@@ -1,125 +1,63 @@
 const path =  require("path")
 const chalk = require("chalk")
-const rollup =  require("rollup")
-const { nodeResolve } =  require("@rollup/plugin-node-resolve")
-// const { terser } =  require("rollup-plugin-terser")
-const commonjs =  require("rollup-plugin-commonjs")
-const json =  require("@rollup/plugin-json")
+const rollup = require("rollup")
 const esbuild = require("rollup-plugin-esbuild")
-const tsc =  require("rollup-plugin-typescript2")
-const nodePolyfills = require("rollup-plugin-node-polyfills")
+const tsc = require("rollup-plugin-typescript2")
+const { nodeResolve } = require('@rollup/plugin-node-resolve')
+const json = require("@rollup/plugin-json")
+const rollupWorker = require("./rollup.worker")
 const rm = require("rimraf")
-const pkg = require("../packages/compile/package.json")
-const deps = Object.keys(pkg.dependencies)
-const args = require("minimist")(process.argv.slice(2))
+const tsconfigPath = path.join(__dirname, "../tsconfig.json")
+const packagePath = path.join(__dirname, "../packages/")
+const { getPackages } = require("@lerna/project")
+const { exit } = require("process")
 
-
-__dirname = path.join(__dirname, "../packages/compile/")
-const tsconfigPath = path.join(__dirname, "tsconfig.json")
-
-let _rollup_options = (_opt) => ({
-  input: {
-    input: path.join(__dirname, "src/index.ts"),
+/**
+ * build component by rollup
+ * @param {string} pkgName
+ */
+async function componentBuilder (pkgName) {
+  const entry = path.resolve(packagePath, pkgName)
+  const deps = Object.keys(require(path.resolve(entry, "package.json")).dependencies || {})
+  const bundle = await rollup.rollup({
+    input: path.resolve(entry, "index.ts"),
     plugins: [
-      _opt.browser && nodePolyfills(),
-      nodeResolve(),
-      commonjs(),
-      _opt.dts
-        ? tsc({
-          tsconfig: tsconfigPath,
-          tsconfigOverride: {
-            compilerOptions: {
-              emitDeclarationOnly: true,
-            },
-          }
-        })
-        : esbuild({
-          tsconfig: tsconfigPath,
-          exclude: [
-            "node_modules",
-            "__tests__",
-          ]
-        }),
+      nodeResolve({
+        jsnext: true,
+        main: true,
+        browser: true,
+      }),
+      esbuild({
+        tsconfig: tsconfigPath,
+        exclude: [
+          "node_modules",
+          "__tests__",
+        ]
+      }),
+      rollupWorker(),
       json(),
-    // terser(),
     ],
-    external(id) {
-    // 不打包deps的项目
-      return deps.some(k => new RegExp("^" + k).test(id))
+    external (id) {
+      return /^@ui-elements/.test(id)
+        || deps.some(k => new RegExp('^' + k).test(id)) && !id.includes("monaco-editor/esm")
     },
-  },
-  output: {
-    format: _opt.browser ? "es" : "cjs",
-    file: _opt.browser
-      ? path.join(__dirname, "/dist/browser.js")
-      : path.join(__dirname, "/dist/node.js")
-
-  }
-})
-
-async function buildNode(watch) {
-  if (watch) {
-    let opts = _rollup_options({ browser: false, dts: true })
-    rollup.watch({ ...opts.input, output: opts.output, watch: { chokidar: true } })
-    opts = _rollup_options({ browser: false, dts: false })
-    rollup.watch({ ...opts.input, output: opts.output, watch: { chokidar: true } })
-    console.log(chalk.green(`build ${watch} server`))
-  } else {
-    let opts = _rollup_options({ browser: false, dts: true })
-    let bundle = await rollup.rollup(opts.input)
-    await bundle.write(opts.output)
-    opts = _rollup_options({ browser: false, dts: false })
-    bundle = await rollup.rollup(opts.input)
-    await bundle.write(opts.output)
-    console.log(chalk.green("build nodejs"))
-  }
-}
-
-async function buildBrowser(watch) {
-  if (watch) {
-    let opts = _rollup_options({ browser: true, dts: true })
-    rollup.watch({ ...opts.input, output: opts.output, watch: { chokidar: true } })
-    opts = _rollup_options({ browser: true, dts: false })
-    rollup.watch({ ...opts.input, output: opts.output, watch: { chokidar: true } })
-    console.log(chalk.green(`build ${watch} server`))
-  } else {
-    let opts = _rollup_options({ browser: true, dts: true })
-    let bundle = await rollup.rollup(opts.input)
-    await bundle.write(opts.output)
-    opts = _rollup_options({ browser: true, dts: false })
-    bundle = await rollup.rollup(opts.input)
-    await bundle.write(opts.output)
-    console.log(chalk.green("build browser"))
-  }
-}
-
-async function rmDir(dir) {
-  return new Promise((resolve) => {
-    rm(dir, {}, () => {
-      resolve()
-    })
+  })
+  await bundle.write({
+    format: "es",
+    dir: path.resolve(__dirname, "..", "lib", pkgName)
   })
 }
 
-async function main () {
-  const watch = args.watch
-  await rmDir(path.join(__dirname, "dist"))
-  switch(watch) {
-    case "browser":
-      buildBrowser("browser")
-      break
-    case "node":
-      buildNode("node")
-      break
-    case "all":
-      buildBrowser("browser")
-      buildNode("node")
-      break
-    default:
-      buildBrowser()
-      buildNode()
-      break
+async function runBuild () {
+  const pkgs = (await getPackages())
+    .map(pkg => pkg.name)
+    .filter(name => !["ui-elements", "@ui-elements/utils"].includes(name))
+    .map(name => name.replace("@ui-elements/", ""))
+
+  for (const pkgName of pkgs) {
+    console.log(pkgName)
+    await componentBuilder(pkgName)
   }
 }
 
-main()
+runBuild()

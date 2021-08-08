@@ -15,7 +15,6 @@ async function loadWorker () {
     { default: TsWorker },
     { default: CSSWorker },
   ] = await Promise.all([
-    // TODO 改成rollup引入worker方式 因为最后会使用rollup打包
     import('monaco-editor/esm/vs/editor/editor.worker?worker' as any),
     import('monaco-editor/esm/vs/language/json/json.worker?worker' as any),
     import('monaco-editor/esm/vs/language/typescript/ts.worker?worker' as any),

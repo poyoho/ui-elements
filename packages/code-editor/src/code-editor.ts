@@ -5,7 +5,7 @@ function validateProps (attr: NamedNodeMap) {
   if (!lang) {
     throw "the component must had attributes[lang]"
   }
-  const supportLanguage = Object.values(SupportLanguage)
+  const supportLanguage = Object.keys(SupportLanguage)
   if (!supportLanguage.includes(lang.value)) {
     throw `that component only support ${supportLanguage}`
   }

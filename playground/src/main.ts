@@ -1,3 +1,3 @@
-import useMdLoaderComponent from "@poyoho/md-loader-components"
+import { install } from "../../lib/code-editor/index.js"
 
-useMdLoaderComponent()
+install()
