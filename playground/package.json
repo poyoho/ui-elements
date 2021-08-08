@@ -1,0 +1,10 @@
+{
+  "license": "ISC",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "^2.3.8"
+  }
+}

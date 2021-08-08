@@ -1,0 +1,9 @@
+{
+  "name": "@ui-elements/code-editor",
+  "version": "0.0.1",
+  "dependencies": {
+    "monaco-editor": "^0.26.1",
+    "monaco-editor-core": "^0.26.0",
+    "vscode-html-languageservice": "^4.0.7"
+  }
+}
