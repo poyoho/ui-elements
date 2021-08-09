@@ -1,3 +1,3 @@
-import { install } from "../../lib/code-editor/index.js"
+import { install } from "../../packages/ui-elements"
 
 install()

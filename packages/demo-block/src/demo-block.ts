@@ -80,23 +80,30 @@ export default class DemoBlockElement extends HTMLElement {
     // if(component?.className.includes("vue")) {
     //   appendVueSFCPlaygroundCtrl(ctrl, state.componentContext)
     // }
+    if (!component) {
+      copyIcon.parentElement?.remove()
+      copyIcon.remove()
+    } else {
+      copyIcon.addEventListener("click", copyToClipBoard)
+      copyIcon.addEventListener("mouseleave", resetCopyIcon)
+    }
     ctrl.addEventListener("click", expandContract)
-    copyIcon.addEventListener("click", copyToClipBoard)
-    copyIcon.addEventListener("mouseleave", resetCopyIcon)
   }
 
   disconnectedCallback() {
     const ctrl = this.ctrl
     const copyIcon = this.copyIcon
     const state = states.get(this)
-    if (!state || !ctrl || !copyIcon) {
-      return
+    if (state) {
+      states.delete(this)
     }
-
-    states.delete(this)
-    ctrl.removeEventListener("click", expandContract)
-    copyIcon.removeEventListener("click", copyToClipBoard)
-    copyIcon.removeEventListener("mouseleave", resetCopyIcon)
+    if (ctrl) {
+      ctrl.removeEventListener("click", expandContract)
+    }
+    if (copyIcon) {
+      copyIcon.removeEventListener("click", copyToClipBoard)
+      copyIcon.removeEventListener("mouseleave", resetCopyIcon)
+    }
   }
 
   get source(): HTMLDivElement {
@@ -121,6 +128,6 @@ export default class DemoBlockElement extends HTMLElement {
 
   get componentSource(): HTMLDivElement | null {
     // !!! this component add in packages/compile
-    return this.querySelector("[slot='highlight'] .component")
+    return this.querySelector("[slot='highlight'] .cloneable")
   }
 }
