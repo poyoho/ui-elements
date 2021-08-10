@@ -9,7 +9,19 @@ export default class CodeCommentElement extends HTMLElement {
     shadowRoot.appendChild(wrap)
   }
 
+  get source () {
+    return this.querySelector("[slot='source']")!
+  }
+
+  get comment () {
+    return this.querySelectorAll("[slot='comment']")!
+  }
+
   connectedCallback() {
+    Array.from(this.source.children).forEach(elm => {
+      const css = getComputedStyle(elm)
+      console.log(css.display)
+    })
   }
 
   disconnectedCallback() {
