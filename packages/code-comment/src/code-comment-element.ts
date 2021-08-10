@@ -8,22 +8,23 @@ export default html`
     <slot name="source"></slot>
   </div>
   <div class="comment">
-    <slot name="comment"></slot>
+    <slot name="comment" class="comment-text"></slot>
   </div>
 </div>
 <style>
 .code-comment {
   display: flex;
+  width: 100%;
 }
 .source {
-  width: 50%;
   flex: 1;
   background: aqua;
+  overflow: auto;
 }
 .comment {
-  width: 50%;
   flex: 1;
   background: green;
+  overflow: auto;
 }
 </style>
 `
