@@ -38,8 +38,8 @@ async function componentBuilder (pkgName) {
       json(),
     ],
     external (id) {
-      return /^@ui-elements/.test(id)
-        || deps.some(k => new RegExp('^' + k).test(id)) && !id.includes("monaco-editor/esm")
+      return /^@ui-elements/.test(id) && !["@ui-elements/utils"].includes(id)
+        || deps.some(k => new RegExp('^' + k).test(id)) && !["monaco-editor/esm"].includes(id)
     },
   })
   await bundle.write({
