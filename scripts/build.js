@@ -6,6 +6,7 @@ const tsc = require("rollup-plugin-typescript2")
 const { nodeResolve } = require('@rollup/plugin-node-resolve')
 const json = require("@rollup/plugin-json")
 const rollupWorker = require("./rollup.worker")
+const rollupTransform = require("./rollup.transform")
 const rm = require("rimraf")
 const tsconfigPath = path.join(__dirname, "../tsconfig.json")
 const packagePath = path.join(__dirname, "../packages/")
@@ -35,23 +36,29 @@ async function componentBuilder (pkgName) {
         ]
       }),
       rollupWorker(),
+      rollupTransform(),
       json(),
     ],
     external (id) {
-      return /^@ui-elements/.test(id) && !["@ui-elements/utils"].includes(id)
-        || deps.some(k => new RegExp('^' + k).test(id)) && !["monaco-editor/esm"].includes(id)
+      return /^@ui-elements/.test(id)
+        || deps.some(k => new RegExp('^' + k).test(id)) && !id.includes("monaco-editor/esm")
     },
   })
   await bundle.write({
     format: "es",
-    dir: path.resolve(__dirname, "..", "lib", pkgName)
+    dir: path.resolve(__dirname, "..", "lib", pkgName),
+    paths(id) {
+      if (id.startsWith("@ui-elements")) {
+        return id.replace('@ui-elements', '..')
+      }
+    },
   })
 }
 
 async function runBuild () {
   const pkgs = (await getPackages())
     .map(pkg => pkg.name)
-    .filter(name => !["ui-elements", "@ui-elements/utils"].includes(name))
+    .filter(name => name !== "@ui-elements/code-editor")
     .map(name => name.replace("@ui-elements/", ""))
 
   for (const pkgName of pkgs) {

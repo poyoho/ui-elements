@@ -39,7 +39,6 @@ module.exports = function rollupWebWorker () {
         return
       }
       const filename = cleanUrl(id)
-      console.log(query, filename)
       const bundle = await rollup.rollup({
         input: filename,
         plugins: [
