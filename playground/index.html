@@ -12,31 +12,72 @@
       padding: 0;
     }
     .demo-block {
-      width: 100%;
       background: #121212;
       color: #fff;
     }
     .editor {
-      width: 100%;
       height: 200px;
+    }
+    .code-comment {
+      width: 300px;
+    }
+    .inline {
+      display: inline-block;
+    }
+    .wrap {
+      width: 80%;
+      margin: 0 auto;
     }
   </style>
 </head>
 <body>
-  <h3>demo-block</h3>
-  <demo-block>
-    <div slot="exec">!!!exec</div>
-    <div slot="description">!!!description</div>
-    <div slot="highlight">
-      <div class="demo-block cloneable">
-        <h1>asd</h1>
+  <div class="wrap">
+    <h3>demo-block</h3>
+    <demo-block>
+      <div slot="exec">!!!exec</div>
+      <div slot="description">!!!description</div>
+      <div slot="highlight">
+        <div class="demo-block cloneable">
+          <h1>asd</h1>
+        </div>
       </div>
-    </div>
-  </demo-block>
-  <h3>code-editor</h3>
-  <code-editor lang="js" class="editor"></code-editor>
-  <h3>code-comment</h3>
-
+    </demo-block>
+  </div>
+  <div class="wrap">
+    <h3>code-editor</h3>
+    <code-editor lang="js" class="editor"></code-editor>
+  </div>
+  <div class="wrap">
+    <h3>code-comment</h3>
+    <code-comment class="code-comment">
+      <div slot="source">
+        <h1>123456789</h1>
+        <h2 class="inline">123456789</h2>
+        <h3 class="inline">123456789</h3>
+        <h4 class="inline">123456789</h4>
+        <p class="inline">123456789123456789123456789123456789123456789123456789123456789123456789123456789</p>
+        <h1><br>123456789</h1>
+        <h2>123456789</h2>
+        <h3 class="inline">123456789</h3>
+        <h4>123456789</h4>
+        <p>12345678912345678912<br>3456789123456789123456789<br>123456789123456789123456789123456789</p>
+        <h1>123456789</h1>
+        <h2>123456789</h2>
+        <h3>123456789</h3>
+        <h4>123456789</h4>
+        <p>12345678912345678912345678912345678912345<br>6789123456789123<br>4567891234567<br>89123456789</p>
+        <strong>strong</strong>
+        <i>strong</i>
+        <pre>
+          asdsadasd
+          bbbb
+          xccsda
+        </pre>
+      </div>
+      <div slot="comment" top="1">hello</div>
+      <div slot="comment" top="20">world</div>
+    </code-comment>
+  </div>
 </body>
 <script>
   const elm = document.querySelector(".editor")
