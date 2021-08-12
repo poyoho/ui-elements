@@ -15,120 +15,89 @@ const runIfNotDry = isDryRun ? dryRun : run
 const step = msg => console.log(chalk.cyan(msg))
 
 async function choiseTargetVersion () {
-  async function chooseVersion(pkg) {
-    let targetVersion
-    const currentVersion = require(path.join(__dir, pkg, "package.json")).version
-    const preId = semver.prerelease(currentVersion) && semver.prerelease(currentVersion)[0]
-    const inc = i => semver.inc(currentVersion, i, preId)
+  const currentVersion = require(path.join(__dirname, "../package.json")).version
+  const preId = semver.prerelease(currentVersion) && semver.prerelease(currentVersion)[0]
+  const inc = i => semver.inc(currentVersion, i, preId)
 
-    const versionIncrements = [
-      "patch",
-      "minor",
-      "major",
-      ...(preId ? ["prepatch", "preminor", "premajor", "prerelease"] : [])
-    ]
+  const versionIncrements = [
+    "patch",
+    "minor",
+    "major",
+    ...(preId ? ["prepatch", "preminor", "premajor", "prerelease"] : [])
+  ]
 
-    // no explicit version, offer suggestions
-    const { release } = await prompt({
-      type: "select",
-      name: "release",
-      message: `Select ${pkg} release type`,
-      choices: (versionIncrements.map(i => `${i} (${inc(i)})`)).concat(["custom"])
-    })
+  // no explicit version, offer suggestions
+  const { release } = await prompt({
+    type: "select",
+    name: "release",
+    message: `Select release type`,
+    choices: (versionIncrements.map(i => `${i} (${inc(i)})`)).concat(["custom"])
+  })
 
-    if (release === "custom") {
-      targetVersion = (await prompt({
-        type: "input",
-        name: "version",
-        message: `Input ${pkg} custom version`,
-        initial: currentVersion
-      })).version
-    } else {
-      targetVersion = release.match(/\((.*)\)/)[1]
-    }
-
-    const { yes } = await prompt({
-      type: "confirm",
-      name: "yes",
-      message: `Releasing ${pkg}@v${targetVersion}. Confirm?`
-    })
-
-    if (!yes) {
-      return
-    }
-    return targetVersion
+  if (release === "custom") {
+    targetVersion = (await prompt({
+      type: "input",
+      name: "version",
+      message: `Input custom version`,
+      initial: currentVersion
+    })).version
+  } else {
+    targetVersion = release.match(/\((.*)\)/)[1]
   }
 
-  const __dir = path.join(__dirname, "../packages")
-  const packages = fs.readdirSync(__dir)
-
-  const { pkg } = await prompt({
-    type: "select",
-    name: "pkg",
-    message: "Select release package",
-    choices: [...packages, "all"]
+  const { yes } = await prompt({
+    type: "confirm",
+    name: "yes",
+    message: `Releasing @v${targetVersion}. Confirm?`
   })
-  const targetVersion = []
-  if (pkg === "all") {
-    for(let i = 0; i < packages.length; i++) {
-      const ver = await chooseVersion(packages[i])
-      ver && targetVersion.push({
-        pkg: packages[i],
-        ver: ver,
-      })
-    }
-  } else {
-    const ver = await chooseVersion(pkg)
-    ver && targetVersion.push({
-      pkg: pkg,
-      ver: ver,
-    })
+
+  if (!yes) {
+    return
   }
   return targetVersion
 }
 
 async function main () {
-  const targetVersions = await choiseTargetVersion()
+  const targetVersion = await choiseTargetVersion()
 
   step("\nUpdating version...")
-  targetVersions.forEach(target => {
-    const pkgPath = path.resolve(__dirname, "../package.json")
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"))
-    pkg.version = target.ver
-    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n")
-  })
-
+  const pkgPath = path.resolve(__dirname, "../package.json")
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"))
   step("\nBuilding all packages...")
-  targetVersions.forEach(async target => {
 
-    try {
-      await run("yarn", [`build:${target.pkg}`], {
-        cwd: path.join(__dirname, ".."),
-        stdio: "pipe"
-      })
-    } catch(e) {
-      console.log(e)
+  try {
+    await run("yarn", [`build`], {
+      cwd: path.join(__dirname, ".."),
+      stdio: "pipe"
+    })
+  } catch(e) {
+    throw e
+  }
+
+  // publish packages
+  step("\nPublishing packages...")
+  pkg.private = false
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n")
+  await runIfNotDry(
+    "yarn",
+    [
+      "publish",
+      "--new-version",
+      targetVersion,
+      "--access",
+      "public"
+    ],
+    {
+      cwd: path.join(__dirname, ".."),
+      stdio: "pipe"
     }
-
-    // publish packages
-    step("\nPublishing packages...")
-    await runIfNotDry(
-      "yarn",
-      [
-        "publish",
-        "--new-version",
-        target.ver,
-        "--access",
-        "public"
-      ],
-      {
-        cwd: path.join(__dirname, "../packages/", target.pkg),
-        stdio: "pipe"
-      }
-    )
-    console.log(chalk.green(`Successfully published ${target.pkg}@${target.ver}`))
+  ).catch((e) => {
+    throw e
   })
-
+  pkg.private = true
+  pkg.version = targetVersion
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n")
+  console.log(chalk.green(`Successfully published @${targetVersion}`))
 }
 
 main()

@@ -56,9 +56,7 @@ async function componentBuilder (pkgName) {
 
 module.exports = async function runBuild () {
   const pkgs = (await getPackages())
-    .map(pkg => pkg.name)
-    .filter(name => name !== "@ui-elements/code-editor")
-    .map(name => name.replace("@ui-elements/", ""))
+    .map(pkg => pkg.name.replace("@ui-elements/", ""))
 
   for (const pkgName of pkgs) {
     console.log(pkgName)
