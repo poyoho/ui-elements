@@ -5,6 +5,8 @@ interface State {
   sourceNode: HTMLElement
   commentNode: HTMLElement
   wrapNode: HTMLElement
+
+  commentOffsetTop: number
 }
 
 const states = new WeakMap<CodeCommentElement, State>()
@@ -31,8 +33,8 @@ function mouseDown (e: MouseEvent) {
     }
     state.sourceNode.style.width = sourceWidth + "%"
     state.commentNode.style.width = (100 - sourceWidth) + "%"
-    state.sourceNode.style.padding = (sourceWidth ? 10 : 0) + "px"
-    state.commentNode.style.padding = (100 - sourceWidth ? 10 : 0) + "px"
+    state.sourceNode.style.paddingLeft = (sourceWidth ? 10 : 0) + "px"
+    state.commentNode.style.paddingLeft = (100 - sourceWidth ? 10 : 0) + "px"
   }
 
   document.addEventListener("mousemove", mounseMove)
@@ -89,23 +91,32 @@ export default class CodeCommentElement extends HTMLElement {
     const state: State = {
       sourceNode: source,
       commentNode: comment,
-      wrapNode: wrap
+      wrapNode: wrap,
+
+      commentOffsetTop: comment.offsetTop
     }
 
     const staticHeight = Math.max(source.offsetHeight, comment.offsetHeight) + 20
     source.style.height = staticHeight + 'px'
     comment.style.height = staticHeight + 'px'
-    source.style.padding = '10px'
-    comment.style.padding = '10px'
+    source.style.paddingLeft = '10px'
+    comment.style.paddingLeft = '10px'
 
     states.set(this, state)
 
     this.split.addEventListener("mousedown", mouseDown)
     control.addEventListener("click", fullScreen)
+    document.addEventListener("scroll", () => {
+      const commentOffsetWrapTop = document.documentElement.scrollTop - comment.offsetTop
+      if (commentOffsetWrapTop > 0) {
+        comment.style.paddingTop = commentOffsetWrapTop + 'px'
+      }
+    })
   }
 
   disconnectedCallback() {
     const { split } = this
+
     split && split.removeEventListener("mousedown", mouseDown)
   }
 }
