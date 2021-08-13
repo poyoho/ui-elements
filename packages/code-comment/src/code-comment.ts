@@ -45,10 +45,14 @@ function fullScreen (e: Event) {
   const target = e.currentTarget! as HTMLElement
   const hostElement = getShadowHost(target) as CodeCommentElement
   const state = states.get(hostElement)!
-
-  state.sourceNode.style.height = "auto"
-  state.commentNode.style.height = "auto"
-  state.wrapNode.classList.toggle("full-screen")
+  if (state.wrapNode.classList.toggle("full-screen")) {
+    state.sourceNode.style.height = "100%"
+    state.commentNode.style.height = "100%"
+  } else {
+    const staticHeight = Math.max(state.sourceNode.offsetHeight, state.commentNode.offsetHeight) + 20
+    state.sourceNode.style.height = staticHeight + 'px'
+    state.commentNode.style.height = staticHeight + 'px'
+  }
 }
 
 export default class CodeCommentElement extends HTMLElement {

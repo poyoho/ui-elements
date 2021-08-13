@@ -20,6 +20,7 @@ export default html`
 .wrap {
   display: flex;
   width: 100%;
+  height: 100%;
 }
 .control {
   cursor: pointer;
