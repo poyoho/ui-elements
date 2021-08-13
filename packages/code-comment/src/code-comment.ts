@@ -4,6 +4,7 @@ import teamplateElement from "./code-comment-element"
 interface State {
   sourceNode: HTMLElement
   commentNode: HTMLElement
+  wrapNode: HTMLElement
 }
 
 const states = new WeakMap<CodeCommentElement, State>()
@@ -22,15 +23,36 @@ function mouseDown (e: MouseEvent) {
     if (changeWidth > maxWidth || changeWidth < 0) {
       return
     }
-    const sourceWidth = (changeWidth * 100) / maxWidth
+    let sourceWidth = (changeWidth * 100) / maxWidth
+    if (sourceWidth < 5) {
+      sourceWidth = 0
+    } else if (sourceWidth > 95) {
+      sourceWidth = 100
+    }
     state.sourceNode.style.width = sourceWidth + "%"
     state.commentNode.style.width = (100 - sourceWidth) + "%"
+    state.sourceNode.style.paddingLeft = (sourceWidth ? 10 : 0) + "px"
+    state.commentNode.style.paddingLeft = (100 - sourceWidth ? 10 : 0) + "px"
   }
 
   document.addEventListener("mousemove", mounseMove)
   document.addEventListener("mouseup", () => {
     document.removeEventListener("mousemove", mounseMove)
   })
+}
+
+function fullScreen (e: Event) {
+  const target = e.currentTarget! as HTMLElement
+  const hostElement = getShadowHost(target) as CodeCommentElement
+  const state = states.get(hostElement)!
+  if (state.wrapNode.classList.toggle("full-screen")) {
+    state.sourceNode.style.height = "100%"
+    state.commentNode.style.height = "100%"
+  } else {
+    const staticHeight = Math.max(state.sourceNode.offsetHeight, state.commentNode.offsetHeight) + 20
+    state.sourceNode.style.height = staticHeight + 'px'
+    state.commentNode.style.height = staticHeight + 'px'
+  }
 }
 
 export default class CodeCommentElement extends HTMLElement {
@@ -40,6 +62,10 @@ export default class CodeCommentElement extends HTMLElement {
     const wrap = this.ownerDocument.createElement("div")
     wrap.innerHTML = teamplateElement
     shadowRoot.appendChild(wrap)
+  }
+
+  get wrap (): HTMLElement {
+    return this.shadowRoot!.querySelector(".code-comment")!
   }
 
   get source (): HTMLElement {
@@ -54,16 +80,39 @@ export default class CodeCommentElement extends HTMLElement {
     return this.shadowRoot!.querySelector(".split")!
   }
 
+  get control (): HTMLElement {
+    return this.shadowRoot!.querySelector(".control")!
+  }
+
   connectedCallback() {
+    const { wrap, source, comment, control } = this
     const state: State = {
-      sourceNode: this.source,
-      commentNode: this.comment,
+      sourceNode: source,
+      commentNode: comment,
+      wrapNode: wrap,
     }
+
+    const staticHeight = Math.max(source.offsetHeight, comment.offsetHeight) + 20
+    source.style.height = staticHeight + 'px'
+    comment.style.height = staticHeight + 'px'
+    source.style.paddingLeft = '10px'
+    comment.style.paddingLeft = '10px'
+
     states.set(this, state)
+
     this.split.addEventListener("mousedown", mouseDown)
+    control.addEventListener("click", fullScreen)
+    document.addEventListener("scroll", () => {
+      const commentOffsetWrapTop = document.documentElement.scrollTop - comment.offsetTop
+      if (commentOffsetWrapTop > 0) {
+        comment.style.paddingTop = commentOffsetWrapTop + 'px'
+      }
+    })
   }
 
   disconnectedCallback() {
-    this.split.removeEventListener("mousedown", mouseDown)
+    const { split } = this
+
+    split && split.removeEventListener("mousedown", mouseDown)
   }
 }
