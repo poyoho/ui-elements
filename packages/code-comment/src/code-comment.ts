@@ -5,8 +5,6 @@ interface State {
   sourceNode: HTMLElement
   commentNode: HTMLElement
   wrapNode: HTMLElement
-
-  commentOffsetTop: number
 }
 
 const states = new WeakMap<CodeCommentElement, State>()
@@ -92,8 +90,6 @@ export default class CodeCommentElement extends HTMLElement {
       sourceNode: source,
       commentNode: comment,
       wrapNode: wrap,
-
-      commentOffsetTop: comment.offsetTop
     }
 
     const staticHeight = Math.max(source.offsetHeight, comment.offsetHeight) + 20
