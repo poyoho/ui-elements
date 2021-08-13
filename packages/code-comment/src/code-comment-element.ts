@@ -34,16 +34,26 @@ export default html`
   height: 100%;
 }
 .source {
+  box-sizing: border-box;
   width: 50%;
   background: #282c34;
   color: #d7d3cb;
   overflow: auto;
 }
 .comment {
+  box-sizing: border-box;
   width: 50%;
   background: #282c3d;
   color: #d7d3c2;
   overflow: auto;
+}
+.full-screen {
+  width: 100% !important;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 65535;
 }
 </style>
 `
