@@ -4,18 +4,33 @@ function html(...args: any) {
 
 export default html`
 <div class="code-comment">
-  <div class="source">
-    <slot name="source"></slot>
+  <div class="wrap">
+    <div class="source">
+      <slot name="source"></slot>
+    </div>
+    <div class="split"></div>
+    <div class="comment">
+      <slot name="comment" class="comment-text"></slot>
+    </div>
   </div>
-  <div class="split"></div>
-  <div class="comment">
-    <slot name="comment" class="comment-text"></slot>
+  <div class="control">
   </div>
 </div>
 <style>
-.code-comment {
+.wrap {
   display: flex;
   width: 100%;
+}
+.control {
+  cursor: pointer;
+  width: 100%;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  background: #303c40;
+  position: sticky;
+  left: 0;
+  bottom: 0;
 }
 .split {
   width: 5px;
@@ -41,6 +56,8 @@ export default html`
   overflow: auto;
 }
 .comment {
+  position: sticky;
+  top: 0;
   box-sizing: border-box;
   width: 50%;
   background: #282c3d;

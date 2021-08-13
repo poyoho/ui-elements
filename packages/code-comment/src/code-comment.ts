@@ -76,15 +76,19 @@ export default class CodeCommentElement extends HTMLElement {
     return this.shadowRoot!.querySelector(".split")!
   }
 
+  get control (): HTMLElement {
+    return this.shadowRoot!.querySelector(".control")!
+  }
+
   connectedCallback() {
-    const { wrap, source, comment } = this
+    const { wrap, source, comment, control } = this
     const state: State = {
       sourceNode: source,
       commentNode: comment,
       wrapNode: wrap
     }
 
-    const staticHeight = Math.max(source.offsetHeight, comment.offsetHeight)
+    const staticHeight = Math.max(source.offsetHeight, comment.offsetHeight) + 20
     source.style.height = staticHeight + 'px'
     comment.style.height = staticHeight + 'px'
     source.style.padding = '10px'
@@ -93,7 +97,7 @@ export default class CodeCommentElement extends HTMLElement {
     states.set(this, state)
 
     this.split.addEventListener("mousedown", mouseDown)
-    source.addEventListener("click", fullScreen)
+    control.addEventListener("click", fullScreen)
   }
 
   disconnectedCallback() {
