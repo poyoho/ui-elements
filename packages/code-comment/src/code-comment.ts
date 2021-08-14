@@ -133,7 +133,7 @@ export default class CodeCommentElement extends HTMLElement {
     }
 
     const staticHeight = Math.max(source.offsetHeight, comment.offsetHeight) + 20
-    const commentPaddintTop = this.getAttribute("top") || "0"
+    const commentPaddintTop = this.getAttribute("paddingTop") || "0"
     source.style.height = staticHeight + 'px'
     comment.style.height = staticHeight + 'px'
     source.style.paddingLeft = '10px'
