@@ -4,13 +4,15 @@ function html(...args: any) {
 
 export default html`
 <div class="code-comment">
+  <div class="comment-content">
+    <slot name="comment" class="comment-text"></slot>
+  </div>
   <div class="wrap">
-    <div class="source">
+    <div class="source-wrap">
       <slot name="source"></slot>
     </div>
     <div class="split"></div>
-    <div class="comment">
-      <slot name="comment" class="comment-text"></slot>
+    <div class="comment-wrap">
     </div>
   </div>
   <div class="control"></div>
@@ -20,6 +22,16 @@ export default html`
   display: flex;
   width: 100%;
   height: 100%;
+}
+.comment-content {
+  position: sticky;
+  height: 0;
+  top: 0;
+  left: 50%;
+  color: #d7d3c2;
+  width: 50%;
+  box-sizing: border-box;
+  padding-left: 10px;
 }
 .control {
   cursor: pointer;
@@ -48,7 +60,7 @@ export default html`
   width: 15px;
   height: 100%;
 }
-.source {
+.source-wrap {
   box-sizing: border-box;
   width: 50%;
   background: #282c34;
@@ -56,7 +68,7 @@ export default html`
   overflow: auto;
   padding-top: 10px;
 }
-.comment {
+.comment-wrap {
   box-sizing: border-box;
   width: 50%;
   background: #282c3d;
@@ -65,11 +77,11 @@ export default html`
   padding-top: 10px;
 }
 .full-screen {
-  width: 100% !important;
-  height: 100%;
   position: fixed;
   top: 0;
   left: 0;
+  width: 100% !important;
+  height: 100% !important;
   z-index: 65535;
 }
 </style>

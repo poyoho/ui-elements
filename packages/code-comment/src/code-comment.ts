@@ -5,6 +5,7 @@ interface State {
   sourceNode: HTMLElement
   commentNode: HTMLElement
   wrapNode: HTMLElement
+  commentContentNode: HTMLElement
 }
 
 const states = new WeakMap<CodeCommentElement, State>()
@@ -31,8 +32,20 @@ function mouseDown (e: MouseEvent) {
     }
     state.sourceNode.style.width = sourceWidth + "%"
     state.commentNode.style.width = (100 - sourceWidth) + "%"
-    state.sourceNode.style.paddingLeft = (sourceWidth ? 10 : 0) + "px"
-    state.commentNode.style.paddingLeft = (100 - sourceWidth ? 10 : 0) + "px"
+    state.commentContentNode.style.transform = `translate(${(-50 + sourceWidth)*2}%, 0)`
+
+    if (sourceWidth === 0) {
+      state.sourceNode.style.paddingLeft = "0px"
+      state.commentNode.style.paddingLeft = "0px"
+    } else if (sourceWidth === 100) {
+      state.sourceNode.style.paddingLeft = "0px"
+      state.commentNode.style.paddingLeft = "0px"
+      state.commentContentNode.style.opacity = "0"
+    } else {
+      state.sourceNode.style.paddingLeft = "10px"
+      state.commentNode.style.paddingLeft = "10px"
+      state.commentContentNode.style.opacity = "1"
+    }
   }
 
   document.addEventListener("mousemove", mounseMove)
@@ -44,14 +57,15 @@ function mouseDown (e: MouseEvent) {
 function fullScreen (e: Event) {
   const target = e.currentTarget! as HTMLElement
   const hostElement = getShadowHost(target) as CodeCommentElement
-  const state = states.get(hostElement)!
-  if (state.wrapNode.classList.toggle("full-screen")) {
-    state.sourceNode.style.height = "100%"
-    state.commentNode.style.height = "100%"
+  const { commentNode, wrapNode, sourceNode } = states.get(hostElement)!
+
+  if (wrapNode.classList.toggle("full-screen")) {
+    sourceNode.style.height = "100%"
+    commentNode.style.height = "100%"
   } else {
-    const staticHeight = Math.max(state.sourceNode.offsetHeight, state.commentNode.offsetHeight) + 20
-    state.sourceNode.style.height = staticHeight + 'px'
-    state.commentNode.style.height = staticHeight + 'px'
+    const staticHeight = Math.max(sourceNode.offsetHeight, commentNode.offsetHeight) + 20
+    sourceNode.style.height = staticHeight + 'px'
+    commentNode.style.height = staticHeight + 'px'
   }
 }
 
@@ -69,11 +83,15 @@ export default class CodeCommentElement extends HTMLElement {
   }
 
   get source (): HTMLElement {
-    return this.shadowRoot!.querySelector(".source")!
+    return this.shadowRoot!.querySelector(".source-wrap")!
   }
 
   get comment (): HTMLElement {
-    return this.shadowRoot!.querySelector(".comment")!
+    return this.shadowRoot!.querySelector(".comment-wrap")!
+  }
+
+  get commentContent (): HTMLElement {
+    return this.shadowRoot!.querySelector(".comment-content")!
   }
 
   get split (): HTMLElement {
@@ -85,10 +103,11 @@ export default class CodeCommentElement extends HTMLElement {
   }
 
   connectedCallback() {
-    const { wrap, source, comment, control } = this
+    const { wrap, source, comment, commentContent, control, split } = this
     const state: State = {
       sourceNode: source,
       commentNode: comment,
+      commentContentNode: commentContent,
       wrapNode: wrap,
     }
 
@@ -100,19 +119,14 @@ export default class CodeCommentElement extends HTMLElement {
 
     states.set(this, state)
 
-    this.split.addEventListener("mousedown", mouseDown)
+    split.addEventListener("mousedown", mouseDown)
     control.addEventListener("click", fullScreen)
-    document.addEventListener("scroll", () => {
-      const commentOffsetWrapTop = document.documentElement.scrollTop - comment.offsetTop
-      if (commentOffsetWrapTop > 0) {
-        comment.style.paddingTop = commentOffsetWrapTop + 'px'
-      }
-    })
   }
 
   disconnectedCallback() {
-    const { split } = this
+    const { split, control } = this
 
     split && split.removeEventListener("mousedown", mouseDown)
+    control && control.removeEventListener("click", fullScreen)
   }
 }
