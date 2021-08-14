@@ -5,35 +5,41 @@ function html(...args: any) {
 export default html`
 <div class="code-comment">
   <div class="top">
-    <div class="occupy"></div>
+    <div class="top-left-occupy"></div>
     <div class="comment-content">
       <slot name="comment" class="comment-text"></slot>
     </div>
   </div>
+
+
   <div class="wrap">
     <div class="source-wrap">
       <slot name="source"></slot>
     </div>
     <div class="split"></div>
-    <div class="comment-wrap">
-    </div>
+    <div class="comment-wrap"></div>
   </div>
+
+  <div class="occupy bottom-occupy"></div>
   <div class="control"></div>
 </div>
 <style>
+.code-comment {
+  position: relative;
+}
 .wrap {
   display: flex;
   width: 100%;
   height: 100%;
 }
 .top {
-  position: sticky;
-  top: 50px;
   display: flex;
   width: 100%;
-  height: 0;
+  z-index: 10;
+  position: sticky;
+  top: 0;
 }
-.occupy {
+.top-left-occupy {
   width: 50%;
 }
 .comment-content {
@@ -82,6 +88,14 @@ export default html`
   color: #d7d3c2;
   overflow: auto;
   padding-top: 10px;
+  position: relative;
+}
+.occupy {
+  width: 100%;
+}
+.bottom-occupy {
+  position: absolute;
+  transform: translateY(-100%);
 }
 .full-screen {
   position: fixed;

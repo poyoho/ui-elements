@@ -72,6 +72,8 @@ function fullScreen (e: Event) {
 }
 
 export default class CodeCommentElement extends HTMLElement {
+  private cancelObserve = () => {}
+
   constructor() {
     super()
     const shadowRoot = this.attachShadow({ mode: "open" })
@@ -109,11 +111,19 @@ export default class CodeCommentElement extends HTMLElement {
   }
 
   get topLeft (): HTMLElement {
-    return this.shadowRoot!.querySelector(".occupy")!
+    return this.shadowRoot!.querySelector(".top-left-occupy")!
+  }
+
+  get topOccupy (): HTMLElement {
+    return this.shadowRoot!.querySelector(".top-occupy")!
+  }
+
+  get bottomOccupy (): HTMLElement {
+    return this.shadowRoot!.querySelector(".bottom-occupy")!
   }
 
   connectedCallback() {
-    const { wrap, source, comment, control, split, top, topLeft, topRight } = this
+    const { wrap, source, comment, control, split, top, topLeft, topRight, bottomOccupy } = this
     const state: State = {
       sourceNode: source,
       commentNode: comment,
@@ -123,12 +133,35 @@ export default class CodeCommentElement extends HTMLElement {
     }
 
     const staticHeight = Math.max(source.offsetHeight, comment.offsetHeight) + 20
+    const commentPaddintTop = this.getAttribute("top") || "0"
     source.style.height = staticHeight + 'px'
     comment.style.height = staticHeight + 'px'
     source.style.paddingLeft = '10px'
     comment.style.paddingLeft = '10px'
-    top.style.top = this.getAttribute("top") || "0"
+    top.style.top = commentPaddintTop
+    bottomOccupy.style.height = `calc(${commentPaddintTop} + ${topRight.clientHeight}px)` // 占位符
+    top.style.height = "0"
     states.set(this, state)
+
+    this.cancelObserve = createBottomSticky({
+      observeNode: bottomOccupy,
+      onBottomSticky () {
+        top.style.height = "auto"
+        const commentHeight = top.clientHeight
+        top.style.height = "0"
+
+        top.style.position = "absolute"
+        top.style.top = "auto"
+        top.style.bottom = "0"
+        top.style.transform = `translateY(-${commentHeight+40}px)` // 40px is control bar height
+      },
+      outBottomSticky () {
+        top.style.position = "sticky"
+        top.style.top = commentPaddintTop
+        top.style.bottom = "auto"
+        top.style.transform = "none"
+      },
+    })
 
     split.addEventListener("mousedown", mouseDown)
     control.addEventListener("click", fullScreen)
@@ -139,5 +172,47 @@ export default class CodeCommentElement extends HTMLElement {
 
     split && split.removeEventListener("mousedown", mouseDown)
     control && control.removeEventListener("click", fullScreen)
+    this.cancelObserve()
+  }
+}
+
+interface BottomStickyCallback {
+  onBottomSticky: () => void
+  outBottomSticky: () => void
+}
+
+let observer: IntersectionObserver
+const eventMap = new Map<HTMLElement, BottomStickyCallback>()
+
+function createBottomSticky (opts: {
+  observeNode: HTMLElement
+} & BottomStickyCallback) {
+  eventMap.set(opts.observeNode, opts)
+  if (!observer) {
+    observer = new IntersectionObserver((records) => {
+      for (const record of records) {
+        const ratio = record.intersectionRatio
+        const targetInfo = record.boundingClientRect
+        const rootBoundsInfo = record.rootBounds!
+        const fn = eventMap.get(record.target as HTMLElement)
+        if (!fn) {
+          return
+        }
+        if (targetInfo.top - rootBoundsInfo.top > 0 && ratio === 1) {
+          fn.outBottomSticky()
+        }
+
+        if (targetInfo.top - rootBoundsInfo.top < 0 &&
+          targetInfo.bottom - rootBoundsInfo.bottom < 0
+        ) {
+          fn.onBottomSticky()
+        }
+      }
+    }, { threshold: [1] })
+  }
+  observer.observe(opts.observeNode)
+  return () => {
+    eventMap.delete(opts.observeNode)
+    observer.unobserve(opts.observeNode)
   }
 }
