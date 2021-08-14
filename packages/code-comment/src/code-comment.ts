@@ -100,6 +100,10 @@ export default class CodeCommentElement extends HTMLElement {
     return this.shadowRoot!.querySelector(".control")!
   }
 
+  get top (): HTMLElement {
+    return this.shadowRoot!.querySelector(".top")!
+  }
+
   get topRight (): HTMLElement {
     return this.shadowRoot!.querySelector(".comment-content")!
   }
@@ -109,7 +113,7 @@ export default class CodeCommentElement extends HTMLElement {
   }
 
   connectedCallback() {
-    const { wrap, source, comment, control, split, topLeft, topRight } = this
+    const { wrap, source, comment, control, split, top, topLeft, topRight } = this
     const state: State = {
       sourceNode: source,
       commentNode: comment,
@@ -123,7 +127,7 @@ export default class CodeCommentElement extends HTMLElement {
     comment.style.height = staticHeight + 'px'
     source.style.paddingLeft = '10px'
     comment.style.paddingLeft = '10px'
-
+    top.style.top = this.getAttribute("top") || "0"
     states.set(this, state)
 
     split.addEventListener("mousedown", mouseDown)

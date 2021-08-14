@@ -28,11 +28,10 @@ export default html`
 }
 .top {
   position: sticky;
-  top: 0;
+  top: 50px;
   display: flex;
   width: 100%;
   height: 0;
-  background: #000;
 }
 .occupy {
   width: 50%;
