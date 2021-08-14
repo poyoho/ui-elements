@@ -5,7 +5,8 @@ interface State {
   sourceNode: HTMLElement
   commentNode: HTMLElement
   wrapNode: HTMLElement
-  commentContentNode: HTMLElement
+  topLeftNode: HTMLElement
+  topRightNode: HTMLElement
 }
 
 const states = new WeakMap<CodeCommentElement, State>()
@@ -32,7 +33,8 @@ function mouseDown (e: MouseEvent) {
     }
     state.sourceNode.style.width = sourceWidth + "%"
     state.commentNode.style.width = (100 - sourceWidth) + "%"
-    state.commentContentNode.style.transform = `translate(${(-50 + sourceWidth)*2}%, 0)`
+    state.topLeftNode.style.width = sourceWidth + "%"
+    state.topRightNode.style.width = (100 - sourceWidth) + "%"
 
     if (sourceWidth === 0) {
       state.sourceNode.style.paddingLeft = "0px"
@@ -40,11 +42,11 @@ function mouseDown (e: MouseEvent) {
     } else if (sourceWidth === 100) {
       state.sourceNode.style.paddingLeft = "0px"
       state.commentNode.style.paddingLeft = "0px"
-      state.commentContentNode.style.opacity = "0"
+      state.topRightNode.style.opacity = "0"
     } else {
       state.sourceNode.style.paddingLeft = "10px"
       state.commentNode.style.paddingLeft = "10px"
-      state.commentContentNode.style.opacity = "1"
+      state.topRightNode.style.opacity = "1"
     }
   }
 
@@ -90,10 +92,6 @@ export default class CodeCommentElement extends HTMLElement {
     return this.shadowRoot!.querySelector(".comment-wrap")!
   }
 
-  get commentContent (): HTMLElement {
-    return this.shadowRoot!.querySelector(".comment-content")!
-  }
-
   get split (): HTMLElement {
     return this.shadowRoot!.querySelector(".split")!
   }
@@ -102,13 +100,22 @@ export default class CodeCommentElement extends HTMLElement {
     return this.shadowRoot!.querySelector(".control")!
   }
 
+  get topRight (): HTMLElement {
+    return this.shadowRoot!.querySelector(".comment-content")!
+  }
+
+  get topLeft (): HTMLElement {
+    return this.shadowRoot!.querySelector(".occupy")!
+  }
+
   connectedCallback() {
-    const { wrap, source, comment, commentContent, control, split } = this
+    const { wrap, source, comment, control, split, topLeft, topRight } = this
     const state: State = {
       sourceNode: source,
       commentNode: comment,
-      commentContentNode: commentContent,
       wrapNode: wrap,
+      topLeftNode: topLeft,
+      topRightNode: topRight,
     }
 
     const staticHeight = Math.max(source.offsetHeight, comment.offsetHeight) + 20

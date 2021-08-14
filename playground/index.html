@@ -75,8 +75,7 @@
           xccsda
         </pre>
       </div>
-      <div slot="comment" top="1">hello</div>
-      <div slot="comment" top="20">world</div>
+      <div slot="comment"><ul><li>按照 <strong>任务队列消费顺序消费</strong> 任务队列。 ---- <code>preQueue</code> -&gt; <code>queue</code> -&gt; <code>postQueue</code></li><li>如果在执行任务的时候还有任务加入进来不会马上执行多一个<code>flushJobs</code>竞争queue，<strong>调度完成后再继续发起<code>flushJobs</code>消费任务</strong>。</li><li>其余两个队列调度执行的方案差不多相同，<strong><code>pre</code>队列在执行前不需要排序</strong>，因为在渲染前执行不存在卸载组件优化的可能。</li></ul></div>
     </code-comment>
   </div>
   <div class="wrap">
@@ -120,8 +119,7 @@
           xccsda
         </pre>
       </div>
-      <div slot="comment" top="1">hello</div>
-      <div slot="comment" top="20">world</div>
+      <div slot="comment"><ul><li>按照 <strong>任务队列消费顺序消费</strong> 任务队列。 ---- <code>preQueue</code> -&gt; <code>queue</code> -&gt; <code>postQueue</code></li><li>如果在执行任务的时候还有任务加入进来不会马上执行多一个<code>flushJobs</code>竞争queue，<strong>调度完成后再继续发起<code>flushJobs</code>消费任务</strong>。</li><li>其余两个队列调度执行的方案差不多相同，<strong><code>pre</code>队列在执行前不需要排序</strong>，因为在渲染前执行不存在卸载组件优化的可能。</li></ul></div>
     </code-comment>
   </div>
 
@@ -153,8 +151,7 @@
           xccsda
         </pre>
       </div>
-      <div slot="comment" top="1">hello</div>
-      <div slot="comment" top="20">world</div>
+      <div slot="comment"><ul><li>按照 <strong>任务队列消费顺序消费</strong> 任务队列。 ---- <code>preQueue</code> -&gt; <code>queue</code> -&gt; <code>postQueue</code></li><li>如果在执行任务的时候还有任务加入进来不会马上执行多一个<code>flushJobs</code>竞争queue，<strong>调度完成后再继续发起<code>flushJobs</code>消费任务</strong>。</li><li>其余两个队列调度执行的方案差不多相同，<strong><code>pre</code>队列在执行前不需要排序</strong>，因为在渲染前执行不存在卸载组件优化的可能。</li></ul></div>
     </code-comment>
   </div>
 </body>

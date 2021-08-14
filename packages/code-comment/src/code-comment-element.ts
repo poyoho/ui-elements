@@ -4,8 +4,11 @@ function html(...args: any) {
 
 export default html`
 <div class="code-comment">
-  <div class="comment-content">
-    <slot name="comment" class="comment-text"></slot>
+  <div class="top">
+    <div class="occupy"></div>
+    <div class="comment-content">
+      <slot name="comment" class="comment-text"></slot>
+    </div>
   </div>
   <div class="wrap">
     <div class="source-wrap">
@@ -23,15 +26,20 @@ export default html`
   width: 100%;
   height: 100%;
 }
-.comment-content {
+.top {
   position: sticky;
-  height: 0;
   top: 0;
-  left: 50%;
-  color: #d7d3c2;
+  display: flex;
+  width: 100%;
+  height: 0;
+  background: #000;
+}
+.occupy {
   width: 50%;
-  box-sizing: border-box;
-  padding-left: 10px;
+}
+.comment-content {
+  width: 50%;
+  color: #d7d3c2;
 }
 .control {
   cursor: pointer;
