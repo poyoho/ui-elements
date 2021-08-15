@@ -2,14 +2,6 @@ import { getShadowHost } from "@ui-elements/utils"
 import teamplateElement from "./code-comment-element"
 
 interface State {
-  sourceNode: HTMLElement
-  commentNode: HTMLElement
-  wrapNode: HTMLElement
-  topNode: HTMLElement
-  topLeftNode: HTMLElement
-  topRightNode: HTMLElement
-  bottomOccupyNode: HTMLElement
-
   paddingTopAttr: string
   commentHeight: number
 }
@@ -59,11 +51,11 @@ function createBottomSticky (opts: {
 function mouseDown (e: MouseEvent) {
   const target = e.currentTarget! as HTMLElement
   const hostElement = getShadowHost(target) as CodeCommentElement
-  const state = states.get(hostElement)!
+  const { source, comment, topLeft, topRight } = hostElement
 
   const startX = e.clientX
-  const maxWidth = state.sourceNode.parentElement!.clientWidth
-  const sourceCurrentWidth = state.sourceNode.clientWidth
+  const maxWidth = source.parentElement!.clientWidth
+  const sourceCurrentWidth = source.clientWidth
   const mounseMove = (e: MouseEvent) => {
     const offset = e.clientX - startX
     const changeWidth = sourceCurrentWidth + offset
@@ -76,22 +68,22 @@ function mouseDown (e: MouseEvent) {
     } else if (sourceWidth > 95) {
       sourceWidth = 100
     }
-    state.sourceNode.style.width = sourceWidth + "%"
-    state.commentNode.style.width = (100 - sourceWidth) + "%"
-    state.topLeftNode.style.width = sourceWidth + "%"
-    state.topRightNode.style.width = (100 - sourceWidth) + "%"
+    source.style.width = sourceWidth + "%"
+    comment.style.width = (100 - sourceWidth) + "%"
+    topLeft.style.width = sourceWidth + "%"
+    topRight.style.width = (100 - sourceWidth) + "%"
 
     if (sourceWidth === 0) {
-      state.sourceNode.style.paddingLeft = "0px"
-      state.commentNode.style.paddingLeft = "0px"
+      source.style.paddingLeft = "0px"
+      comment.style.paddingLeft = "0px"
     } else if (sourceWidth === 100) {
-      state.sourceNode.style.paddingLeft = "0px"
-      state.commentNode.style.paddingLeft = "0px"
-      state.topRightNode.style.opacity = "0"
+      source.style.paddingLeft = "0px"
+      comment.style.paddingLeft = "0px"
+      topRight.style.opacity = "0"
     } else {
-      state.sourceNode.style.paddingLeft = "10px"
-      state.commentNode.style.paddingLeft = "10px"
-      state.topRightNode.style.opacity = "1"
+      source.style.paddingLeft = "10px"
+      comment.style.paddingLeft = "10px"
+      topRight.style.opacity = "1"
     }
   }
 
@@ -104,23 +96,64 @@ function mouseDown (e: MouseEvent) {
 function fullScreen (e: Event) {
   const target = e.currentTarget! as HTMLElement
   const hostElement = getShadowHost(target) as CodeCommentElement
-  const { commentNode, wrapNode, sourceNode } = states.get(hostElement)!
+  const { wrap, comment, source } = hostElement
 
-  if (wrapNode.classList.toggle("full-screen")) {
-    sourceNode.style.height = "100%"
-    commentNode.style.height = "100%"
+  if (wrap.classList.toggle("full-screen")) {
+    source.style.height = "100%"
+    comment.style.height = "100%"
   } else {
-    const staticHeight = Math.max(sourceNode.offsetHeight, commentNode.offsetHeight) + 20
-    sourceNode.style.height = staticHeight + 'px'
-    commentNode.style.height = staticHeight + 'px'
+    const staticHeight = Math.max(source.offsetHeight, comment.offsetHeight) + 20
+    source.style.height = staticHeight + 'px'
+    comment.style.height = staticHeight + 'px'
   }
 }
 
+function resize (hostElement: CodeCommentElement) {
+  const state = states.get(hostElement)!
+  const { source, comment, topLeft, topRight, bottomOccupy } = hostElement
+
+  const wrapHeight = Math.max(source.offsetHeight, comment.offsetHeight)
+  topRight.style.height = "auto"
+  state.commentHeight = topRight.clientHeight
+  topRight.style.height = "0"
+
+  topLeft.style.width = "0"
+  topRight.style.width = "100%"
+  source.style.height = wrapHeight + 'px'
+  comment.style.height = wrapHeight + 'px'
+  bottomOccupy.style.height = `calc(${state.paddingTopAttr} + ${state.commentHeight}px)` // 占位符
+
+  states.set(hostElement, state)
+}
+
 // TODO 立即左右全屏 上下分屏
+function upDownSplitScreen (hostElement: CodeCommentElement) {
+  const { contentWrap, comment, source, top, topRight } = hostElement
+
+  const cache = {
+    sourceWidth: "100%",
+    commentWidth: "100%",
+    topPostion: "absolute",
+    topTop: "0",
+    contentWrapFlexDirection: "column-reverse"
+  }
+
+  contentWrap.style.flexDirection = cache.contentWrapFlexDirection
+  source.style.width = cache.sourceWidth
+  comment.style.width = cache.commentWidth
+  top.style.position = cache.topPostion
+  top.style.top = cache.topTop
+
+  topRight.style.height = "auto"
+  const commentHeight = topRight.clientHeight
+  topRight.style.height = "0"
+  comment.style.height = commentHeight + "px"
+}
 
 export default class CodeCommentElement extends HTMLElement {
   private cancelObserve = () => {}
   private resizeEvent = () => {}
+  private upDownSplitScreen = () => {}
 
   constructor() {
     super()
@@ -130,8 +163,56 @@ export default class CodeCommentElement extends HTMLElement {
     shadowRoot.appendChild(wrap)
   }
 
+  connectedCallback() {
+    this.resizeEvent = () => resize(this)
+    this.upDownSplitScreen = () => upDownSplitScreen(this)
+    const { wrap, source, comment, control, split, top, topLeft, topRight, bottomOccupy } = this
+    const state: State = {
+      paddingTopAttr: this.getAttribute("paddingTop") || "0",
+      commentHeight: 0,
+    }
+    top.style.top = state.paddingTopAttr
+    states.set(this, state)
+
+    // this.cancelObserve = (() => createBottomSticky({
+    //   observeNode: bottomOccupy,
+    //   onBottomSticky: () => {
+    //     const { commentHeight } = states.get(this)!
+    //     top.style.position = "absolute"
+    //     top.style.top = "auto"
+    //     top.style.bottom = "0"
+    //     top.style.transform = `translateY(-${commentHeight+40}px)` // 40px is control bar height
+    //   },
+    //   outBottomSticky: () => {
+    //     const { paddingTopAttr } = states.get(this)!
+    //     top.style.position = "sticky"
+    //     top.style.top = paddingTopAttr
+    //     top.style.bottom = "auto"
+    //     top.style.transform = "none"
+    //   },
+    // }))()
+    this.resizeEvent()
+    this.upDownSplitScreen()
+    window.addEventListener('resize', this.resizeEvent)
+    split.addEventListener("mousedown", mouseDown)
+    control.addEventListener("click", fullScreen)
+  }
+
+  disconnectedCallback() {
+    const { split, control } = this
+
+    split && split.removeEventListener("mousedown", mouseDown)
+    control && control.removeEventListener("click", fullScreen)
+    window.removeEventListener("resize", this.resizeEvent)
+    this.cancelObserve()
+  }
+
   get wrap (): HTMLElement {
     return this.shadowRoot!.querySelector(".code-comment")!
+  }
+
+  get contentWrap (): HTMLElement {
+    return this.shadowRoot!.querySelector(".wrap")!
   }
 
   get source (): HTMLElement {
@@ -162,76 +243,7 @@ export default class CodeCommentElement extends HTMLElement {
     return this.shadowRoot!.querySelector(".top-left-occupy")!
   }
 
-  get topOccupy (): HTMLElement {
-    return this.shadowRoot!.querySelector(".top-occupy")!
-  }
-
   get bottomOccupy (): HTMLElement {
     return this.shadowRoot!.querySelector(".bottom-occupy")!
   }
-
-  connectedCallback() {
-    const { wrap, source, comment, control, split, top, topLeft, topRight, bottomOccupy } = this
-    const state: State = {
-      sourceNode: source,
-      commentNode: comment,
-      wrapNode: wrap,
-      topNode: top,
-      topLeftNode: topLeft,
-      topRightNode: topRight,
-      bottomOccupyNode: bottomOccupy,
-
-      paddingTopAttr: this.getAttribute("paddingTop") || "0",
-      commentHeight: topRight.clientHeight,
-    }
-
-    top.style.top = state.paddingTopAttr
-    states.set(this, state)
-
-    this.cancelObserve = (() => createBottomSticky({
-      observeNode: bottomOccupy,
-      onBottomSticky: () => {
-        const { commentHeight } = states.get(this)!
-        top.style.position = "absolute"
-        top.style.top = "auto"
-        top.style.bottom = "0"
-        top.style.transform = `translateY(-${commentHeight+40}px)` // 40px is control bar height
-      },
-      outBottomSticky: () => {
-        const { paddingTopAttr } = states.get(this)!
-        top.style.position = "sticky"
-        top.style.top = paddingTopAttr
-        top.style.bottom = "auto"
-        top.style.transform = "none"
-      },
-    }))()
-    this.resizeEvent = () => resize(this)
-
-    this.resizeEvent()
-    window.addEventListener('resize', this.resizeEvent)
-    split.addEventListener("mousedown", mouseDown)
-    control.addEventListener("click", fullScreen)
-  }
-
-  disconnectedCallback() {
-    const { split, control } = this
-
-    split && split.removeEventListener("mousedown", mouseDown)
-    control && control.removeEventListener("click", fullScreen)
-    window.removeEventListener("resize", this.resizeEvent)
-    this.cancelObserve()
-  }
-}
-
-function resize (hostElement: CodeCommentElement) {
-  const state = states.get(hostElement)!
-
-  const wrapHeight = Math.max(state.sourceNode.offsetHeight, state.commentNode.offsetHeight)
-  state.topRightNode.style.height = "auto"
-  state.commentHeight = state.topRightNode.clientHeight
-  state.topRightNode.style.height = "0"
-
-  state.sourceNode.style.height = wrapHeight + 'px'
-  state.commentNode.style.height = wrapHeight + 'px'
-  state.bottomOccupyNode.style.height = `calc(${state.paddingTopAttr} + ${state.commentHeight}px)` // 占位符
 }

@@ -34,7 +34,7 @@ export default html`
 .top {
   display: flex;
   width: 100%;
-  z-index: 10;
+  z-index: 1;
   position: sticky;
   top: 0;
 }
@@ -46,6 +46,7 @@ export default html`
   color: #d7d3c2;
 }
 .control {
+  z-index: 10;
   cursor: pointer;
   width: 100%;
   height: 40px;
