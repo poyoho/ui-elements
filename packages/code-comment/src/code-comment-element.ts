@@ -11,7 +11,6 @@ export default html`
     </div>
   </div>
 
-
   <div class="wrap">
     <div class="source-wrap">
       <slot name="source"></slot>
@@ -80,15 +79,17 @@ export default html`
   color: #d7d3cb;
   overflow: auto;
   padding-top: 10px;
+  padding-left: 10px;
 }
 .comment-wrap {
+  position: relative;
   box-sizing: border-box;
   width: 50%;
   background: #282c3d;
   color: #d7d3c2;
   overflow: auto;
   padding-top: 10px;
-  position: relative;
+  padding-left: 10px;
 }
 .occupy {
   width: 100%;

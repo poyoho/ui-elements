@@ -5,11 +5,56 @@ interface State {
   sourceNode: HTMLElement
   commentNode: HTMLElement
   wrapNode: HTMLElement
+  topNode: HTMLElement
   topLeftNode: HTMLElement
   topRightNode: HTMLElement
+  bottomOccupyNode: HTMLElement
+
+  paddingTopAttr: string
+  commentHeight: number
 }
 
+interface BottomStickyCallback {
+  onBottomSticky: () => void
+  outBottomSticky: () => void
+}
+
+let observer: IntersectionObserver
+const eventMap = new WeakMap<HTMLElement, BottomStickyCallback>()
 const states = new WeakMap<CodeCommentElement, State>()
+
+function createBottomSticky (opts: {
+  observeNode: HTMLElement
+} & BottomStickyCallback) {
+  eventMap.set(opts.observeNode, opts)
+  if (!observer) {
+    observer = new IntersectionObserver((records) => {
+      for (const record of records) {
+        const ratio = record.intersectionRatio
+        const targetInfo = record.boundingClientRect
+        const rootBoundsInfo = record.rootBounds!
+        const fn = eventMap.get(record.target as HTMLElement)
+        if (!fn) {
+          return
+        }
+        if (targetInfo.top - rootBoundsInfo.top > 0 && ratio === 1) {
+          fn.outBottomSticky()
+        }
+
+        if (targetInfo.top - rootBoundsInfo.top < 0 &&
+          targetInfo.bottom - rootBoundsInfo.bottom < 0
+        ) {
+          fn.onBottomSticky()
+        }
+      }
+    }, { threshold: [1] })
+  }
+  observer.observe(opts.observeNode)
+  return () => {
+    eventMap.delete(opts.observeNode)
+    observer.unobserve(opts.observeNode)
+  }
+}
 
 function mouseDown (e: MouseEvent) {
   const target = e.currentTarget! as HTMLElement
@@ -71,8 +116,11 @@ function fullScreen (e: Event) {
   }
 }
 
+// TODO 立即左右全屏 上下分屏
+
 export default class CodeCommentElement extends HTMLElement {
   private cancelObserve = () => {}
+  private resizeEvent = () => {}
 
   constructor() {
     super()
@@ -128,41 +176,39 @@ export default class CodeCommentElement extends HTMLElement {
       sourceNode: source,
       commentNode: comment,
       wrapNode: wrap,
+      topNode: top,
       topLeftNode: topLeft,
       topRightNode: topRight,
+      bottomOccupyNode: bottomOccupy,
+
+      paddingTopAttr: this.getAttribute("paddingTop") || "0",
+      commentHeight: topRight.clientHeight,
     }
 
-    const staticHeight = Math.max(source.offsetHeight, comment.offsetHeight) + 20
-    const commentPaddintTop = this.getAttribute("paddingTop") || "0"
-    source.style.height = staticHeight + 'px'
-    comment.style.height = staticHeight + 'px'
-    source.style.paddingLeft = '10px'
-    comment.style.paddingLeft = '10px'
-    top.style.top = commentPaddintTop
-    bottomOccupy.style.height = `calc(${commentPaddintTop} + ${topRight.clientHeight}px)` // 占位符
-    top.style.height = "0"
+    top.style.top = state.paddingTopAttr
     states.set(this, state)
 
-    this.cancelObserve = createBottomSticky({
+    this.cancelObserve = (() => createBottomSticky({
       observeNode: bottomOccupy,
-      onBottomSticky () {
-        top.style.height = "auto"
-        const commentHeight = top.clientHeight
-        top.style.height = "0"
-
+      onBottomSticky: () => {
+        const { commentHeight } = states.get(this)!
         top.style.position = "absolute"
         top.style.top = "auto"
         top.style.bottom = "0"
         top.style.transform = `translateY(-${commentHeight+40}px)` // 40px is control bar height
       },
-      outBottomSticky () {
+      outBottomSticky: () => {
+        const { paddingTopAttr } = states.get(this)!
         top.style.position = "sticky"
-        top.style.top = commentPaddintTop
+        top.style.top = paddingTopAttr
         top.style.bottom = "auto"
         top.style.transform = "none"
       },
-    })
+    }))()
+    this.resizeEvent = () => resize(this)
 
+    this.resizeEvent()
+    window.addEventListener('resize', this.resizeEvent)
     split.addEventListener("mousedown", mouseDown)
     control.addEventListener("click", fullScreen)
   }
@@ -172,47 +218,20 @@ export default class CodeCommentElement extends HTMLElement {
 
     split && split.removeEventListener("mousedown", mouseDown)
     control && control.removeEventListener("click", fullScreen)
+    window.removeEventListener("resize", this.resizeEvent)
     this.cancelObserve()
   }
 }
 
-interface BottomStickyCallback {
-  onBottomSticky: () => void
-  outBottomSticky: () => void
-}
+function resize (hostElement: CodeCommentElement) {
+  const state = states.get(hostElement)!
 
-let observer: IntersectionObserver
-const eventMap = new Map<HTMLElement, BottomStickyCallback>()
+  const wrapHeight = Math.max(state.sourceNode.offsetHeight, state.commentNode.offsetHeight)
+  state.topRightNode.style.height = "auto"
+  state.commentHeight = state.topRightNode.clientHeight
+  state.topRightNode.style.height = "0"
 
-function createBottomSticky (opts: {
-  observeNode: HTMLElement
-} & BottomStickyCallback) {
-  eventMap.set(opts.observeNode, opts)
-  if (!observer) {
-    observer = new IntersectionObserver((records) => {
-      for (const record of records) {
-        const ratio = record.intersectionRatio
-        const targetInfo = record.boundingClientRect
-        const rootBoundsInfo = record.rootBounds!
-        const fn = eventMap.get(record.target as HTMLElement)
-        if (!fn) {
-          return
-        }
-        if (targetInfo.top - rootBoundsInfo.top > 0 && ratio === 1) {
-          fn.outBottomSticky()
-        }
-
-        if (targetInfo.top - rootBoundsInfo.top < 0 &&
-          targetInfo.bottom - rootBoundsInfo.bottom < 0
-        ) {
-          fn.onBottomSticky()
-        }
-      }
-    }, { threshold: [1] })
-  }
-  observer.observe(opts.observeNode)
-  return () => {
-    eventMap.delete(opts.observeNode)
-    observer.unobserve(opts.observeNode)
-  }
+  state.sourceNode.style.height = wrapHeight + 'px'
+  state.commentNode.style.height = wrapHeight + 'px'
+  state.bottomOccupyNode.style.height = `calc(${state.paddingTopAttr} + ${state.commentHeight}px)` // 占位符
 }
