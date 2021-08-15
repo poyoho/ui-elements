@@ -2,9 +2,11 @@ import { getShadowHost } from "@ui-elements/utils"
 import teamplateElement from "./code-comment-element"
 
 interface ModeCache {
+  topHeight: string
   topPostion: string
   topTop: string
   topBottom: string
+  topOverflowY: string
   topTransform: string
   topLeftWidth: string
   topRightWidth: string
@@ -25,7 +27,8 @@ interface State {
 
   mode: Mode
   paddingTopAttr: string
-  cache?: ModeCache
+  willChangeSourceWidth: number
+  cache: ModeCache
 }
 
 interface BottomStickyCallback {
@@ -78,7 +81,7 @@ const createBottomSticky = (() => {
 function mouseDown (e: MouseEvent) {
   const target = e.currentTarget! as HTMLElement
   const hostElement = getShadowHost(target) as CodeCommentElement
-  const { source, comment, topLeft, topRight, bottomOccupy } = hostElement
+  const { source, comment, topLeft, topRight, bottomOccupy, top } = hostElement
   const state = states.get(hostElement)!
 
   const startX = e.clientX
@@ -100,6 +103,29 @@ function mouseDown (e: MouseEvent) {
     comment.style.width = (100 - sourceWidth) + "%"
     topLeft.style.width = sourceWidth + "%"
     topRight.style.width = (100 - sourceWidth) + "%"
+
+    if (top.scrollHeight > comment.clientHeight && !state.willChangeSourceWidth) {
+      const currentStyle = window.getComputedStyle(top)
+      state.cache.topHeight = currentStyle.height
+      state.cache.topPostion = currentStyle.position
+      state.cache.topOverflowY = currentStyle.overflow
+      state.cache.topTop = currentStyle.top
+      top.style.cssText = `
+        height: ${comment.style.height};
+        position: absolute;
+        overflow-y: scroll;
+        top: 0;
+      `
+      state.willChangeSourceWidth = sourceWidth
+      states.set(hostElement, state)
+    } else if (sourceWidth < state.willChangeSourceWidth && state.willChangeSourceWidth) {
+      top.style.height = state.cache.topHeight
+      top.style.position = state.cache.topPostion
+      top.style.overflow = state.cache.topOverflowY
+      top.style.top = state.cache.topTop
+      state.willChangeSourceWidth = 0
+      states.set(hostElement, state)
+    }
 
     if (sourceWidth === 0) {
       source.style.paddingLeft = "0px"
@@ -157,6 +183,8 @@ function toggleShowMode (hostElement: CodeCommentElement) {
   let cache: ModeCache
   if (state.mode === "leftRight") {
     state.cache = {
+      topOverflowY: top.style.overflow,
+      topHeight: top.style.height,
       topPostion: top.style.position,
       topTop: top.style.top,
       topBottom: top.style.bottom,
@@ -170,6 +198,8 @@ function toggleShowMode (hostElement: CodeCommentElement) {
     state.mode = "topBottom"
     states.set(hostElement, state)
     cache = {
+      topOverflowY: "none",
+      topHeight: "0",
       topPostion: "absolute",
       topTop: "0",
       topBottom: "auto",
@@ -188,10 +218,12 @@ function toggleShowMode (hostElement: CodeCommentElement) {
     return
   }
 
+  top.style.overflow = cache.topOverflowY
+  top.style.height = cache.topHeight
   top.style.position = cache.topPostion
   top.style.top = cache.topTop
-  top.style.bottom = "auto"
-  top.style.transform = "none"
+  top.style.bottom = cache.topBottom
+  top.style.transform = cache.topTransform
   topLeft.style.width = cache.topLeftWidth
   topRight.style.width = cache.topRightWidth
   contentWrap.style.flexDirection = cache.contentWrapFlexDirection
@@ -239,8 +271,22 @@ export default class CodeCommentElement extends HTMLElement {
 
     const state: State = {
       paddingTopAttr: this.getAttribute("paddingTop") || "0",
+      willChangeSourceWidth: 0,
       mode: "leftRight",
       observer: observer,
+      cache: {
+        topOverflowY: "",
+        topHeight: "",
+        topPostion: "",
+        topTop: "",
+        topBottom: "",
+        topTransform: "",
+        topLeftWidth: "",
+        topRightWidth: "",
+        contentWrapFlexDirection: "",
+        sourceWrapWidth: "",
+        commentWrapWidth: "",
+      },
 
       resize: () => resize(this),
       upDownSplitScreen: () => toggleShowMode(this),
