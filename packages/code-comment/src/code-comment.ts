@@ -1,9 +1,31 @@
 import { getShadowHost } from "@ui-elements/utils"
 import teamplateElement from "./code-comment-element"
 
+interface ModeCache {
+  topPostion: string
+  topTop: string
+  topBottom: string
+  topTransform: string
+  topLeftWidth: string
+  topRightWidth: string
+  contentWrapFlexDirection: string
+  sourceWrapWidth: string
+  commentWrapWidth: string
+}
+
+export type Mode = "leftRight" | "topBottom"
+
 interface State {
+  observer: {
+    observe: () => void
+    unobserve: () => void
+  }
+  resize: () => void
+  upDownSplitScreen: () => void
+
+  mode: Mode
   paddingTopAttr: string
-  commentHeight: number
+  cache?: ModeCache
 }
 
 interface BottomStickyCallback {
@@ -11,47 +33,53 @@ interface BottomStickyCallback {
   outBottomSticky: () => void
 }
 
-let observer: IntersectionObserver
-const eventMap = new WeakMap<HTMLElement, BottomStickyCallback>()
 const states = new WeakMap<CodeCommentElement, State>()
 
-function createBottomSticky (opts: {
-  observeNode: HTMLElement
-} & BottomStickyCallback) {
-  eventMap.set(opts.observeNode, opts)
-  if (!observer) {
-    observer = new IntersectionObserver((records) => {
-      for (const record of records) {
-        const ratio = record.intersectionRatio
-        const targetInfo = record.boundingClientRect
-        const rootBoundsInfo = record.rootBounds!
-        const fn = eventMap.get(record.target as HTMLElement)
-        if (!fn) {
-          return
-        }
-        if (targetInfo.top - rootBoundsInfo.top > 0 && ratio === 1) {
-          fn.outBottomSticky()
-        }
-
-        if (targetInfo.top - rootBoundsInfo.top < 0 &&
-          targetInfo.bottom - rootBoundsInfo.bottom < 0
-        ) {
-          fn.onBottomSticky()
-        }
+const createBottomSticky = (() => {
+  const eventMap = new WeakMap<HTMLElement, BottomStickyCallback>()
+  const observer = new IntersectionObserver((records) => {
+    for (const record of records) {
+      const ratio = record.intersectionRatio
+      const targetInfo = record.boundingClientRect
+      const rootBoundsInfo = record.rootBounds!
+      const fn = eventMap.get(record.target as HTMLElement)
+      if (!fn) {
+        return
       }
-    }, { threshold: [1] })
+      if (targetInfo.top - rootBoundsInfo.top > 0 && ratio === 1) {
+        fn.outBottomSticky()
+      }
+      if (targetInfo.top - rootBoundsInfo.top < 0 && targetInfo.bottom - rootBoundsInfo.bottom < 0) {
+        fn.onBottomSticky()
+      }
+    }
+  }, { threshold: [1] })
+
+  return (opts: { observeNode: HTMLElement } & BottomStickyCallback) => {
+    const eventHandle = {
+      onBottomSticky: opts.onBottomSticky,
+      outBottomSticky: opts.outBottomSticky,
+    }
+    eventMap.set(opts.observeNode, eventHandle)
+    return {
+      ...observer,
+      observe: () => {
+        eventMap.set(opts.observeNode, eventHandle)
+        observer.observe(opts.observeNode)
+      },
+      unobserve: () => {
+        eventMap.delete(opts.observeNode)
+        observer.unobserve(opts.observeNode)
+      }
+    }
   }
-  observer.observe(opts.observeNode)
-  return () => {
-    eventMap.delete(opts.observeNode)
-    observer.unobserve(opts.observeNode)
-  }
-}
+})()
 
 function mouseDown (e: MouseEvent) {
   const target = e.currentTarget! as HTMLElement
   const hostElement = getShadowHost(target) as CodeCommentElement
-  const { source, comment, topLeft, topRight } = hostElement
+  const { source, comment, topLeft, topRight, bottomOccupy } = hostElement
+  const state = states.get(hostElement)!
 
   const startX = e.clientX
   const maxWidth = source.parentElement!.clientWidth
@@ -85,6 +113,8 @@ function mouseDown (e: MouseEvent) {
       comment.style.paddingLeft = "10px"
       topRight.style.opacity = "1"
     }
+    bottomOccupy.style.height = `calc(${state.paddingTopAttr} + ${topRight.scrollHeight + 30}px)` // 占位符
+    states.set(hostElement, state)
   }
 
   document.addEventListener("mousemove", mounseMove)
@@ -103,58 +133,82 @@ function fullScreen (e: Event) {
     comment.style.height = "100%"
   } else {
     const staticHeight = Math.max(source.offsetHeight, comment.offsetHeight) + 20
-    source.style.height = staticHeight + 'px'
-    comment.style.height = staticHeight + 'px'
+    source.style.height = staticHeight + "px"
+    comment.style.height = staticHeight + "px"
   }
 }
 
 function resize (hostElement: CodeCommentElement) {
   const state = states.get(hostElement)!
-  const { source, comment, topLeft, topRight, bottomOccupy } = hostElement
-
+  const { source, comment, topRight, bottomOccupy } = hostElement
   const wrapHeight = Math.max(source.offsetHeight, comment.offsetHeight)
-  topRight.style.height = "auto"
-  state.commentHeight = topRight.clientHeight
-  topRight.style.height = "0"
 
-  topLeft.style.width = "0"
-  topRight.style.width = "100%"
-  source.style.height = wrapHeight + 'px'
-  comment.style.height = wrapHeight + 'px'
-  bottomOccupy.style.height = `calc(${state.paddingTopAttr} + ${state.commentHeight}px)` // 占位符
+  source.style.height = wrapHeight + "px"
+  comment.style.height = wrapHeight + "px"
+  bottomOccupy.style.height = `calc(${state.paddingTopAttr} + ${topRight.scrollHeight + 20}px)` // 占位符
 
   states.set(hostElement, state)
 }
 
-// TODO 立即左右全屏 上下分屏
-function upDownSplitScreen (hostElement: CodeCommentElement) {
-  const { contentWrap, comment, source, top, topRight } = hostElement
+function toggleShowMode (hostElement: CodeCommentElement) {
+  const { contentWrap, comment, source, top, topLeft, topRight } = hostElement
+  const state = states.get(hostElement)!
 
-  const cache = {
-    sourceWidth: "100%",
-    commentWidth: "100%",
-    topPostion: "absolute",
-    topTop: "0",
-    contentWrapFlexDirection: "column-reverse"
+  let cache: ModeCache
+  if (state.mode === "leftRight") {
+    state.cache = {
+      topPostion: top.style.position,
+      topTop: top.style.top,
+      topBottom: top.style.bottom,
+      topTransform: top.style.transform,
+      topLeftWidth: topLeft.style.width,
+      topRightWidth: topRight.style.width,
+      contentWrapFlexDirection: contentWrap.style.flexDirection,
+      sourceWrapWidth: source.style.width,
+      commentWrapWidth: comment.style.width,
+    }
+    state.mode = "topBottom"
+    states.set(hostElement, state)
+    cache = {
+      topPostion: "absolute",
+      topTop: "0",
+      topBottom: "auto",
+      topTransform: "none",
+      topLeftWidth: "0",
+      topRightWidth: "100%",
+      contentWrapFlexDirection: "column-reverse",
+      sourceWrapWidth: "100%",
+      commentWrapWidth: "100%",
+    }
+  } else if (state.mode === "topBottom") {
+    state.mode = "leftRight"
+    cache = state.cache!
+    states.set(hostElement, state)
+  } else {
+    return
   }
 
-  contentWrap.style.flexDirection = cache.contentWrapFlexDirection
-  source.style.width = cache.sourceWidth
-  comment.style.width = cache.commentWidth
   top.style.position = cache.topPostion
   top.style.top = cache.topTop
+  top.style.bottom = "auto"
+  top.style.transform = "none"
+  topLeft.style.width = cache.topLeftWidth
+  topRight.style.width = cache.topRightWidth
+  contentWrap.style.flexDirection = cache.contentWrapFlexDirection
+  source.style.width = cache.sourceWrapWidth
+  comment.style.width = cache.commentWrapWidth
 
-  topRight.style.height = "auto"
-  const commentHeight = topRight.clientHeight
-  topRight.style.height = "0"
-  comment.style.height = commentHeight + "px"
+  // need calc
+  if (state.mode === "topBottom") {
+    state.observer.unobserve()
+    comment.style.height = topRight.scrollHeight + 20 + "px"
+  } else if (state.mode === "leftRight") {
+    state.observer.observe()
+    comment.style.height = source.style.height
+  }
 }
 
 export default class CodeCommentElement extends HTMLElement {
-  private cancelObserve = () => {}
-  private resizeEvent = () => {}
-  private upDownSplitScreen = () => {}
-
   constructor() {
     super()
     const shadowRoot = this.attachShadow({ mode: "open" })
@@ -164,47 +218,52 @@ export default class CodeCommentElement extends HTMLElement {
   }
 
   connectedCallback() {
-    this.resizeEvent = () => resize(this)
-    this.upDownSplitScreen = () => upDownSplitScreen(this)
     const { wrap, source, comment, control, split, top, topLeft, topRight, bottomOccupy } = this
+
+    const observer = createBottomSticky({
+      observeNode: bottomOccupy,
+      onBottomSticky: () => {
+        top.style.position = "absolute"
+        top.style.top = "auto"
+        top.style.bottom = "0"
+        top.style.transform = `translateY(-${topRight.scrollHeight+20+40}px)` // 40px is control bar height
+      },
+      outBottomSticky: () => {
+        const { paddingTopAttr } = states.get(this)!
+        top.style.position = "sticky"
+        top.style.top = paddingTopAttr
+        top.style.bottom = "auto"
+        top.style.transform = "none"
+      },
+    })
+
     const state: State = {
       paddingTopAttr: this.getAttribute("paddingTop") || "0",
-      commentHeight: 0,
+      mode: "leftRight",
+      observer: observer,
+
+      resize: () => resize(this),
+      upDownSplitScreen: () => toggleShowMode(this),
     }
     top.style.top = state.paddingTopAttr
     states.set(this, state)
 
-    // this.cancelObserve = (() => createBottomSticky({
-    //   observeNode: bottomOccupy,
-    //   onBottomSticky: () => {
-    //     const { commentHeight } = states.get(this)!
-    //     top.style.position = "absolute"
-    //     top.style.top = "auto"
-    //     top.style.bottom = "0"
-    //     top.style.transform = `translateY(-${commentHeight+40}px)` // 40px is control bar height
-    //   },
-    //   outBottomSticky: () => {
-    //     const { paddingTopAttr } = states.get(this)!
-    //     top.style.position = "sticky"
-    //     top.style.top = paddingTopAttr
-    //     top.style.bottom = "auto"
-    //     top.style.transform = "none"
-    //   },
-    // }))()
-    this.resizeEvent()
-    this.upDownSplitScreen()
-    window.addEventListener('resize', this.resizeEvent)
+    state.resize()
+    observer.observe()
+    window.addEventListener("resize", state.resize)
     split.addEventListener("mousedown", mouseDown)
-    control.addEventListener("click", fullScreen)
+    control.addEventListener("click", state.upDownSplitScreen)
   }
 
   disconnectedCallback() {
     const { split, control } = this
+    const state = states.get(this)!
+    states.delete(this)
 
     split && split.removeEventListener("mousedown", mouseDown)
     control && control.removeEventListener("click", fullScreen)
-    window.removeEventListener("resize", this.resizeEvent)
-    this.cancelObserve()
+    state && window.removeEventListener("resize", state.resize)
+    state && state.observer.unobserve()
   }
 
   get wrap (): HTMLElement {

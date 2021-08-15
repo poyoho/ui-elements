@@ -34,6 +34,7 @@ export default html`
 .top {
   display: flex;
   width: 100%;
+  height: 0;
   z-index: 1;
   position: sticky;
   top: 0;
@@ -62,6 +63,7 @@ export default html`
   background: #000;
   position: relative;
   user-select: none;
+  z-index: 1;
 }
 .split::before {
   content: "";
@@ -98,6 +100,7 @@ export default html`
 .bottom-occupy {
   position: absolute;
   transform: translateY(-100%);
+  z-index: 0;
 }
 .full-screen {
   position: fixed;
