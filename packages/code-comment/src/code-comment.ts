@@ -10,7 +10,7 @@ type StyleCache = Readonly<{
     position: string
     top: string
     bottom: string
-    overflowY: string
+    overflow: string
     transform: string
   }
   topRight: {
@@ -101,7 +101,7 @@ function pushStyleState (hostElement: CodeCommentElement) {
 
   state.cache.push({
     top: {
-      overflowY: currentStyle.overflowY,
+      overflow: currentStyle.overflowY,
       height: currentStyle.height,
       position: currentStyle.position,
       top: currentStyle.top,
@@ -169,28 +169,6 @@ function mouseDown (e: MouseEvent) {
     topLeft.style.width = sourceWidth + "%"
     topRight.style.width = (100 - sourceWidth) + "%"
 
-    if (top.scrollHeight > comment.clientHeight && !state.willChangeSourceWidth) {
-      pushStyleState(hostElement)
-      useStyleState(hostElement, {
-        top: {
-          height: comment.style.height,
-          position: "absolute",
-          overflowY: "scroll",
-          top: "0",
-          bottom: "auto",
-          transform: "none"
-        }
-      })
-      state.willChangeSourceWidth = sourceWidth
-      state.observer.unobserve()
-      states.set(hostElement, state)
-    } else if (sourceWidth < state.willChangeSourceWidth && state.willChangeSourceWidth) {
-      useStyleState(hostElement)
-      state.willChangeSourceWidth = 0
-      state.observer.observe()
-      states.set(hostElement, state)
-    }
-
     if (sourceWidth === 0) {
       source.style.paddingLeft = "0px"
       comment.style.paddingLeft = "0px"
@@ -202,8 +180,33 @@ function mouseDown (e: MouseEvent) {
       source.style.paddingLeft = "10px"
       comment.style.paddingLeft = "10px"
       topRight.style.opacity = "1"
+      if (state.willChangeSourceWidth) {
+        top.style.overflow = "scroll"
+      }
     }
     bottomOccupy.style.height = `calc(${state.paddingTopAttr} + ${topRight.scrollHeight + 30}px)` // 占位符
+
+    // topRight高度过高处理
+    if (top.scrollHeight > comment.clientHeight && !state.willChangeSourceWidth) {
+      pushStyleState(hostElement)
+      useStyleState(hostElement, {
+        top: {
+          height: comment.style.height,
+          position: "absolute",
+          overflow: "scroll",
+          top: "0",
+          bottom: "auto",
+          transform: "none"
+        }
+      })
+      state.willChangeSourceWidth = sourceWidth
+      state.observer.unobserve()
+    } else if (sourceWidth < state.willChangeSourceWidth && state.willChangeSourceWidth) {
+      useStyleState(hostElement)
+      state.willChangeSourceWidth = 0
+      state.observer.observe()
+    }
+
     states.set(hostElement, state)
   }
 
@@ -250,7 +253,7 @@ function toggleShowMode (hostElement: CodeCommentElement) {
     states.set(hostElement, state)
     useStyleState(hostElement, {
       top: {
-        overflowY: "visible",
+        overflow: "visible",
         height: "0",
         position: "absolute",
         top: "0",
@@ -295,7 +298,7 @@ export default class CodeCommentElement extends HTMLElement {
   }
 
   connectedCallback() {
-    const { control, split, top, topRight, bottomOccupy } = this
+    const { controlFold, controlFullScreen, controlSpliteScreen, split, top, topRight, bottomOccupy } = this
 
     const observer = createBottomSticky({
       observeNode: bottomOccupy,
@@ -322,7 +325,10 @@ export default class CodeCommentElement extends HTMLElement {
       cache: [],
 
       resize: () => resize(this),
-      upDownSplitScreen: () => toggleShowMode(this),
+      upDownSplitScreen: () => {
+        controlSpliteScreen.classList.toggle("rotate90")
+        toggleShowMode(this)
+      },
     }
     top.style.top = state.paddingTopAttr
     states.set(this, state)
@@ -331,16 +337,18 @@ export default class CodeCommentElement extends HTMLElement {
     observer.observe()
     window.addEventListener("resize", state.resize)
     split.addEventListener("mousedown", mouseDown)
-    control.addEventListener("click", state.upDownSplitScreen)
+    controlFullScreen.addEventListener("click", fullScreen)
+    controlSpliteScreen.addEventListener("click", state.upDownSplitScreen)
   }
 
   disconnectedCallback() {
-    const { split, control } = this
+    const { split, controlFullScreen, controlSpliteScreen } = this
     const state = states.get(this)!
     states.delete(this)
 
     split && split.removeEventListener("mousedown", mouseDown)
-    control && control.removeEventListener("click", fullScreen)
+    controlFullScreen && controlFullScreen.removeEventListener("click", fullScreen)
+    controlSpliteScreen && controlSpliteScreen.removeEventListener("click", state.upDownSplitScreen)
     state && window.removeEventListener("resize", state.resize)
     state && state.observer.unobserve()
   }
@@ -365,8 +373,16 @@ export default class CodeCommentElement extends HTMLElement {
     return this.shadowRoot!.querySelector(".split")!
   }
 
-  get control (): HTMLElement {
-    return this.shadowRoot!.querySelector(".control")!
+  get controlFullScreen (): HTMLElement {
+    return this.shadowRoot!.querySelector(".icon-full-screen")!
+  }
+
+  get controlSpliteScreen (): HTMLElement {
+    return this.shadowRoot!.querySelector(".icon-splite-screen")!
+  }
+
+  get controlFold (): HTMLElement {
+    return this.shadowRoot!.querySelector(".icon-left")!
   }
 
   get top (): HTMLElement {

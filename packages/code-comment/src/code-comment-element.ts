@@ -1,5 +1,8 @@
+const IconFullScreen = new URL("./full-screen.svg", import.meta.url).href
+const IconSpliteScreen = new URL("./splite-screen.svg", import.meta.url).href
+
 function html(...args: any) {
-  return args
+  return (args[0] as Array<string>).map((str, idx) => str + args[1 + idx]).join("")
 }
 
 export default html`
@@ -20,9 +23,30 @@ export default html`
   </div>
 
   <div class="occupy bottom-occupy"></div>
-  <div class="control"></div>
+  <div class="control">
+    <span class="icon icon-full-screen"></span>
+    <span class="icon icon-splite-screen rotate90"></span>
+  </div>
 </div>
 <style>
+.icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  margin-top: 8px;
+  margin-right: 10px;
+}
+.icon-full-screen {
+  background: url(${IconFullScreen}) no-repeat;
+  background-size: 100% 100%;
+}
+.icon-splite-screen {
+  background: url(${IconSpliteScreen}) no-repeat;
+  background-size: 100% 100%;
+}
+.rotate90 {
+  transform: rotate(90deg);
+}
 .code-comment {
   position: relative;
 }
@@ -52,7 +76,7 @@ export default html`
   width: 100%;
   height: 40px;
   line-height: 40px;
-  text-align: center;
+  text-align: end;
   background: #303c40;
   position: sticky;
   left: 0;
