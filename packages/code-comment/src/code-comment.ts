@@ -1,39 +1,54 @@
 import { getShadowHost } from "@ui-elements/utils"
 import teamplateElement from "./code-comment-element"
 
-interface ModeCache {
-  topHeight: string
-  topPostion: string
-  topTop: string
-  topBottom: string
-  topOverflowY: string
-  topTransform: string
-  topLeftWidth: string
-  topRightWidth: string
-  contentWrapFlexDirection: string
-  sourceWrapWidth: string
-  commentWrapWidth: string
-}
-
+type NOOP = () => void
 export type Mode = "leftRight" | "topBottom"
 
-interface State {
-  observer: {
-    observe: () => void
-    unobserve: () => void
+type StyleCache = Readonly<{
+  top: {
+    height: string
+    position: string
+    top: string
+    bottom: string
+    overflowY: string
+    transform: string
   }
-  resize: () => void
-  upDownSplitScreen: () => void
+  topRight: {
+    width: string
+  }
+  topLeft: {
+    width: string
+  }
+  contentWrap: {
+    flexDirection: string
+  }
+  source: {
+    width: string
+  }
+  comment: {
+    width: string
+  }
+}>
+
+interface Observer {
+  observe: NOOP
+  unobserve: NOOP
+}
+
+interface State {
+  observer: Observer
+  resize: NOOP
+  upDownSplitScreen: NOOP
 
   mode: Mode
   paddingTopAttr: string
   willChangeSourceWidth: number
-  cache: ModeCache
+  cache: StyleCache[] // stack
 }
 
 interface BottomStickyCallback {
-  onBottomSticky: () => void
-  outBottomSticky: () => void
+  onBottomSticky: NOOP
+  outBottomSticky: NOOP
 }
 
 const states = new WeakMap<CodeCommentElement, State>()
@@ -78,6 +93,56 @@ const createBottomSticky = (() => {
   }
 })()
 
+function pushStyleState (hostElement: CodeCommentElement) {
+  console.log("pushStyleState")
+  const { top, topLeft, topRight, contentWrap, source, comment } = hostElement
+  const currentStyle = window.getComputedStyle(top)
+  const state = states.get(hostElement)!
+
+  state.cache.push({
+    top: {
+      overflowY: currentStyle.overflowY,
+      height: currentStyle.height,
+      position: currentStyle.position,
+      top: currentStyle.top,
+      bottom: currentStyle.bottom,
+      transform: currentStyle.transform,
+    },
+    topLeft: {
+      width: topLeft.style.width,
+    },
+    topRight: {
+      width: topRight.style.width
+    },
+    contentWrap: {
+      flexDirection: contentWrap.style.flexDirection,
+    },
+    source: {
+      width: source.style.width,
+    },
+    comment: {
+      width: comment.style.width,
+    }
+  })
+}
+
+
+function useStyleState (hostElement: CodeCommentElement, state?: Partial<StyleCache>) {
+  let topItem = state
+  if (!topItem) {
+    topItem = states.get(hostElement)!.cache.pop()!
+  }
+  const { top, topLeft, topRight, contentWrap, source, comment } = hostElement
+  if (topItem) {
+    Object.assign(top.style, topItem.top)
+    Object.assign(topLeft.style, topItem.topLeft)
+    Object.assign(topRight.style, topItem.topRight)
+    Object.assign(contentWrap.style, topItem.contentWrap)
+    Object.assign(source.style, topItem.source)
+    Object.assign(comment.style, topItem.comment)
+  }
+}
+
 function mouseDown (e: MouseEvent) {
   const target = e.currentTarget! as HTMLElement
   const hostElement = getShadowHost(target) as CodeCommentElement
@@ -105,25 +170,24 @@ function mouseDown (e: MouseEvent) {
     topRight.style.width = (100 - sourceWidth) + "%"
 
     if (top.scrollHeight > comment.clientHeight && !state.willChangeSourceWidth) {
-      const currentStyle = window.getComputedStyle(top)
-      state.cache.topHeight = currentStyle.height
-      state.cache.topPostion = currentStyle.position
-      state.cache.topOverflowY = currentStyle.overflow
-      state.cache.topTop = currentStyle.top
-      top.style.cssText = `
-        height: ${comment.style.height};
-        position: absolute;
-        overflow-y: scroll;
-        top: 0;
-      `
+      pushStyleState(hostElement)
+      useStyleState(hostElement, {
+        top: {
+          height: comment.style.height,
+          position: "absolute",
+          overflowY: "scroll",
+          top: "0",
+          bottom: "auto",
+          transform: "none"
+        }
+      })
       state.willChangeSourceWidth = sourceWidth
+      state.observer.unobserve()
       states.set(hostElement, state)
     } else if (sourceWidth < state.willChangeSourceWidth && state.willChangeSourceWidth) {
-      top.style.height = state.cache.topHeight
-      top.style.position = state.cache.topPostion
-      top.style.overflow = state.cache.topOverflowY
-      top.style.top = state.cache.topTop
+      useStyleState(hostElement)
       state.willChangeSourceWidth = 0
+      state.observer.observe()
       states.set(hostElement, state)
     }
 
@@ -177,65 +241,46 @@ function resize (hostElement: CodeCommentElement) {
 }
 
 function toggleShowMode (hostElement: CodeCommentElement) {
-  const { contentWrap, comment, source, top, topLeft, topRight } = hostElement
+  const { comment, source, topRight } = hostElement
   const state = states.get(hostElement)!
 
-  let cache: ModeCache
   if (state.mode === "leftRight") {
-    state.cache = {
-      topOverflowY: top.style.overflow,
-      topHeight: top.style.height,
-      topPostion: top.style.position,
-      topTop: top.style.top,
-      topBottom: top.style.bottom,
-      topTransform: top.style.transform,
-      topLeftWidth: topLeft.style.width,
-      topRightWidth: topRight.style.width,
-      contentWrapFlexDirection: contentWrap.style.flexDirection,
-      sourceWrapWidth: source.style.width,
-      commentWrapWidth: comment.style.width,
-    }
+    pushStyleState(hostElement)
     state.mode = "topBottom"
     states.set(hostElement, state)
-    cache = {
-      topOverflowY: "none",
-      topHeight: "0",
-      topPostion: "absolute",
-      topTop: "0",
-      topBottom: "auto",
-      topTransform: "none",
-      topLeftWidth: "0",
-      topRightWidth: "100%",
-      contentWrapFlexDirection: "column-reverse",
-      sourceWrapWidth: "100%",
-      commentWrapWidth: "100%",
-    }
-  } else if (state.mode === "topBottom") {
-    state.mode = "leftRight"
-    cache = state.cache!
-    states.set(hostElement, state)
-  } else {
-    return
-  }
-
-  top.style.overflow = cache.topOverflowY
-  top.style.height = cache.topHeight
-  top.style.position = cache.topPostion
-  top.style.top = cache.topTop
-  top.style.bottom = cache.topBottom
-  top.style.transform = cache.topTransform
-  topLeft.style.width = cache.topLeftWidth
-  topRight.style.width = cache.topRightWidth
-  contentWrap.style.flexDirection = cache.contentWrapFlexDirection
-  source.style.width = cache.sourceWrapWidth
-  comment.style.width = cache.commentWrapWidth
-
-  // need calc
-  if (state.mode === "topBottom") {
+    useStyleState(hostElement, {
+      top: {
+        overflowY: "visible",
+        height: "0",
+        position: "absolute",
+        top: "0",
+        bottom: "auto",
+        transform: "none",
+      },
+      topLeft: {
+        width: "0",
+      },
+      topRight: {
+        width: "100%",
+      },
+      contentWrap: {
+        flexDirection: "column-reverse",
+      },
+      source: {
+        width: "100%",
+      },
+      comment: {
+        width: "100%",
+      }
+    })
     state.observer.unobserve()
     comment.style.height = topRight.scrollHeight + 20 + "px"
-  } else if (state.mode === "leftRight") {
-    state.observer.observe()
+  } else if (state.mode === "topBottom") {
+    state.mode = "leftRight"
+    states.set(hostElement, state)
+    useStyleState(hostElement)
+    // mouseDown event disable observer need mouseDown event enable it
+    !state.willChangeSourceWidth && state.observer.observe()
     comment.style.height = source.style.height
   }
 }
@@ -250,7 +295,7 @@ export default class CodeCommentElement extends HTMLElement {
   }
 
   connectedCallback() {
-    const { wrap, source, comment, control, split, top, topLeft, topRight, bottomOccupy } = this
+    const { control, split, top, topRight, bottomOccupy } = this
 
     const observer = createBottomSticky({
       observeNode: bottomOccupy,
@@ -274,19 +319,7 @@ export default class CodeCommentElement extends HTMLElement {
       willChangeSourceWidth: 0,
       mode: "leftRight",
       observer: observer,
-      cache: {
-        topOverflowY: "",
-        topHeight: "",
-        topPostion: "",
-        topTop: "",
-        topBottom: "",
-        topTransform: "",
-        topLeftWidth: "",
-        topRightWidth: "",
-        contentWrapFlexDirection: "",
-        sourceWrapWidth: "",
-        commentWrapWidth: "",
-      },
+      cache: [],
 
       resize: () => resize(this),
       upDownSplitScreen: () => toggleShowMode(this),
