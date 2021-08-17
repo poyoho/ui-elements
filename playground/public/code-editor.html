@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>code-editor</title>
+  <script type="module" src="./src/main.ts"></script>
+  <style>
+    .wrap {
+      width: 80%;
+      margin: 0 auto;
+    }
+    .editor {
+      height: 500px;
+    }
+    .head {
+      position: fixed;
+      top: 0;
+      background: red;
+      text-align: center;
+      width: 100%;
+      height: 100px;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <a href="/">back</a>
+  <div class="wrap">
+    <h3>code-editor</h3>
+    <code-editor lang="js" class="editor"></code-editor>
+  </div>
+</body>
+<script>
+  const elm = document.querySelector(".editor")
+  elm.addEventListener("change", (e) => {
+    console.log(e.srcElement.value)
+  })
+</script>
+</html>

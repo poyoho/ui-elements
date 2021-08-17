@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "baseUrl": ".",
-    "module": "commonjs",
+    "module": "esnext",
     "moduleResolution": "node",
     "declaration": true,
     "removeComments": true,
@@ -11,19 +11,17 @@
     "strict": true,
     "noUnusedLocals": true,
     "jsx": "preserve",
-    "target": "es2019",
+    "target": "esnext",
     "lib": [
-      "ESNext", "DOM"
+      "esnext", "DOM"
     ],
-
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": ["vite/client"]
   },
   "exclude": [
     "node_modules",
   ],
-  "include": [ 
-    "src",
-    "**/*.d.ts"
-    , "../lib/component/demo-block/useRefTemplate.ts"  ]
+  "include": [
+    "src"
+  ]
 }
- 
