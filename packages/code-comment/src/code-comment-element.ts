@@ -69,6 +69,8 @@ export default html`
 .comment-content {
   width: 50%;
   color: #d7d3c2;
+  padding-top: 10px;
+  padding-left: 10px;
 }
 .control {
   z-index: 10;
@@ -110,13 +112,10 @@ export default html`
 }
 .comment-wrap {
   position: relative;
-  box-sizing: border-box;
   width: 50%;
   background: #282c3d;
   color: #d7d3c2;
   overflow: auto;
-  padding-top: 10px;
-  padding-left: 10px;
 }
 .occupy {
   width: 100%;

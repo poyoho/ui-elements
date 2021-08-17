@@ -1,6 +1,6 @@
 {
   "name": "@poyoho/ui-elements",
-  "private": false,
+  "private": true,
   "version": "0.0.9",
   "description": "web components library",
   "scripts": {
