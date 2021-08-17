@@ -1,5 +1,8 @@
+const IconFullScreen = new URL("./full-screen.svg", import.meta.url).href
+const IconSpliteScreen = new URL("./splite-screen.svg", import.meta.url).href
+
 function html(...args: any) {
-  return args
+  return (args[0] as Array<string>).map((str, idx) => str + (args[1 + idx] || "")).join("")
 }
 
 export default html`
@@ -20,9 +23,30 @@ export default html`
   </div>
 
   <div class="occupy bottom-occupy"></div>
-  <div class="control"></div>
+  <div class="control">
+    <span class="icon icon-full-screen"></span>
+    <span class="icon icon-splite-screen rotate90"></span>
+  </div>
 </div>
 <style>
+.icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  margin-top: 8px;
+  margin-right: 10px;
+}
+.icon-full-screen {
+  background: url(${IconFullScreen}) no-repeat;
+  background-size: 100% 100%;
+}
+.icon-splite-screen {
+  background: url(${IconSpliteScreen}) no-repeat;
+  background-size: 100% 100%;
+}
+.rotate90 {
+  transform: rotate(90deg);
+}
 .code-comment {
   position: relative;
 }
@@ -34,7 +58,8 @@ export default html`
 .top {
   display: flex;
   width: 100%;
-  z-index: 10;
+  height: 0;
+  z-index: 1;
   position: sticky;
   top: 0;
 }
@@ -46,11 +71,12 @@ export default html`
   color: #d7d3c2;
 }
 .control {
+  z-index: 10;
   cursor: pointer;
   width: 100%;
   height: 40px;
   line-height: 40px;
-  text-align: center;
+  text-align: end;
   background: #303c40;
   position: sticky;
   left: 0;
@@ -61,6 +87,7 @@ export default html`
   background: #000;
   position: relative;
   user-select: none;
+  z-index: 1;
 }
 .split::before {
   content: "";
@@ -97,6 +124,7 @@ export default html`
 .bottom-occupy {
   position: absolute;
   transform: translateY(-100%);
+  z-index: 0;
 }
 .full-screen {
   position: fixed;
@@ -104,7 +132,7 @@ export default html`
   left: 0;
   width: 100% !important;
   height: 100% !important;
-  z-index: 65535;
+  z-index: 2147483647; /* z-index max */
 }
 </style>
 `

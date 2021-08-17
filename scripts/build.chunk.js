@@ -11,6 +11,7 @@ const tsconfigPath = path.join(__dirname, "../tsconfig.json")
 const packagePath = path.join(__dirname, "../packages/")
 const { getPackages } = require("@lerna/project")
 const { exit } = require("process")
+const { importMetaAssets } = require("@web/rollup-plugin-import-meta-assets")
 
 /**
  * build component by rollup
@@ -34,6 +35,7 @@ async function componentBuilder (pkgName) {
           "__tests__",
         ]
       }),
+      importMetaAssets(),
       rollupWorker(),
       rollupTransform(),
       json(),
@@ -57,6 +59,7 @@ async function componentBuilder (pkgName) {
 module.exports = async function runBuild () {
   const pkgs = (await getPackages())
     .map(pkg => pkg.name.replace("@ui-elements/", ""))
+    .filter(name => name !== "code-editor")
 
   for (const pkgName of pkgs) {
     console.log(pkgName)

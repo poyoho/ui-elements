@@ -12,7 +12,7 @@ const packagePath = path.join(__dirname, "../packages/")
 const { getPackages } = require("@lerna/project")
 const { exit } = require("process")
 const _rm = require("rimraf")
-
+console.log(tsconfigPath)
 function rm (dirOrFile) {
   return new Promise((resolve) => {
     _rm(dirOrFile, {}, () => {
