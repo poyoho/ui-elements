@@ -1,7 +1,7 @@
 {
   "name": "@poyoho/ui-elements",
   "private": false,
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "web components library",
   "scripts": {
     "bootstrap": "yarn --frozen-lockfile && npx lerna bootstrap",
