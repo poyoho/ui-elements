@@ -2,7 +2,7 @@ const IconFullScreen = new URL("./full-screen.svg", import.meta.url).href
 const IconSpliteScreen = new URL("./splite-screen.svg", import.meta.url).href
 
 function html(...args: any) {
-  return (args[0] as Array<string>).map((str, idx) => str + args[1 + idx]).join("")
+  return (args[0] as Array<string>).map((str, idx) => str + (args[1 + idx] || "")).join("")
 }
 
 export default html`
@@ -132,7 +132,7 @@ export default html`
   left: 0;
   width: 100% !important;
   height: 100% !important;
-  z-index: 65535;
+  z-index: 2147483647; /* z-index max */
 }
 </style>
 `

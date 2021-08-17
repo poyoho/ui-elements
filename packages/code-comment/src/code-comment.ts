@@ -53,6 +53,55 @@ interface BottomStickyCallback {
 
 const states = new WeakMap<CodeCommentElement, State>()
 
+function pushStyleState (hostElement: CodeCommentElement) {
+  console.log("pushStyleState")
+  const { top, topLeft, topRight, contentWrap, source, comment } = hostElement
+  const currentStyle = window.getComputedStyle(top)
+  const state = states.get(hostElement)!
+
+  state.cache.push({
+    top: {
+      height: currentStyle.height,
+      position: currentStyle.position,
+      top: currentStyle.top,
+      bottom: currentStyle.bottom,
+      transform: currentStyle.transform,
+    },
+    topLeft: {
+      width: topLeft.style.width,
+    },
+    topRight: {
+      width: topRight.style.width,
+      overflow: topRight.style.overflow
+    },
+    contentWrap: {
+      flexDirection: contentWrap.style.flexDirection,
+    },
+    source: {
+      width: source.style.width,
+    },
+    comment: {
+      width: comment.style.width,
+    }
+  })
+}
+
+function useStyleState (hostElement: CodeCommentElement, state?: Partial<StyleCache>) {
+  let topItem = state
+  if (!topItem) {
+    topItem = states.get(hostElement)!.cache.pop()!
+  }
+  const { top, topLeft, topRight, contentWrap, source, comment } = hostElement
+  if (topItem) {
+    Object.assign(top.style, topItem.top)
+    Object.assign(topLeft.style, topItem.topLeft)
+    Object.assign(topRight.style, topItem.topRight)
+    Object.assign(contentWrap.style, topItem.contentWrap)
+    Object.assign(source.style, topItem.source)
+    Object.assign(comment.style, topItem.comment)
+  }
+}
+
 const createBottomSticky = (() => {
   const eventMap = new WeakMap<HTMLElement, BottomStickyCallback>()
   const observer = new IntersectionObserver((records) => {
@@ -92,56 +141,6 @@ const createBottomSticky = (() => {
     }
   }
 })()
-
-function pushStyleState (hostElement: CodeCommentElement) {
-  console.log("pushStyleState")
-  const { top, topLeft, topRight, contentWrap, source, comment } = hostElement
-  const currentStyle = window.getComputedStyle(top)
-  const state = states.get(hostElement)!
-
-  state.cache.push({
-    top: {
-      height: currentStyle.height,
-      position: currentStyle.position,
-      top: currentStyle.top,
-      bottom: currentStyle.bottom,
-      transform: currentStyle.transform,
-    },
-    topLeft: {
-      width: topLeft.style.width,
-    },
-    topRight: {
-      width: topRight.style.width,
-      overflow: topRight.style.overflow
-    },
-    contentWrap: {
-      flexDirection: contentWrap.style.flexDirection,
-    },
-    source: {
-      width: source.style.width,
-    },
-    comment: {
-      width: comment.style.width,
-    }
-  })
-}
-
-
-function useStyleState (hostElement: CodeCommentElement, state?: Partial<StyleCache>) {
-  let topItem = state
-  if (!topItem) {
-    topItem = states.get(hostElement)!.cache.pop()!
-  }
-  const { top, topLeft, topRight, contentWrap, source, comment } = hostElement
-  if (topItem) {
-    Object.assign(top.style, topItem.top)
-    Object.assign(topLeft.style, topItem.topLeft)
-    Object.assign(topRight.style, topItem.topRight)
-    Object.assign(contentWrap.style, topItem.contentWrap)
-    Object.assign(source.style, topItem.source)
-    Object.assign(comment.style, topItem.comment)
-  }
-}
 
 function mouseDown (e: MouseEvent) {
   const target = e.currentTarget! as HTMLElement
@@ -209,8 +208,6 @@ function mouseDown (e: MouseEvent) {
           overflow: "auto"
         }
       })
-      Object.assign(topRight.style, {
-      })
       state.willChangeSourceWidth = sourceWidth
     } else if (sourceWidth < state.willChangeSourceWidth && state.willChangeSourceWidth) {
       useStyleState(hostElement)
@@ -236,10 +233,12 @@ function fullScreen (e: Event) {
   if (wrap.classList.toggle("full-screen")) {
     source.style.height = "100%"
     comment.style.height = "100%"
+    document.body.style.overflow = "hidden"
   } else {
     const staticHeight = Math.max(source.offsetHeight, comment.offsetHeight) + 20
     source.style.height = staticHeight + "px"
     comment.style.height = staticHeight + "px"
+    document.body.style.overflow = "auto"
   }
 }
 
