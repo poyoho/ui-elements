@@ -10,11 +10,11 @@ type StyleCache = Readonly<{
     position: string
     top: string
     bottom: string
-    overflow: string
     transform: string
   }
   topRight: {
     width: string
+    overflow: string
   }
   topLeft: {
     width: string
@@ -101,7 +101,6 @@ function pushStyleState (hostElement: CodeCommentElement) {
 
   state.cache.push({
     top: {
-      overflow: currentStyle.overflowY,
       height: currentStyle.height,
       position: currentStyle.position,
       top: currentStyle.top,
@@ -112,7 +111,8 @@ function pushStyleState (hostElement: CodeCommentElement) {
       width: topLeft.style.width,
     },
     topRight: {
-      width: topRight.style.width
+      width: topRight.style.width,
+      overflow: topRight.style.overflow
     },
     contentWrap: {
       flexDirection: contentWrap.style.flexDirection,
@@ -180,33 +180,45 @@ function mouseDown (e: MouseEvent) {
       source.style.paddingLeft = "10px"
       comment.style.paddingLeft = "10px"
       topRight.style.opacity = "1"
-      if (state.willChangeSourceWidth) {
-        top.style.overflow = "scroll"
-      }
     }
-    bottomOccupy.style.height = `calc(${state.paddingTopAttr} + ${topRight.scrollHeight + 30}px)` // 占位符
 
     // topRight高度过高处理
-    if (top.scrollHeight > comment.clientHeight && !state.willChangeSourceWidth) {
-      pushStyleState(hostElement)
+    if (sourceWidth === 100) {
       useStyleState(hostElement, {
         top: {
           height: comment.style.height,
           position: "absolute",
-          overflow: "scroll",
           top: "0",
           bottom: "auto",
           transform: "none"
         }
       })
-      state.willChangeSourceWidth = sourceWidth
+    } else if (top.scrollHeight > comment.clientHeight && !state.willChangeSourceWidth) {
       state.observer.unobserve()
+      pushStyleState(hostElement)
+      useStyleState(hostElement, {
+        top: {
+          position: "absolute",
+          height: comment.style.height,
+          top: "0",
+          bottom: "auto",
+          transform: "none"
+        },
+        topRight: {
+          width: comment.style.width,
+          overflow: "auto"
+        }
+      })
+      Object.assign(topRight.style, {
+      })
+      state.willChangeSourceWidth = sourceWidth
     } else if (sourceWidth < state.willChangeSourceWidth && state.willChangeSourceWidth) {
       useStyleState(hostElement)
-      state.willChangeSourceWidth = 0
       state.observer.observe()
+      state.willChangeSourceWidth = 0
     }
 
+    bottomOccupy.style.height = `calc(${state.paddingTopAttr} + ${topRight.scrollHeight + 30}px)` // 占位符
     states.set(hostElement, state)
   }
 
@@ -253,7 +265,6 @@ function toggleShowMode (hostElement: CodeCommentElement) {
     states.set(hostElement, state)
     useStyleState(hostElement, {
       top: {
-        overflow: "visible",
         height: "0",
         position: "absolute",
         top: "0",
@@ -265,6 +276,7 @@ function toggleShowMode (hostElement: CodeCommentElement) {
       },
       topRight: {
         width: "100%",
+        overflow: "visible",
       },
       contentWrap: {
         flexDirection: "column-reverse",
@@ -298,7 +310,7 @@ export default class CodeCommentElement extends HTMLElement {
   }
 
   connectedCallback() {
-    const { controlFold, controlFullScreen, controlSpliteScreen, split, top, topRight, bottomOccupy } = this
+    const { controlFullScreen, controlSpliteScreen, split, top, topRight, bottomOccupy } = this
 
     const observer = createBottomSticky({
       observeNode: bottomOccupy,
@@ -379,10 +391,6 @@ export default class CodeCommentElement extends HTMLElement {
 
   get controlSpliteScreen (): HTMLElement {
     return this.shadowRoot!.querySelector(".icon-splite-screen")!
-  }
-
-  get controlFold (): HTMLElement {
-    return this.shadowRoot!.querySelector(".icon-left")!
   }
 
   get top (): HTMLElement {
