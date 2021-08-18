@@ -1219,6 +1219,13 @@
   dependencies:
     "@types/node" "*"
 
+"@types/vue@^2.0.0":
+  version "2.0.0"
+  resolved "http://npmjs.cmzhfe.com/@types%2fvue/-/vue-2.0.0.tgz#ec77b3d89591deb9ca5cb052368aa9c32be088e7"
+  integrity sha1-7Hez2JWR3rnKXLBSNoqpwyvgiOc=
+  dependencies:
+    vue "*"
+
 "@typescript-eslint/eslint-plugin@^4.9.1":
   version "4.29.1"
   resolved "https://registry.nlark.com/@typescript-eslint/eslint-plugin/download/@typescript-eslint/eslint-plugin-4.29.1.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40typescript-eslint%2Feslint-plugin%2Fdownload%2F%40typescript-eslint%2Feslint-plugin-4.29.1.tgz#808d206e2278e809292b5de752a91105da85860b"
@@ -5730,6 +5737,11 @@ vscode-uri@^3.0.2:
   version "3.0.2"
   resolved "https://registry.npm.taobao.org/vscode-uri/download/vscode-uri-3.0.2.tgz#ecfd1d066cb8ef4c3a208decdbab9a8c23d055d0"
   integrity sha1-7P0dBmy470w6II3s26uajCPQVdA=
+
+vue@*:
+  version "2.6.14"
+  resolved "http://npmjs.cmzhfe.com/vue/-/vue-2.6.14.tgz#e51aa5250250d569a3fbad3a8a5a687d6036e235"
+  integrity sha1-5RqlJQJQ1Wmj+606ilpofWA24jU=
 
 wcwidth@^1.0.0:
   version "1.0.1"

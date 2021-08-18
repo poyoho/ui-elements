@@ -58,7 +58,6 @@ export async function setupMonaco () {
   monaco.editor.defineTheme('dark', await import("./dark.json") as any)
   await loadWorker()
 
-
   const packages = new Map<string, {
     content: string;
     filePath?: string;
