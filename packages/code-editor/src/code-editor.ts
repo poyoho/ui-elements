@@ -1,4 +1,5 @@
 import { setupMonaco, SupportLanguage } from "./monaco"
+import { resolvePackage } from "@ui-elements/utils"
 
 function validateProps (attr: NamedNodeMap) {
   const lang = attr.getNamedItem("lang")!
@@ -39,6 +40,7 @@ export default class CodeEditor extends HTMLElement {
       SupportLanguage[extension],
       monaco.Uri.parse(`file:///root/${Date.now()}.${extension}`)
     )
+
     const editor = monaco.editor.create(this.container, {
       model,
       tabSize: 2,
@@ -60,6 +62,8 @@ export default class CodeEditor extends HTMLElement {
       event.initEvent("change", false, false)
       this.dispatchEvent(event)
     })
+
+    // console.log(await resolvePackage("vue", "next"))
   }
 
   disconnectedCallback() {}
