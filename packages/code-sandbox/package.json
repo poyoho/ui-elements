@@ -2,6 +2,8 @@
   "name": "@ui-elements/code-sandbox",
   "version": "0.0.0",
   "main": "index.ts",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "@vue/compiler-sfc": "^3.2.4"
   }
 }

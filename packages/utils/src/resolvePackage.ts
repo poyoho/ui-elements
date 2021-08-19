@@ -1,7 +1,7 @@
 export interface Package {
   name: string
   version: string
-  types: () => Promise<string>
+  types: string
   entry: string
 }
 
@@ -9,8 +9,8 @@ export interface Package {
 export interface PackageMetadata {
   name: string
   version: string
-  main: string
   types: string
+  main: string
   module: string
   dependencies: Record<string, string>
 }
@@ -31,11 +31,8 @@ export async function resolvePackageMetadata(name: string, version: string): Pro
   return await response.json()
 }
 
-export async function resolvePackageTypes(metadata: PackageMetadata): Promise<string> {
-  if (!metadata.types)
-    return ''
-
-  const response = await fetch(url(`${metadata.name}@${metadata.version}/${metadata.types}`))
+export async function resolvePackageTypes(name: string, version: string, entry: string): Promise<string> {
+  const response = await fetch(url(`${name}@${version}/${entry}`))
 
   if (!response.ok)
     return ''
@@ -48,7 +45,7 @@ export async function resolvePackage(name: string, version: string) {
   const metadata = await resolvePackageMetadata(name, version)
 
   if (!(metadata instanceof Error)) {
-    const types = () => resolvePackageTypes(metadata)
+    const typesEntry = metadata.types
     const dependencies = Object.entries(metadata.dependencies || []).map(([name, version]) => ({ name, version }))
     // 递归加载所有依赖
     const resolvedDeps = await Promise.allSettled(dependencies.map(({ name, version }) => resolvePackage(name, version)))
@@ -58,7 +55,7 @@ export async function resolvePackage(name: string, version: string) {
         name: metadata.name,
         version: metadata.version,
         entry: metadata.module || metadata.main,
-        types,
+        types: typesEntry,
       },
       ...resolvedDeps
         .filter((result): result is PromiseFulfilledResult<Package[]> => result.status === 'fulfilled')
