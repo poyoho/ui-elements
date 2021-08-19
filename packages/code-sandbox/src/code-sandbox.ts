@@ -1,3 +1,6 @@
+import srcdoc from "./sandboxRuntime/srcdoc.html?raw"
+import { SandboxProxy } from "./sandboxRuntime/proxy"
+
 export default class CodeSandbox extends HTMLElement {
   constructor() {
     super()
@@ -13,6 +16,10 @@ export default class CodeSandbox extends HTMLElement {
       'allow-scripts',
       'allow-top-navigation-by-user-activation',
     ].join(' '))
+    sandbox.srcdoc = srcdoc
+    const proxy = new SandboxProxy(sandbox, {
+
+    })
     this.appendChild(sandbox)
   }
 

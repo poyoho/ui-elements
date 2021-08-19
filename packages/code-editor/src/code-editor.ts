@@ -50,8 +50,6 @@ export default class CodeEditor extends HTMLElement {
     })
 
     this.editor = editor
-
-    this.createModel("ts", "aaa")
   }
 
   disconnectedCallback() {}

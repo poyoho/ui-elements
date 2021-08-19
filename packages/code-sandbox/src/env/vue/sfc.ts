@@ -1,6 +1,6 @@
 /* 这里引用只用dts 后面打包去除 */
-import { SFCDescriptor, BindingMetadata } from '@vue/compiler-sfc'
-import * as defaultCompiler from '@vue/compiler-sfc'
+import type { SFCDescriptor, BindingMetadata } from '@vue/compiler-sfc'
+import type * as defaultCompiler from '@vue/compiler-sfc'
 
 // import { fs, SFCFile } from '../fs'
 
