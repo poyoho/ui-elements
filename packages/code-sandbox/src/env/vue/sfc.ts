@@ -1,48 +1,27 @@
-/* 这里引用只用dts 后面打包去除 */
 import type { SFCDescriptor, BindingMetadata } from '@vue/compiler-sfc'
-import type * as defaultCompiler from '@vue/compiler-sfc'
-
-// import { fs, SFCFile } from '../fs'
-
-export const COMP_IDENTIFIER = '__sfc__'
-
-type SFCCompiler = typeof defaultCompiler
-
-// import in sandbox
-export async function importCompile(version: string) {
-  const compilerUrl = `https://unpkg.com/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`
-  const runtimeUrl = `https://unpkg.com/@vue/runtime-dom@${version}/dist/runtime-dom.esm-browser.js`
-  const [compiler] = await Promise.all([
-    import(compilerUrl),
-    import(runtimeUrl),
-  ])
-  console.info(`Now using Vue version: ${version}`)
-  return compiler
-}
+import { importVuePackage, COMP_IDENTIFIER, SFCFile } from "./env"
 
 export async function compileFile(
-  SFCCompiler: SFCCompiler,
   { filename, compiled, content }: SFCFile
-) {
+): Promise<Error[]> {
+  const { compiler } = await importVuePackage()
+
   if (!content.trim()) {
-    fs.errors = []
-    return
+    return []
   }
 
   if (!filename.endsWith('.vue')) {
     compiled.js = compiled.ssr = content
-    fs.errors = []
-    return
+    return []
   }
 
   const id = await hashId(filename)
-  const { errors, descriptor } = SFCCompiler.parse(content, {
+  const { errors, descriptor } = compiler.parse(content, {
     filename,
     sourceMap: true,
   })
   if (errors.length) {
-    fs.errors = errors
-    return
+    return errors
   }
 
   if (
@@ -51,10 +30,9 @@ export async function compileFile(
     || descriptor.styles.some(s => s.lang)
     || (descriptor.template && descriptor.template.lang)
   ) {
-    fs.errors = [
-      'lang="x" pre-processors are not supported in the in-browser playground.',
+    return [
+      Error('lang="x" pre-processors are not supported in the in-browser playground.'),
     ]
-    return
   }
 
   const hasScoped = descriptor.styles.some(s => s.scoped)
@@ -66,9 +44,10 @@ export async function compileFile(
     ssrCode += code
   }
 
-  const clientScriptResult = doCompileScript(SFCCompiler, descriptor, id, false)
-  if (!clientScriptResult)
-    return
+  const clientScriptResult = await doCompileScript(descriptor, id, false)
+  if (!clientScriptResult) {
+    return []
+  }
 
   const [clientScript, bindings] = clientScriptResult
   clientCode += clientScript
@@ -76,9 +55,10 @@ export async function compileFile(
   // script ssr only needs to be performed if using <script setup> where
   // the render fn is inlined.
   if (descriptor.scriptSetup) {
-    const ssrScriptResult = doCompileScript(SFCCompiler, descriptor, id, true)
-    if (!ssrScriptResult)
-      return
+    const ssrScriptResult = doCompileScript(descriptor, id, true)
+    if (!ssrScriptResult) {
+      return []
+    }
 
     ssrCode += ssrScriptResult[0]
   }
@@ -90,21 +70,22 @@ export async function compileFile(
   // template
   // only need dedicated compilation if not using <script setup>
   if (descriptor.template && !descriptor.scriptSetup) {
-    const clientTemplateResult = doCompileTemplate(
-      SFCCompiler,
+    const clientTemplateResult = await doCompileTemplate(
       descriptor,
       id,
       bindings,
       false,
     )
-    if (!clientTemplateResult)
-      return
+    if (!clientTemplateResult) {
+      return []
+    }
 
     clientCode += clientTemplateResult
 
-    const ssrTemplateResult = doCompileTemplate(SFCCompiler, descriptor, id, bindings, true)
-    if (!ssrTemplateResult)
-      return
+    const ssrTemplateResult = await doCompileTemplate(descriptor, id, bindings, true)
+    if (!ssrTemplateResult) {
+      return []
+    }
 
     ssrCode += ssrTemplateResult
   }
@@ -124,19 +105,19 @@ export async function compileFile(
     compiled.ssr = ssrCode.trimStart()
   }
 
-  // clear errors
-  fs.errors = []
+  return []
 }
 
-function doCompileScript(
-  SFCCompiler: SFCCompiler,
+async function doCompileScript(
   descriptor: SFCDescriptor,
   id: string,
   ssr: boolean,
-): [string, BindingMetadata | undefined] | undefined {
+): Promise<[string, BindingMetadata | undefined] | undefined> {
+
   if (descriptor.script || descriptor.scriptSetup) {
     try {
-      const compiledScript = SFCCompiler.compileScript(descriptor, {
+      const { compiler } = await importVuePackage()
+      const compiledScript = compiler.compileScript(descriptor, {
         id,
         refSugar: true,
         inlineTemplate: true,
@@ -155,26 +136,25 @@ function doCompileScript(
       }
       code
         += `\n${
-          SFCCompiler.rewriteDefault(compiledScript.content, COMP_IDENTIFIER)}`
+          compiler.rewriteDefault(compiledScript.content, COMP_IDENTIFIER)}`
       return [code, compiledScript.bindings]
     }
     catch (e) {
       // store.errors = [e]
     }
-  }
-  else {
+  } else {
     return [`\nconst ${COMP_IDENTIFIER} = {}`, undefined]
   }
 }
 
-function doCompileTemplate(
-  SFCCompiler: SFCCompiler,
+async function doCompileTemplate(
   descriptor: SFCDescriptor,
   id: string,
   bindingMetadata: BindingMetadata | undefined,
   ssr: boolean,
 ) {
-  const templateResult = SFCCompiler.compileTemplate({
+  const { compiler } = await importVuePackage()
+  const templateResult = compiler.compileTemplate({
     source: descriptor.template!.content,
     filename: descriptor.filename,
     id,

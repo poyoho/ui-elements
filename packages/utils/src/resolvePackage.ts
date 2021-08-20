@@ -20,10 +20,10 @@ export interface PacakgeVersions {
   versions: string[]
 }
 
-const url = (path: string) => `https://unpkg.com/${path}`
+export const PACKAGE_CDN = (path: string) => `https://unpkg.com/${path}`
 
 export async function resolvePackageMetadata(name: string, version: string): Promise<PackageMetadata | Error> {
-  const response = await fetch(url(`${name}${version ? `@${version}` : ''}/package.json`))
+  const response = await fetch(PACKAGE_CDN(`${name}${version ? `@${version}` : ''}/package.json`))
 
   if (!response.ok)
     return new Error('Error Resolving Package Data')
@@ -32,7 +32,7 @@ export async function resolvePackageMetadata(name: string, version: string): Pro
 }
 
 export async function resolvePackageTypes(name: string, version: string, entry: string): Promise<string> {
-  const response = await fetch(url(`${name}@${version}/${entry}`))
+  const response = await fetch(PACKAGE_CDN(`${name}@${version}/${entry}`))
 
   if (!response.ok)
     return ''

@@ -1,5 +1,5 @@
 import srcdoc from "./sandboxRuntime/srcdoc.html?raw"
-import { SandboxProxy } from "./sandboxRuntime/proxy"
+import { SandboxProxy } from "./sandbox/proxy"
 
 export default class CodeSandbox extends HTMLElement {
   constructor() {
@@ -17,9 +17,6 @@ export default class CodeSandbox extends HTMLElement {
       'allow-top-navigation-by-user-activation',
     ].join(' '))
     sandbox.srcdoc = srcdoc
-    const proxy = new SandboxProxy(sandbox, {
-
-    })
     this.appendChild(sandbox)
   }
 
@@ -27,7 +24,16 @@ export default class CodeSandbox extends HTMLElement {
     return this.querySelector(".sandbox")!
   }
 
-  connectedCallback() {}
+  connectedCallback() {
+    const { sandbox } = this
+    const proxy = new SandboxProxy(sandbox, {
+
+    })
+
+    sandbox.addEventListener('load', () => {
+      proxy.handle_links()
+    })
+  }
 
   disconnectedCallback() {}
 }
