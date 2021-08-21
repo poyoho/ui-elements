@@ -1,5 +1,6 @@
 import { PACKAGE_CDN, createSinglePromise } from '@ui-elements/utils'
-import type * as defaultCompiler from '@vue/compiler-sfc'
+import type * as VueCompiler from '@vue/compiler-sfc'
+import type * as VueShared from '@vue/shared'
 
 export interface SFCFile {
   filename: string
@@ -11,18 +12,24 @@ export interface SFCFile {
   }
 }
 
-export type SFCCompiler = typeof defaultCompiler
+export type VueCompilerSFC = typeof VueCompiler
+export type VueSharedPkg = typeof VueShared
 
 // import in sandbox
 export const importVuePackage = createSinglePromise(async () => {
   const compilerUrl = PACKAGE_CDN(`@vue/compiler-sfc@next/dist/compiler-sfc.esm-browser.js`)
+  const sharedUrl = PACKAGE_CDN(`@vue/runtime-dom@next/dist/shared.esm-bundler.js`)
   const runtimeUrl = PACKAGE_CDN(`@vue/runtime-dom@next/dist/runtime-dom.esm-browser.js`)
-  const [compiler] = await Promise.all([
+  const [compiler, shared] = await Promise.all([
     import(compilerUrl),
+    import(sharedUrl),
     import(runtimeUrl),
   ])
   console.info(`Now using Vue version: next`)
-  return { compiler: compiler as SFCCompiler }
+  return {
+    compiler: compiler as VueCompilerSFC,
+    shared: shared as VueSharedPkg
+  }
 })
 
 export const COMP_IDENTIFIER = '__sfc__'

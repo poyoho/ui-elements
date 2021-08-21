@@ -23,7 +23,7 @@ const isStaticProperty = (node: Node): node is ObjectProperty =>
 
 // similar logic with Vite's SSR transform, except this is targeting the browser
 async function processFile(file: SFCFile, seen = new Set<BaseFile>()) {
-  const { compiler } = await importVuePackage()
+  const { compiler, shared } = await importVuePackage()
   if (seen.has(file)) {
     return []
   }
@@ -37,7 +37,7 @@ async function processFile(file: SFCFile, seen = new Set<BaseFile>()) {
   const ast = compiler.babelParse(js, {
     sourceFilename: file.filename,
     sourceType: 'module',
-    plugins: [...babelParserDefaultPlugins],
+    plugins: [...shared.babelParserDefaultPlugins],
   }).program.body
 
   const idToImportMap = new Map<string, string>()
