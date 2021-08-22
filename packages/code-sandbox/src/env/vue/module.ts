@@ -1,28 +1,21 @@
-import { importVuePackage, MAIN_FILE, modulesKey, exportKey, dynamicImportKey, moduleKey, SFCFile } from "./env"
+import { importVuePackage, modulesKey, exportKey, dynamicImportKey, moduleKey } from "./env"
 import type { ExportSpecifier, Identifier, Node, ObjectProperty } from '@babel/types'
+import { CompiledFile } from "@ui-elements/utils"
 
-export function compileModulesForPreview() {
-  if (filesystem.files[MAIN_FILE] instanceof SFCFile) {
-    const sfcImports = processFile(filesystem.files[MAIN_FILE] as SFCFile)
-    const mainImports = processFile(filesystem.files['main.js'] as SFCFile)
 
-    const preImports = [sfcImports[0], mainImports[0]]
-    const postImports = new Set([...sfcImports.slice(1), ...mainImports.slice(1)])
-
-    return [
-      ...postImports,
-      ...preImports,
-    ]
-  }
-
-  return []
+const isStaticProperty = (node: Node): node is ObjectProperty => {
+  return node.type === 'ObjectProperty' && !node.computed
 }
 
-const isStaticProperty = (node: Node): node is ObjectProperty =>
-  node.type === 'ObjectProperty' && !node.computed
+export function compileModule(file: CompiledFile, filesystem: Record<string, CompiledFile>) {
+  return processFile(file, filesystem)
+}
 
-// similar logic with Vite's SSR transform, except this is targeting the browser
-async function processFile(file: SFCFile, seen = new Set<BaseFile>()) {
+async function processFile(
+  file: CompiledFile,
+  filesystem: Record<string, CompiledFile>,
+  seen = new Set<CompiledFile>()
+) {
   const { compiler, shared } = await importVuePackage()
   if (seen.has(file)) {
     return []
@@ -47,11 +40,13 @@ async function processFile(file: SFCFile, seen = new Set<BaseFile>()) {
 
   function defineImport(node: Node, source: string) {
     const filename = source.replace(/^\.\/+/, '')
-    if (!(filename in filesystem.files))
+    if (!(filename in filesystem)) {
       throw new Error(`File "${filename}" does not exist.`)
+    }
 
-    if (importedFiles.has(filename))
+    if (importedFiles.has(filename)) {
       return importToIdMap.get(filename)!
+    }
 
     importedFiles.add(filename)
     const id = `__import_${importedFiles.size}__`
@@ -89,11 +84,9 @@ async function processFile(file: SFCFile, seen = new Set<BaseFile>()) {
               spec.local.name,
               `${importId}.${(spec.imported as Identifier).name}`,
             )
-          }
-          else if (spec.type === 'ImportDefaultSpecifier') {
+          } else if (spec.type === 'ImportDefaultSpecifier') {
             idToImportMap.set(spec.local.name, `${importId}.default`)
-          }
-          else {
+          } else {
             // namespace specifier
             idToImportMap.set(spec.local.name, importId)
           }
@@ -114,18 +107,17 @@ async function processFile(file: SFCFile, seen = new Set<BaseFile>()) {
         ) {
           // export function foo() {}
           defineExport(node.declaration.id!.name)
-        }
-        else if (node.declaration.type === 'VariableDeclaration') {
+        } else if (node.declaration.type === 'VariableDeclaration') {
           // export const foo = 1, bar = 2
           for (const decl of node.declaration.declarations) {
             const names = extractNames(decl.id as any)
-            for (const name of names)
+            for (const name of names) {
               defineExport(name)
+            }
           }
         }
         s.remove(node.start!, node.declaration.start!)
-      }
-      else if (node.source) {
+      } else if (node.source) {
         // export { foo, bar } from './foo'
         const importId = defineImport(node, node.source.value)
         for (const spec of node.specifiers) {
@@ -135,8 +127,7 @@ async function processFile(file: SFCFile, seen = new Set<BaseFile>()) {
           )
         }
         s.remove(node.start!, node.end!)
-      }
-      else {
+      } else {
         // export { foo, bar }
         for (const spec of node.specifiers) {
           const local = (spec as ExportSpecifier).local.name
@@ -148,8 +139,9 @@ async function processFile(file: SFCFile, seen = new Set<BaseFile>()) {
     }
 
     // default export
-    if (node.type === 'ExportDefaultDeclaration')
+    if (node.type === 'ExportDefaultDeclaration') {
       s.overwrite(node.start!, node.start! + 14, `${moduleKey}.default =`)
+    }
 
     // export * from './foo'
     if (node.type === 'ExportAllDeclaration') {
@@ -165,11 +157,14 @@ async function processFile(file: SFCFile, seen = new Set<BaseFile>()) {
 
   // 3. convert references to import bindings
   for (const node of ast) {
-    if (node.type === 'ImportDeclaration') continue
+    if (node.type === 'ImportDeclaration') {
+      continue
+    }
     compiler.walkIdentifiers(node, (id, parent, parentStack) => {
       const binding = idToImportMap.get(id.name)
-      if (!binding)
+      if (!binding) {
         return
+      }
 
       if (isStaticProperty(parent) && parent.shorthand) {
         // let binding used in a property shorthand
@@ -178,10 +173,10 @@ async function processFile(file: SFCFile, seen = new Set<BaseFile>()) {
         if (
           !(parent as any).inPattern
           || isInDestructureAssignment(parent, parentStack)
-        )
+        ) {
           s.appendLeft(id.end!, `: ${binding}`)
-      }
-      else if (
+        }
+      } else if (
         parent.type === 'ClassDeclaration'
         && id === parent.superClass
       ) {
@@ -191,8 +186,7 @@ async function processFile(file: SFCFile, seen = new Set<BaseFile>()) {
           const topNode = parentStack[1]
           s.prependRight(topNode.start!, `const ${id.name} = ${binding};\n`)
         }
-      }
-      else {
+      } else {
         s.overwrite(id.start!, id.end!, binding)
       }
     })
@@ -223,7 +217,7 @@ async function processFile(file: SFCFile, seen = new Set<BaseFile>()) {
   const processed = [s.toString()]
   if (importedFiles.size) {
     for (const imported of importedFiles) {
-      const processedFile = await processFile(filesystem.files[imported] as SFCFile, seen)
+      const processedFile = await processFile(filesystem[imported] as CompiledFile, filesystem, seen)
       processed.push(...processedFile)
     }
   }
@@ -247,24 +241,27 @@ function extractIdentifiers(
 
     case 'MemberExpression':
       let object: any = param // eslint-disable-line no-case-declarations
-      while (object.type === 'MemberExpression')
+      while (object.type === 'MemberExpression') {
         object = object.object
-
+      }
       nodes.push(object)
       break
 
     case 'ObjectPattern':
       param.properties.forEach((prop) => {
-        if (prop.type === 'RestElement')
+        if (prop.type === 'RestElement') {
           extractIdentifiers(prop.argument, nodes)
-        else
+        } else {
           extractIdentifiers(prop.value, nodes)
+        }
       })
       break
 
     case 'ArrayPattern':
       param.elements.forEach((element) => {
-        if (element) extractIdentifiers(element, nodes)
+        if (element) {
+          extractIdentifiers(element, nodes)
+        }
       })
       break
 
@@ -288,10 +285,11 @@ function isInDestructureAssignment(parent: Node, parentStack: Node[]): boolean {
     let i = parentStack.length
     while (i--) {
       const p = parentStack[i]
-      if (p.type === 'AssignmentExpression')
+      if (p.type === 'AssignmentExpression') {
         return true
-      else if (p.type !== 'ObjectProperty' && !p.type.endsWith('Pattern'))
+      } else if (p.type !== 'ObjectProperty' && !p.type.endsWith('Pattern')) {
         break
+      }
     }
   }
   return false
