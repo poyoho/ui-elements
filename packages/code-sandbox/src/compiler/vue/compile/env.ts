@@ -33,7 +33,7 @@ export const importVuePackage = createSinglePromise(async () => {
 })
 
 export const COMP_IDENTIFIER = '__sfc__'
-export const MAIN_FILE = 'App.vue'
+// use key in bootstrap
 export const modulesKey = '__modules__'
 export const exportKey = '__export__'
 export const dynamicImportKey = '__dynamic_import__'

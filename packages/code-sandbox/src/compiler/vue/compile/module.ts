@@ -1,4 +1,4 @@
-import { importVuePackage, modulesKey, exportKey, dynamicImportKey, moduleKey, globalCSS } from "../env"
+import { importVuePackage, modulesKey, exportKey, dynamicImportKey, moduleKey, globalCSS } from "./env"
 import type { ExportSpecifier, Identifier, Node, ObjectProperty } from '@babel/types'
 
 interface CompiledFile {

@@ -1,5 +1,5 @@
 import type { SFCDescriptor, BindingMetadata } from '@vue/compiler-sfc'
-import { importVuePackage, COMP_IDENTIFIER, SFCFile } from "../env"
+import { importVuePackage, COMP_IDENTIFIER, SFCFile } from "./env"
 
 export async function compileFile(
   { filename, compiled, content }: SFCFile
