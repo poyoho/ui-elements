@@ -1,19 +1,31 @@
-import { importVuePackage, modulesKey, exportKey, dynamicImportKey, moduleKey } from "./env"
+import { importVuePackage, modulesKey, exportKey, dynamicImportKey, moduleKey, globalCSS } from "../env"
 import type { ExportSpecifier, Identifier, Node, ObjectProperty } from '@babel/types'
-import { CompiledFile } from "@ui-elements/utils"
 
+interface CompiledFile {
+  filename: string
+  compiled: {
+    js: string
+    ssr: string
+    css: string
+  }
+}
+
+interface FileSystem {
+  isExist: (filename: string) => boolean
+  readFile: (filename: string) => CompiledFile | undefined
+}
 
 const isStaticProperty = (node: Node): node is ObjectProperty => {
   return node.type === 'ObjectProperty' && !node.computed
 }
 
-export function compileModule(file: CompiledFile, filesystem: Record<string, CompiledFile>) {
+export function parseFileModules (file: CompiledFile, filesystem: FileSystem) {
   return processFile(file, filesystem)
 }
 
 async function processFile(
   file: CompiledFile,
-  filesystem: Record<string, CompiledFile>,
+  filesystem: FileSystem,
   seen = new Set<CompiledFile>()
 ) {
   const { compiler, shared } = await importVuePackage()
@@ -40,7 +52,7 @@ async function processFile(
 
   function defineImport(node: Node, source: string) {
     const filename = source.replace(/^\.\/+/, '')
-    if (!(filename in filesystem)) {
+    if (!(filesystem.isExist(filename))) {
       throw new Error(`File "${filename}" does not exist.`)
     }
 
@@ -211,13 +223,17 @@ async function processFile(
 
   // append CSS injection code
   if (css) {
-    s.append(`\nwindow.__css__ += ${JSON.stringify(css)}`)
+    s.append(`\n${globalCSS} += ${JSON.stringify(css)}`)
   }
 
   const processed = [s.toString()]
   if (importedFiles.size) {
     for (const imported of importedFiles) {
-      const processedFile = await processFile(filesystem[imported] as CompiledFile, filesystem, seen)
+      const processedFile = await processFile(
+        filesystem.readFile(imported)!,
+        filesystem,
+        seen
+      )
       processed.push(...processedFile)
     }
   }

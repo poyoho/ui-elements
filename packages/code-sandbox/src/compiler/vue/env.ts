@@ -17,15 +17,15 @@ export type VueSharedPkg = typeof VueShared
 
 // import in sandbox
 export const importVuePackage = createSinglePromise(async () => {
-  const compilerUrl = PACKAGE_CDN(`@vue/compiler-sfc@next/dist/compiler-sfc.esm-browser.js`)
-  const sharedUrl = PACKAGE_CDN(`@vue/runtime-dom@next/dist/shared.esm-bundler.js`)
-  const runtimeUrl = PACKAGE_CDN(`@vue/runtime-dom@next/dist/runtime-dom.esm-browser.js`)
+  // @ts-ignore
+  window.process = { env: {}}
+  const compilerUrl = PACKAGE_CDN(`@vue/compiler-sfc@3.2.4/dist/compiler-sfc.esm-browser.js`)
+  const sharedUrl = PACKAGE_CDN(`@vue/shared@3.2.4/dist/shared.esm-bundler.js`)
   const [compiler, shared] = await Promise.all([
     import(compilerUrl),
     import(sharedUrl),
-    import(runtimeUrl),
   ])
-  console.info(`Now using Vue version: next`)
+  console.info(`Now using Vue version: 3.2.4`)
   return {
     compiler: compiler as VueCompilerSFC,
     shared: shared as VueSharedPkg
@@ -38,3 +38,4 @@ export const modulesKey = '__modules__'
 export const exportKey = '__export__'
 export const dynamicImportKey = '__dynamic_import__'
 export const moduleKey = '__module__'
+export const globalCSS = "window.__css__"

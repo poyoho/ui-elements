@@ -1,11 +1,22 @@
-export default class FileSystem {
-  private files: Record<string, string> = {}
-  private fileNames = [] as string[]
-  private currentFilename = ""
+import { BaseFile } from "./baseFile"
 
-  readFile() { }
+export class FileSystem<FileType extends BaseFile> {
+  private files: Record<string, FileType> = {}
 
-  writeFile() { }
+  isExist(filename: string) {
+    return this.files[filename] !== undefined
+  }
 
-  rm() { }
+  readFile(filename: string): FileType | undefined {
+    return this.files[filename]
+  }
+
+  writeFile<T extends FileType> (file: T): T {
+    this.files[file.filename] = file
+    return file
+  }
+
+  rm(filename: string) {
+    delete this.files[filename]
+  }
 }

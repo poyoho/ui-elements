@@ -1,5 +1,6 @@
 export interface FileOptions {
   name: string
+  content?: string
 }
 
 export interface FileCompile {
@@ -16,6 +17,7 @@ export class BaseFile {
 
   constructor(options: FileOptions) {
     this.filename = options.name
+    this.text = options.content || ""
   }
 
   public get content() {
@@ -27,6 +29,11 @@ export class BaseFile {
   }
 }
 
-export abstract class CompiledFile extends BaseFile {
-  public abstract get compiled(): FileCompile;
+export class CompiledFile extends BaseFile {
+  public compiled: FileCompile = {
+    js: '',
+    ssr: '',
+    css: ''
+  }
+
 }

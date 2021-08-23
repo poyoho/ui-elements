@@ -1,5 +1,5 @@
 import type { SFCDescriptor, BindingMetadata } from '@vue/compiler-sfc'
-import { importVuePackage, COMP_IDENTIFIER, SFCFile } from "./env"
+import { importVuePackage, COMP_IDENTIFIER, SFCFile } from "../env"
 
 export async function compileFile(
   { filename, compiled, content }: SFCFile
@@ -66,7 +66,6 @@ export async function compileFile(
     // when no <script setup> is used, the script result will be identical.
     ssrCode += clientScript
   }
-
   // template
   // only need dedicated compilation if not using <script setup>
   if (descriptor.template && !descriptor.scriptSetup) {
@@ -104,6 +103,8 @@ export async function compileFile(
     compiled.js = clientCode.trimStart()
     compiled.ssr = ssrCode.trimStart()
   }
+
+  compiled.css = await doCompileStyle(descriptor, id)
 
   return []
 }
@@ -168,7 +169,6 @@ async function doCompileTemplate(
     },
   })
   if (templateResult.errors.length) {
-    // store.errors = templateResult.errors
     return
   }
 
@@ -180,6 +180,22 @@ async function doCompileTemplate(
       `$1 ${fnName}`,
     )}` + `\n${COMP_IDENTIFIER}.${fnName} = ${fnName}`
   )
+}
+
+async function doCompileStyle(descriptor: SFCDescriptor, id: string) {
+  const { compiler } = await importVuePackage()
+  return descriptor.styles.map(style => {
+    const styleResult = compiler.compileStyle({
+      id: id,
+      filename: descriptor.filename,
+      source: style.content,
+      scoped: style.scoped,
+    })
+    if (styleResult.errors.length) {
+      return ""
+    }
+    return styleResult.code
+  }).join("\n")
 }
 
 async function hashId(filename: string) {

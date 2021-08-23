@@ -8,14 +8,24 @@ interface PendingCMD {
   reject: (reason?: any) => void
 }
 
+export type SandboxHandler =  Partial<{
+  on_fetch_progress: Function
+  on_error: Function
+  on_unhandled_rejection: Function
+  on_console: Function
+  on_console_group: Function
+  on_console_group_collapsed: Function
+  on_console_group_end: Function
+}>
+
 export class SandboxProxy {
   iframe: HTMLIFrameElement
-  handlers: Record<string, Function>
+  handlers: SandboxHandler
   pending_cmds: Map<number, PendingCMD>
 
   handle_event: (e: any) => void
 
-  constructor(iframe: HTMLIFrameElement, handlers: Record<string, Function>) {
+  constructor(iframe: HTMLIFrameElement, handlers: SandboxHandler) {
     this.iframe = iframe
     this.handlers = handlers
 
@@ -73,19 +83,19 @@ export class SandboxProxy {
       case 'cmd_ok':
         return this.handle_command_message(event.data)
       case 'fetch_progress':
-        return this.handlers.on_fetch_progress(args.remaining)
+        return this.handlers.on_fetch_progress && this.handlers.on_fetch_progress(args.remaining)
       case 'error':
-        return this.handlers.on_error(event.data)
+        return this.handlers.on_error && this.handlers.on_error(event.data)
       case 'unhandledrejection':
-        return this.handlers.on_unhandled_rejection(event.data)
+        return this.handlers.on_unhandled_rejection && this.handlers.on_unhandled_rejection(event.data)
       case 'console':
-        return this.handlers.on_console(event.data)
+        return this.handlers.on_console && this.handlers.on_console(event.data)
       case 'console_group':
-        return this.handlers.on_console_group(event.data)
+        return this.handlers.on_console_group && this.handlers.on_console_group(event.data)
       case 'console_group_collapsed':
-        return this.handlers.on_console_group_collapsed(event.data)
+        return this.handlers.on_console_group_collapsed && this.handlers.on_console_group_collapsed(event.data)
       case 'console_group_end':
-        return this.handlers.on_console_group_end(event.data)
+        return this.handlers.on_console_group_end && this.handlers.on_console_group_end(event.data)
     }
   }
 
