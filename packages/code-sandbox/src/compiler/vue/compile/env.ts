@@ -22,8 +22,8 @@ export const importVuePackage = createSinglePromise(async () => {
   const compilerUrl = PACKAGE_CDN(`@vue/compiler-sfc@3.2.4/dist/compiler-sfc.esm-browser.js`)
   const sharedUrl = PACKAGE_CDN(`@vue/shared@3.2.4/dist/shared.esm-bundler.js`)
   const [compiler, shared] = await Promise.all([
-    import(compilerUrl),
-    import(sharedUrl),
+    import(/* @vite-ignore */ compilerUrl),
+    import(/* @vite-ignore */ sharedUrl),
   ])
   console.info(`Now using Vue version: 3.2.4`)
   return {

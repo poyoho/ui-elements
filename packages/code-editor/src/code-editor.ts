@@ -41,11 +41,17 @@ export default class CodeEditor extends HTMLElement {
         return
       }
 
-      model.onDidChangeContent(() => {
+      model.onDidChangeContent(async () => {
         this.value = editor.getValue()
         const event = document.createEvent("events")
         event.initEvent("change", false, false)
         this.dispatchEvent(event)
+
+        const worker = await monaco.languages.typescript.getTypeScriptWorker()
+        const client = await worker(model.uri)
+        const result = await client.getEmitOutput(model.uri.toString())
+        const firstJS = result.outputFiles.find((o: any) => o.name.endsWith(".js") || o.name.endsWith(".jsx"))!
+        console.log(firstJS.text)
       })
     })
 

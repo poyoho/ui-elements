@@ -29,13 +29,8 @@
   <a href="/">back</a>
   <div class="wrap">
     <h3>code-editor</h3>
-    <code-editor lang="js" class="editor"></code-editor>
+    <code-editor class="editor"></code-editor>
   </div>
 </body>
-<script>
-  const elm = document.querySelector(".editor")
-  elm.addEventListener("change", (e) => {
-    console.log(e.srcElement.value)
-  })
-</script>
+<script type="module" src="./src/editor.ts"></script>
 </html>
