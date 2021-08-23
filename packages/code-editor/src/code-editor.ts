@@ -1,9 +1,14 @@
-import { setupMonaco, SupportLanguage, useMonacoImport } from "./monaco"
-import { resolvePackageTypes } from "@ui-elements/utils"
-import type { editor } from "monaco-editor"
+import { setupMonaco, SupportLanguage, editor, getRunnableJS } from "./monaco"
+import { debounce, resolvePackageTypes } from "@ui-elements/utils"
+
+export type CodeEditorChangeEvent = Event & {
+  value: {
+    content: string
+    runnableJS: string
+  }
+}
 
 export default class CodeEditor extends HTMLElement {
-  public value = ""
   private monacoInstance = setupMonaco()
   private editor: editor.IStandaloneCodeEditor | undefined
 
@@ -41,18 +46,15 @@ export default class CodeEditor extends HTMLElement {
         return
       }
 
-      model.onDidChangeContent(async () => {
-        this.value = editor.getValue()
-        const event = document.createEvent("events")
-        event.initEvent("change", false, false)
+      model.onDidChangeContent(debounce(async () => {
+        const event = document.createEvent("events") as CodeEditorChangeEvent
+        event.initEvent("code-change", false, false)
+        event.value = {
+          content: editor.getValue(),
+          runnableJS: await getRunnableJS(monaco, model)
+        }
         this.dispatchEvent(event)
-
-        const worker = await monaco.languages.typescript.getTypeScriptWorker()
-        const client = await worker(model.uri)
-        const result = await client.getEmitOutput(model.uri.toString())
-        const firstJS = result.outputFiles.find((o: any) => o.name.endsWith(".js") || o.name.endsWith(".jsx"))!
-        console.log(firstJS.text)
-      })
+      }))
     })
 
     this.editor = editor

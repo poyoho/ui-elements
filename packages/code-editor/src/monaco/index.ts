@@ -1,4 +1,20 @@
 import { createSinglePromise } from "@ui-elements/utils"
+import type { editor } from "monaco-editor"
+
+export type { editor }
+export type monaco = typeof import("monaco-editor")
+
+export async function getEmitResult (monaco: monaco, model: editor.ITextModel) {
+  const worker = await monaco.languages.typescript.getTypeScriptWorker()
+  const client = await worker(model.uri)
+  return await client.getEmitOutput(model.uri.toString())
+}
+
+export async function getRunnableJS (monaco: monaco, model: editor.ITextModel) {
+  const result = await getEmitResult(monaco, model)
+  const firstJS = result.outputFiles.find((o: any) => o.name.endsWith(".js"))
+  return (firstJS && firstJS.text) || ""
+}
 
 export const SupportLanguage = {
   // "html": "html",
