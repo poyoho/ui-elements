@@ -1,4 +1,20 @@
-import * as monaco from 'monaco-editor'
+import { createSinglePromise } from "@ui-elements/utils"
+import type { editor } from "monaco-editor"
+
+export type { editor }
+export type monaco = typeof import("monaco-editor")
+
+export async function getEmitResult (monaco: monaco, model: editor.ITextModel) {
+  const worker = await monaco.languages.typescript.getTypeScriptWorker()
+  const client = await worker(model.uri)
+  return await client.getEmitOutput(model.uri.toString())
+}
+
+export async function getRunnableJS (monaco: monaco, model: editor.ITextModel) {
+  const result = await getEmitResult(monaco, model)
+  const firstJS = result.outputFiles.find((o: any) => o.name.endsWith(".js"))
+  return (firstJS && firstJS.text) || ""
+}
 
 export const SupportLanguage = {
   // "html": "html",
@@ -8,7 +24,7 @@ export const SupportLanguage = {
   "json": "json"
 }
 
-async function loadWorker () {
+export const loadWorkers = createSinglePromise(async () => {
   const [
     { default: EditorWorker },
     { default: JSONWorker },
@@ -42,21 +58,35 @@ async function loadWorker () {
       return new EditorWorker()
     },
   }
-}
+})
 
-export async function setupMonaco () {
+export const useMonacoImport = createSinglePromise(async() => {
+  if (typeof window !== 'undefined')
+    return await import('monaco-editor')
+
+  return null
+})
+
+export const setupMonaco = createSinglePromise(async () => {
+  const monaco = await useMonacoImport()
+
+  if (!monaco) {
+    throw "can not load moncao"
+  }
+  await loadWorkers()
   monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
     ...monaco.languages.typescript.javascriptDefaults.getCompilerOptions(),
     noUnusedLocals: false,
     noUnusedParameters: false,
     allowUnreachableCode: true,
+    moduleResolution: 2,
     allowUnusedLabels: true,
     strict: false,
     allowJs: true,
+    importHelpers: true,
+    noImplicitUseStrict: false,
   })
-
   monaco.editor.defineTheme('dark', await import("./dark.json") as any)
-  await loadWorker()
 
   const packages = new Map<string, {
     content: string;
@@ -65,18 +95,28 @@ export async function setupMonaco () {
 
   return {
     monaco,
-    addPackages (pack: string, types: string) {
-      if (packages.has(pack)) {
-        return
-      }
-      const lib =  {
-        content: `declare module '${pack}' { ${types} } `
-      }
-      packages.set(pack, lib)
+    addPackage (options: Array<{name: string, types: string}>) {
+      options.forEach(opt => {
+        if (packages.has(opt.name)) {
+          return
+        }
+        const lib =  {
+          content: `declare module '${opt.name}' { ${opt.types} } `
+        }
+        packages.set(opt.name, lib)
+      })
+      monaco.languages.typescript.javascriptDefaults.setExtraLibs(Array.from(packages.values()))
+    },
+    deletePackage (names: string[]) {
+      names.forEach(name => {
+        packages.delete(name)
+      })
       monaco.languages.typescript.javascriptDefaults.setExtraLibs(Array.from(packages.values()))
     }
   }
-}
+})
 
 export default setupMonaco
 
+// preload worker
+loadWorkers()

@@ -1,24 +1,17 @@
-import { setupMonaco, SupportLanguage } from "./monaco"
-import { resolvePackage } from "@ui-elements/utils"
+import { setupMonaco, SupportLanguage, editor, getRunnableJS } from "./monaco"
+import { debounce, resolvePackageTypes } from "@ui-elements/utils"
 
-function validateProps (attr: NamedNodeMap) {
-  const lang = attr.getNamedItem("lang")!
-  if (!lang) {
-    throw "the component must had attributes[lang]"
-  }
-  const supportLanguage = Object.keys(SupportLanguage)
-  if (!supportLanguage.includes(lang.value)) {
-    throw `that component only support ${supportLanguage}`
-  }
-  const code = attr.getNamedItem("code")!
-  return {
-    lang: lang.value,
-    code: code?.value || ""
+export type CodeEditorChangeEvent = Event & {
+  value: {
+    content: string
+    runnableJS: string
   }
 }
 
 export default class CodeEditor extends HTMLElement {
-  private value = "" // value of code editor
+  private monacoInstance = setupMonaco()
+  private editor: editor.IStandaloneCodeEditor | undefined
+
   constructor() {
     super()
     const container = document.createElement("div")
@@ -31,18 +24,9 @@ export default class CodeEditor extends HTMLElement {
   }
 
   async connectedCallback() {
-    const { monaco } = await setupMonaco()
-
-    const { lang: extension, code } = validateProps(this.attributes)
-    this.value = code
-    const model = monaco.editor.createModel(
-      code,
-      SupportLanguage[extension],
-      monaco.Uri.parse(`file:///root/${Date.now()}.${extension}`)
-    )
-
+    const { monacoInstance } = this
+    const { monaco } = await monacoInstance
     const editor = monaco.editor.create(this.container, {
-      model,
       tabSize: 2,
       insertSpaces: true,
       autoClosingQuotes: 'always',
@@ -55,16 +39,62 @@ export default class CodeEditor extends HTMLElement {
       },
     })
 
-    editor.getModel()?.onDidChangeContent(() => {
-      const code = editor.getValue()
-      this.value = code
-      const event = document.createEvent("events")
-      event.initEvent("change", false, false)
-      this.dispatchEvent(event)
+    // send change event
+    editor.onDidChangeModel(() => {
+      const model = editor.getModel()
+      if (!model) {
+        return
+      }
+
+      model.onDidChangeContent(debounce(async () => {
+        const event = document.createEvent("events") as CodeEditorChangeEvent
+        event.initEvent("code-change", false, false)
+        event.value = {
+          content: editor.getValue(),
+          runnableJS: await getRunnableJS(monaco, model)
+        }
+        this.dispatchEvent(event)
+      }))
     })
 
-    // console.log(await resolvePackage("vue", "next"))
+    this.editor = editor
   }
 
   disconnectedCallback() {}
+
+  async createModel (
+    extension: keyof typeof SupportLanguage,
+    filename: string,
+    code?: string) {
+    const { monacoInstance } = this
+    const { monaco } = await monacoInstance
+    return monaco.editor.createModel(
+      code || "",
+      SupportLanguage[extension],
+      monaco.Uri.parse(`file://${filename}`)
+    )
+  }
+
+  async setModel (model: editor.ITextModel) {
+    const { monacoInstance } = this
+    await monacoInstance
+    this.editor!.setModel(model)
+  }
+
+  async addDTS (options: Array<{name: string, version: string, entry: string}>) {
+    const { monacoInstance } = this
+    const { addPackage } = await monacoInstance
+    addPackage(
+      await Promise.all(options.map(async option => ({
+        name: option.name,
+        types: await resolvePackageTypes(option.name, option.version, option.entry)
+      })))
+    )
+  }
+
+  async deleteDTS (names: string[]) {
+    const { monacoInstance } = this
+    const { deletePackage } = await monacoInstance
+    deletePackage(names)
+  }
 }
