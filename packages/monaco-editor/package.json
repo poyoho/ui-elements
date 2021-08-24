@@ -1,13 +1,10 @@
 {
-  "name": "@ui-elements/code-editor",
+  "name": "@ui-elements/monaco-editor",
   "version": "0.0.0",
   "main": "index.ts",
-  "dependencies": {
+  "peerDependencies": {
     "monaco-editor": "^0.26.1",
     "monaco-editor-core": "^0.26.0",
-    "vscode-html-languageservice": "^4.0.7"
-  },
-  "devDependencies": {
     "monaco-editor-textmate": "^3.0.0",
     "monaco-textmate": "^3.0.1",
     "onigasm": "^2.2.5"

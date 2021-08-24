@@ -1,4 +1,4 @@
-import { CompiledFile, FileSystem } from "@ui-elements/utils"
+import { CompiledFile, FileSystem } from "@ui-elements/vfs"
 
 interface Compiler {
   getAppEntry: (filesystem: FileSystem<CompiledFile>) => CompiledFile
@@ -17,7 +17,7 @@ type CompilerType = "vue"
 
 async function importCompiler (type: CompilerType): Promise<Compiler> {
   switch(type) {
-    case "vue": return await import("./vue")
+    case "vue": return await import("./vue/vue")
   }
 }
 

@@ -1,11 +1,11 @@
 import * as DemoBlock from "@ui-elements/demo-block"
-import * as CodeEditor from "@ui-elements/code-editor"
+import * as MonacoEditor from "@ui-elements/monaco-editor"
 import * as CodeComment from "@ui-elements/code-comment"
-import * as CodeSandbox from "@ui-elements/code-sandbox"
+import * as IframeSandbox from "@ui-elements/iframe-sandbox"
 
 export function install () {
   DemoBlock.install()
-  CodeEditor.install()
+  MonacoEditor.install()
   CodeComment.install()
-  CodeSandbox.install()
+  IframeSandbox.install()
 }

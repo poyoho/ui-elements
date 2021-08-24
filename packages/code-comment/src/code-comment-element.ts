@@ -1,5 +1,5 @@
-const IconFullScreen = new URL("./full-screen.svg", import.meta.url).href
-const IconSpliteScreen = new URL("./splite-screen.svg", import.meta.url).href
+import IconFullScreen from "./full-screen.svg?raw"
+import IconSpliteScreen from "./splite-screen.svg?raw"
 
 function html(...args: any) {
   return (args[0] as Array<string>).map((str, idx) => str + (args[1 + idx] || "")).join("")

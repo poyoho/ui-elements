@@ -2,12 +2,8 @@ import { Registry } from 'monaco-textmate'
 import { wireTmGrammars } from 'monaco-editor-textmate'
 
 import { loadWASM } from 'onigasm'
+
 import onigasm from "./token/onigasm.wasm?url"
-import cssToken from "./token/css.tmGrammar.json?url"
-import jsToken from "./token/JavaScript.tmLanguage.json?url"
-import tsToken from "./token/TypeScript.tmLanguage.json?url"
-import darkTheme from "./theme/dark_plus.json"
-import lightTheme from "./theme/light_plus.json"
 
 import type { editor } from 'monaco-editor'
 export type monaco = typeof import("monaco-editor")
@@ -60,15 +56,15 @@ export async function setupTheme (monaco: monaco, editor: editor.ICodeEditor) {
       return ({
         "source.ts": {
           format: 'json',
-          content: await (await fetch(tsToken)).text()
+          content: (await import("./token/TypeScript.tmLanguage.json")).default
         },
         "source.js": {
           format: 'json',
-          content: await (await fetch(jsToken)).text()
+          content: (await import("./token/JavaScript.tmLanguage.json")).default
         },
         "source.css": {
           format: 'json',
-          content: await (await fetch(cssToken)).text()
+          content: (await import("./token/css.tmGrammar.json")).default
         },
       })[scopeName] as any
     }
@@ -83,7 +79,7 @@ export async function setupTheme (monaco: monaco, editor: editor.ICodeEditor) {
   monaco.languages.register({id: 'css'})
   monaco.languages.register({id: 'typescript'})
   monaco.languages.register({id: 'javascript'})
-  monaco.editor.defineTheme("dark", convertTheme(darkTheme))
-  monaco.editor.defineTheme("light", convertTheme(lightTheme))
+  monaco.editor.defineTheme("dark", convertTheme((await import("./theme/dark_plus.json")).default))
+  // monaco.editor.defineTheme("light", convertTheme((await import("./theme/light_plus.json")).default))
   await wireTmGrammars(monaco, registry, grammars, editor)
 }

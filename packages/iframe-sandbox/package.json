@@ -1,0 +1,7 @@
+{
+  "name": "@ui-elements/iframe-sandbox",
+  "version": "0.0.0",
+  "main": "index.ts",
+  "dependencies": {},
+  "devDependencies": {}
+}

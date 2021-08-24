@@ -1,14 +1,14 @@
-import { setupMonaco, SupportLanguage, editor, getRunnableJS, setupTheme } from "./monaco"
+import { setupMonaco, SupportLanguage, editor, getRunnableJS, setupTheme } from "@ui-elements/monaco"
 import { debounce, resolvePackageTypes } from "@ui-elements/utils"
 
-export type CodeEditorChangeEvent = Event & {
+export type MonacoEditorChangeEvent = Event & {
   value: {
     content: string
     runnableJS: string
   }
 }
 
-export default class CodeEditor extends HTMLElement {
+export default class MonacoEditor extends HTMLElement {
   private monacoInstance = setupMonaco()
   private editor: editor.IStandaloneCodeEditor | undefined
 
@@ -50,7 +50,7 @@ export default class CodeEditor extends HTMLElement {
       }
 
       model.onDidChangeContent(debounce(async () => {
-        const event = document.createEvent("events") as CodeEditorChangeEvent
+        const event = document.createEvent("events") as MonacoEditorChangeEvent
         event.initEvent("code-change", false, false)
         event.value = {
           content: this.editor!.getValue(),
