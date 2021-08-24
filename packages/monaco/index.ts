@@ -3,7 +3,7 @@ import { createSinglePromise } from "@ui-elements/utils"
 import type { editor } from "monaco-editor"
 export type { editor }
 export type monaco = typeof import("monaco-editor")
-export * from "./theme"
+export * from "./textmate"
 
 export async function getEmitResult (monaco: monaco, model: editor.ITextModel) {
   const worker = await monaco.languages.typescript.getTypeScriptWorker()
@@ -18,7 +18,7 @@ export async function getRunnableJS (monaco: monaco, model: editor.ITextModel) {
 }
 
 export const SupportLanguage = {
-  // "html": "html",
+  "html": "html",
   "js": "javascript",
   "ts": "typescript",
   "css": "css",
@@ -31,11 +31,13 @@ export const loadWorkers = createSinglePromise(async () => {
     { default: JSONWorker },
     { default: TsWorker },
     { default: CSSWorker },
+    { default: HtmlWorker },
   ] = await Promise.all([
     import('monaco-editor/esm/vs/editor/editor.worker?worker' as any),
     import('monaco-editor/esm/vs/language/json/json.worker?worker' as any),
     import('monaco-editor/esm/vs/language/typescript/ts.worker?worker' as any),
     import('monaco-editor/esm/vs/language/css/css.worker?worker' as any),
+    import('./languages/html/html.worker?worker' as any),
   ])
 
   // monaco要求将worker挂载到window上
@@ -46,9 +48,9 @@ export const loadWorkers = createSinglePromise(async () => {
       if (label === 'json') {
         return new JSONWorker()
       }
-      // if (label === 'html' || label === 'handlebars' || label === 'razor') {
-      //   return new HtmlWorker()
-      // }
+      if (label === 'html') {
+        return new HtmlWorker()
+      }
       if (label === 'typescript' || label === 'javascript') {
         return new TsWorker()
       }
