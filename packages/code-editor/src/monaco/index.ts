@@ -1,8 +1,9 @@
 import { createSinglePromise } from "@ui-elements/utils"
-import type { editor } from "monaco-editor"
 
+import type { editor } from "monaco-editor"
 export type { editor }
 export type monaco = typeof import("monaco-editor")
+export * from "./theme"
 
 export async function getEmitResult (monaco: monaco, model: editor.ITextModel) {
   const worker = await monaco.languages.typescript.getTypeScriptWorker()
@@ -86,7 +87,6 @@ export const setupMonaco = createSinglePromise(async () => {
     importHelpers: true,
     noImplicitUseStrict: false,
   })
-  monaco.editor.defineTheme('dark', await import("./dark.json") as any)
 
   const packages = new Map<string, {
     content: string;
