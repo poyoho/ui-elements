@@ -85,15 +85,15 @@ async function main () {
       "--new-version",
       targetVersion,
       "--access",
-      "public"
+      "public",
+      "--tag",
+      `v${targetVersion}`
     ],
     {
       cwd: path.join(__dirname, ".."),
       stdio: "pipe"
     }
-  ).catch((e) => {
-    throw e
-  })
+  )
   pkg.private = true
   pkg.version = targetVersion
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n")

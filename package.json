@@ -1,7 +1,7 @@
 {
   "name": "@poyoho/ui-elements",
   "private": true,
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "web components library",
   "scripts": {
     "bootstrap": "yarn --frozen-lockfile && npx lerna bootstrap",
@@ -17,6 +17,10 @@
     "web components",
     "monaco"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/poyoho/ui-elements"
+  },
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
@@ -26,9 +30,6 @@
     "**/*.{js,ts,tsx,jsx,json}": [
       "eslint --fix --ext .js,.ts,.tsx,.jsx"
     ]
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "files": [
     "packages",
