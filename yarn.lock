@@ -2667,6 +2667,11 @@ fast-levenshtein@^2.0.6:
   resolved "https://registry.npm.taobao.org/fast-levenshtein/download/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
 
+fast-plist@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.npmjs.org/fast-plist/-/fast-plist-0.1.2.tgz#a45aff345196006d406ca6cdcd05f69051ef35b8"
+  integrity sha1-pFr/NFGWAG1AbKbNzQX2kFHvNbg=
+
 fastq@^1.6.0:
   version "1.12.0"
   resolved "https://registry.nlark.com/fastq/download/fastq-1.12.0.tgz?cache=0&sync_timestamp=1629361026370&other_urls=https%3A%2F%2Fregistry.nlark.com%2Ffastq%2Fdownload%2Ffastq-1.12.0.tgz#ed7b6ab5d62393fb2cc591c853652a5c318bf794"
@@ -4137,10 +4142,22 @@ monaco-editor-core@^0.26.0:
   resolved "https://registry.nlark.com/monaco-editor-core/download/monaco-editor-core-0.26.0.tgz#60f2b7673710a383c877b43a587fd25b7a6e440a"
   integrity sha1-YPK3ZzcQo4PId7Q6WH/SW3puRAo=
 
+monaco-editor-textmate@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/monaco-editor-textmate/-/monaco-editor-textmate-3.0.0.tgz#a90517380d5e52304aef780eebeab9f687ab9b67"
+  integrity sha512-4BK3ual4WllRpiQBDcBO8NKdbk4ukdBtnl23cRYvu1eNWOWKYOBM0rYac50HvFClSbtd5GMezLPjkaim0iM7sw==
+
 monaco-editor@^0.26.1:
   version "0.26.1"
   resolved "https://registry.nlark.com/monaco-editor/download/monaco-editor-0.26.1.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fmonaco-editor%2Fdownload%2Fmonaco-editor-0.26.1.tgz#62bb5f658bc95379f8abb64b147632bd1c019d73"
   integrity sha1-YrtfZYvJU3n4q7ZLFHYyvRwBnXM=
+
+monaco-textmate@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.npmjs.org/monaco-textmate/-/monaco-textmate-3.0.1.tgz#b6d26d266aa12edaff7069dae0d6e3747cba5cd7"
+  integrity sha512-ZxxY3OsqUczYP1sGqo97tu+CJmMBwuSW+dL0WEBdDhOZ5G1zntw72hvBc68ZQAirosWvbDKgN1dL5k173QtFww==
+  dependencies:
+    fast-plist "^0.1.2"
 
 ms@2.1.2:
   version "2.1.2"
@@ -4440,6 +4457,13 @@ onetime@^5.1.0, onetime@^5.1.2:
   integrity sha1-0Oluu1awdHbfHdnEgG5SN5hcpF4=
   dependencies:
     mimic-fn "^2.1.0"
+
+onigasm@^2.2.5:
+  version "2.2.5"
+  resolved "https://registry.npmjs.org/onigasm/-/onigasm-2.2.5.tgz#cc4d2a79a0fa0b64caec1f4c7ea367585a676892"
+  integrity sha512-F+th54mPc0l1lp1ZcFMyL/jTs2Tlq4SqIHKIXGZOR/VkHkF9A7Fr5rRr5+ZG/lWeRsyrClLYRq7s/yFQ/XhWCA==
+  dependencies:
+    lru-cache "^5.1.1"
 
 optionator@^0.9.1:
   version "0.9.1"
@@ -5964,36 +5988,6 @@ verror@1.10.0:
     assert-plus "^1.0.0"
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
-
-vscode-html-languageservice@^4.0.7:
-  version "4.0.7"
-  resolved "https://registry.nlark.com/vscode-html-languageservice/download/vscode-html-languageservice-4.0.7.tgz#94f2ed22c821965f828222d13b5aa541b358d992"
-  integrity sha1-lPLtIsghll+CgiLRO1qlQbNY2ZI=
-  dependencies:
-    vscode-languageserver-textdocument "^1.0.1"
-    vscode-languageserver-types "^3.16.0"
-    vscode-nls "^5.0.0"
-    vscode-uri "^3.0.2"
-
-vscode-languageserver-textdocument@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.npm.taobao.org/vscode-languageserver-textdocument/download/vscode-languageserver-textdocument-1.0.1.tgz#178168e87efad6171b372add1dea34f53e5d330f"
-  integrity sha1-F4Fo6H761hcbNyrdHeo09T5dMw8=
-
-vscode-languageserver-types@^3.16.0:
-  version "3.16.0"
-  resolved "https://registry.nlark.com/vscode-languageserver-types/download/vscode-languageserver-types-3.16.0.tgz#ecf393fc121ec6974b2da3efb3155644c514e247"
-  integrity sha1-7POT/BIexpdLLaPvsxVWRMUU4kc=
-
-vscode-nls@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.npm.taobao.org/vscode-nls/download/vscode-nls-5.0.0.tgz#99f0da0bd9ea7cda44e565a74c54b1f2bc257840"
-  integrity sha1-mfDaC9nqfNpE5WWnTFSx8rwleEA=
-
-vscode-uri@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.npm.taobao.org/vscode-uri/download/vscode-uri-3.0.2.tgz?cache=0&sync_timestamp=1609832420778&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fvscode-uri%2Fdownload%2Fvscode-uri-3.0.2.tgz#ecfd1d066cb8ef4c3a208decdbab9a8c23d055d0"
-  integrity sha1-7P0dBmy470w6II3s26uajCPQVdA=
 
 vue@*:
   version "2.6.14"

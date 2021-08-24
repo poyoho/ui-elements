@@ -1,4 +1,5 @@
-import { CompiledFile, FileSystem, PACKAGE_CDN } from "@ui-elements/utils"
+import { CompiledFile, FileSystem } from "@ui-elements/vfs"
+import { PACKAGE_CDN } from "@ui-elements/utils"
 import boostrap from "./bootstrap/main.js?raw"
 import appvue from "./bootstrap/app.vue?raw"
 

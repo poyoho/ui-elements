@@ -1,14 +1,14 @@
-import { setupMonaco, SupportLanguage, editor, getRunnableJS } from "./monaco"
+import { setupMonaco, SupportLanguage, editor, getRunnableJS, setupTheme } from "@ui-elements/monaco"
 import { debounce, resolvePackageTypes } from "@ui-elements/utils"
 
-export type CodeEditorChangeEvent = Event & {
+export type MonacoEditorChangeEvent = Event & {
   value: {
     content: string
     runnableJS: string
   }
 }
 
-export default class CodeEditor extends HTMLElement {
+export default class MonacoEditor extends HTMLElement {
   private monacoInstance = setupMonaco()
   private editor: editor.IStandaloneCodeEditor | undefined
 
@@ -26,7 +26,7 @@ export default class CodeEditor extends HTMLElement {
   async connectedCallback() {
     const { monacoInstance } = this
     const { monaco } = await monacoInstance
-    const editor = monaco.editor.create(this.container, {
+    this.editor = monaco.editor.create(this.container, {
       tabSize: 2,
       insertSpaces: true,
       autoClosingQuotes: 'always',
@@ -39,25 +39,26 @@ export default class CodeEditor extends HTMLElement {
       },
     })
 
+    await setupTheme(monaco, this.editor)
+    monaco.editor.setTheme("dark")
+
     // send change event
-    editor.onDidChangeModel(() => {
-      const model = editor.getModel()
+    this.editor.onDidChangeModel(() => {
+      const model = this.editor!.getModel()
       if (!model) {
         return
       }
 
       model.onDidChangeContent(debounce(async () => {
-        const event = document.createEvent("events") as CodeEditorChangeEvent
+        const event = document.createEvent("events") as MonacoEditorChangeEvent
         event.initEvent("code-change", false, false)
         event.value = {
-          content: editor.getValue(),
+          content: this.editor!.getValue(),
           runnableJS: await getRunnableJS(monaco, model)
         }
         this.dispatchEvent(event)
       }))
     })
-
-    this.editor = editor
   }
 
   disconnectedCallback() {}

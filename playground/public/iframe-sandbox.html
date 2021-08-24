@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>code-editor</title>
   <script type="module" src="./src/main.ts"></script>
+  <script type="module" src="./src/sandbox.ts"></script>
   <style>
     .wrap {
       width: 80%;
       margin: 0 auto;
     }
+
     .editor {
       height: 500px;
     }
+
     .head {
       position: fixed;
       top: 0;
@@ -25,12 +29,12 @@
     }
   </style>
 </head>
+
 <body>
   <a href="/">back</a>
   <div class="wrap">
-    <h3>code-editor</h3>
-    <code-editor class="editor"></code-editor>
+    <h3>code-sandbox</h3>
+    <iframe-sandbox></iframe-sandbox>
   </div>
 </body>
-<script type="module" src="./src/editor.ts"></script>
 </html>

@@ -5,8 +5,9 @@ const esbuild = require("rollup-plugin-esbuild")
 const tsc = require("rollup-plugin-typescript2")
 const { nodeResolve } = require('@rollup/plugin-node-resolve')
 const json = require("@rollup/plugin-json")
-const rollupWorker = require("./rollup.worker")
-const rollupTransform = require("./rollup.transform")
+const rollupWorker = require("./plugins/rollup.worker")
+const rollupRaw = require("./plugins/rollup.raw")
+const rollupTransform = require("./plugins/rollup.transform")
 const tsconfigPath = path.join(__dirname, "../tsconfig.json")
 const packagePath = path.join(__dirname, "../packages/")
 const { getPackages } = require("@lerna/project")
@@ -46,6 +47,7 @@ module.exports = async function runBuild () {
       }),
       rollupWorker(),
       rollupTransform(),
+      rollupRaw(),
       json(),
     ],
     external (id) {

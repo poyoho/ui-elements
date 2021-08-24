@@ -42,7 +42,7 @@ async function componentBuilder (pkgName) {
       rollupTransform(),
       json(),
       importMetaAssets({
-        exclude: /\?worker/
+        exclude: /\?worker|\?raw/
       }),
     ],
     external (id) {
