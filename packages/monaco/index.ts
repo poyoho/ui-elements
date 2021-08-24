@@ -18,6 +18,7 @@ export async function getRunnableJS (monaco: monaco, model: editor.ITextModel) {
 }
 
 export const SupportLanguage = {
+  "vue": "vue",
   "html": "html",
   "js": "javascript",
   "ts": "typescript",
@@ -31,12 +32,14 @@ export const loadWorkers = createSinglePromise(async () => {
     { default: JSONWorker },
     { default: TsWorker },
     { default: CSSWorker },
-    { default: HtmlWorker },
+    { default: HTMLWorker },
+    { default: VueWorker },
   ] = await Promise.all([
     import('monaco-editor/esm/vs/editor/editor.worker?worker' as any),
     import('monaco-editor/esm/vs/language/json/json.worker?worker' as any),
     import('monaco-editor/esm/vs/language/typescript/ts.worker?worker' as any),
     import('monaco-editor/esm/vs/language/css/css.worker?worker' as any),
+    import('monaco-editor/esm/vs/language/html/html.worker?worker' as any),
     import('./languages/html/html.worker?worker' as any),
   ])
 
@@ -48,8 +51,11 @@ export const loadWorkers = createSinglePromise(async () => {
       if (label === 'json') {
         return new JSONWorker()
       }
-      if (label === 'html') {
-        return new HtmlWorker()
+      if (label === 'vue') {
+        return new VueWorker()
+      }
+      if (label === "html") {
+        return new HTMLWorker()
       }
       if (label === 'typescript' || label === 'javascript') {
         return new TsWorker()

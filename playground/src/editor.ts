@@ -14,7 +14,7 @@ elm.addEventListener("code-change", (e) => {
 })
 
 const elm2 = document.querySelector(".editor2") as any as MonacoEditor
-const model2 = await elm2.createModel("html", "test.html", "")
+const model2 = await elm2.createModel("vue", "test.html", "")
 elm2.addDTS([{
   name: "vue",
   version: "3.2.4",
