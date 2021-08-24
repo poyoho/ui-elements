@@ -3,12 +3,12 @@ import { wireTmGrammars } from 'monaco-editor-textmate'
 
 import { loadWASM } from 'onigasm'
 
-import onigasm from "./token/onigasm.wasm?url"
+const onigasm = new URL("./token/onigasm.wasm", import.meta.url)
 
 import type { editor } from 'monaco-editor'
 export type monaco = typeof import("monaco-editor")
 
-const loadOnigasm = loadWASM(onigasm) // See https://www.npmjs.com/package/onigasm#light-it-up
+const loadOnigasm = loadWASM(onigasm.href) // See https://www.npmjs.com/package/onigasm#light-it-up
 
 // anyscript fork from https://github.com/Nishkalkashyap/monaco-vscode-textmate-theme-converter/blob/master/lib/cjs/index.js
 function convertTheme(theme: any): any {

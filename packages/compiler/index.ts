@@ -8,11 +8,6 @@ interface Compiler {
   parseFileModules: (file: CompiledFile, filesystem: FileSystem<CompiledFile>) => Promise<string[]>
 }
 
-interface CodeSandbox {
-  setupDependency: (importMap: Record<string, string>) => void
-  eval: (scrpt: string | string[]) => void
-}
-
 type CompilerType = "vue"
 
 async function importCompiler (type: CompilerType): Promise<Compiler> {
@@ -21,11 +16,11 @@ async function importCompiler (type: CompilerType): Promise<Compiler> {
   }
 }
 
-export async function setupSandboxRuntime (type: CompilerType, filesystem: FileSystem<CompiledFile>, sandbox: CodeSandbox) {
+export async function setupSandboxRuntime (type: CompilerType, filesystem: FileSystem<CompiledFile>) {
   const tool = await importCompiler(type)
-  sandbox.setupDependency(tool.getRuntimeImportMap())
   // setup compiler
   const compiler = {
+    importMap: tool.getRuntimeImportMap(),
     // compile one file
     compileFile: async (file: CompiledFile) => {
       const err = await tool.compileFile(file)
@@ -44,7 +39,7 @@ export async function setupSandboxRuntime (type: CompilerType, filesystem: FileS
         ...modules.reverse(),
         tool.getBootstrap(),
       ]
-      sandbox.eval(scripts)
+      return scripts
     }
   }
 
