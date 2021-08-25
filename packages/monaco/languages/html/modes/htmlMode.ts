@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *-------------------------------------------------------------------------------------------- */
 
-import { WorkerManager } from './workerManager'
-import type { HTMLWorker } from './htmlWorker'
-import { LanguageServiceDefaults } from './monaco.contribution'
-import * as languageFeatures from './languageFeatures'
-import { Uri, IDisposable, languages } from './fillers/monaco-editor-core'
+import { WorkerManager } from '../workerManager'
+import type { HTMLWorker } from '../htmlWorker'
+import { LanguageServiceDefaults } from '../monaco.contribution'
+import * as languageFeatures from '../languageFeatures'
+import { Uri, IDisposable, languages } from '../fillers/monaco-editor-core'
 
 export function setupMode1(defaults: LanguageServiceDefaults): void {
   const client = new WorkerManager(defaults)
