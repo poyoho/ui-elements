@@ -40,7 +40,7 @@ export const loadWorkers = createSinglePromise(async () => {
     import('monaco-editor/esm/vs/language/typescript/ts.worker?worker' as any),
     import('monaco-editor/esm/vs/language/css/css.worker?worker' as any),
     import('monaco-editor/esm/vs/language/html/html.worker?worker' as any),
-    import('./languages/html/html.worker?worker' as any),
+    import('./languages/vue/vue.worker?worker' as any),
   ])
 
   // monaco要求将worker挂载到window上

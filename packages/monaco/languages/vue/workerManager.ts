@@ -1,24 +1,19 @@
-/* ---------------------------------------------------------------------------------------------
-*  Copyright (c) Microsoft Corporation. All rights reserved.
-*  Licensed under the MIT License. See License.txt in the project root for license information.
-*-------------------------------------------------------------------------------------------- */
-
-import { LanguageServiceDefaults } from './monaco.contribution'
-import type { HTMLWorker } from './htmlWorker'
-import { Uri, IDisposable, editor } from './fillers/monaco-editor-core'
+import { LanguageServiceDefaultsImpl } from './monaco.contribution'
+import type { VueWorker } from './vueWorker'
+import { Uri, IDisposable, editor } from 'monaco-editor-core'
 
 const STOP_WHEN_IDLE_FOR = 2 * 60 * 1000 // 2min
 
 export class WorkerManager {
-  private _defaults: LanguageServiceDefaults
+  private _defaults: LanguageServiceDefaultsImpl
   private _idleCheckInterval: number
   private _lastUsedTime: number
   private _configChangeListener: IDisposable
 
-  private _worker: editor.MonacoWebWorker<HTMLWorker> | null
-  private _client: Promise<HTMLWorker> | undefined
+  private _worker: editor.MonacoWebWorker<VueWorker> | null
+  private _client: Promise<VueWorker> | undefined
 
-  constructor(defaults: LanguageServiceDefaults) {
+  constructor(defaults: LanguageServiceDefaultsImpl) {
     this._defaults = defaults
     this._worker = null
     this._idleCheckInterval = window.setInterval(() => this._checkIfIdle(), 30 * 1000)
@@ -49,13 +44,13 @@ export class WorkerManager {
       this._stopWorker()
   }
 
-  private _getClient(): Promise<HTMLWorker> {
+  private _getClient(): Promise<VueWorker> {
     this._lastUsedTime = Date.now()
 
     if (!this._client) {
-      this._worker = editor.createWebWorker<HTMLWorker>({
+      this._worker = editor.createWebWorker<VueWorker>({
       // module that exports the create() method and returns a `HTMLWorker` instance
-        moduleId: 'vs/language/html/htmlWorker',
+        moduleId: 'vs/language/vue/vueWorker',
 
         // passed in to the create() method
         createData: {
@@ -66,14 +61,14 @@ export class WorkerManager {
         label: this._defaults.languageId,
       })
 
-      this._client = <Promise<HTMLWorker>> this._worker.getProxy()
+      this._client = <Promise<VueWorker>> this._worker.getProxy()
     }
 
     return this._client
   }
 
-  getLanguageServiceWorker(...resources: Uri[]): Promise<HTMLWorker> {
-    let _client: HTMLWorker
+  getLanguageServiceWorker(...resources: Uri[]): Promise<VueWorker> {
+    let _client: VueWorker
     return this._getClient()
       .then((client) => {
         _client = client

@@ -1,35 +1,28 @@
-import * as mode from './modes/htmlMode'
-import { languages, Emitter, IEvent } from './fillers/monaco-editor-core'
+import * as mode from './vueMode'
+import { languages, Emitter, IEvent } from 'monaco-editor-core'
 
-export interface HTMLFormatConfiguration {
-  readonly tabSize: number
-  readonly insertSpaces: boolean
-  readonly wrapLineLength: number
-  readonly unformatted: string
-  readonly contentUnformatted: string
-  readonly indentInnerHtml: boolean
-  readonly preserveNewLines: boolean
-  readonly maxPreserveNewLines: number
-  readonly indentHandlebars: boolean
-  readonly endWithNewline: boolean
-  readonly extraLiners: string
-  readonly wrapAttributes: 'auto' | 'force' | 'force-aligned' | 'force-expand-multiline'
+declare module monaco.languages.vue {
+  export interface CompletionConfiguration {
+      [provider: string]: boolean;
+  }
+
+  export interface Options {
+    /**
+     * A list of known schemas and/or associations of schemas to file names.
+     */
+    readonly suggest?: CompletionConfiguration;
+  }
+
+  export interface LanguageServiceDefaults {
+      readonly onDidChange: IEvent<LanguageServiceDefaults>;
+      readonly options: Options;
+      setOptions(options: Options): void;
+  }
+
+  export var vueDefaults: LanguageServiceDefaults;
 }
 
-export interface CompletionConfiguration {
-  [provider: string]: boolean
-}
-
-export interface Options {
-/**
- * If set, comments are tolerated. If set to false, syntax errors will be emitted for comments.
- */
-  readonly format?: HTMLFormatConfiguration
-  /**
- * A list of known schemas and/or associations of schemas to file names.
- */
-  readonly suggest?: CompletionConfiguration
-}
+export type Options = monaco.languages.vue.Options
 
 export interface ModeConfiguration {
 /**
@@ -103,10 +96,10 @@ export interface LanguageServiceDefaults {
 
 // --- HTML configuration and defaults ---------
 
-class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
-  private _onDidChange = new Emitter<LanguageServiceDefaults>()
-  private _options: Options | undefined
-  private _modeConfiguration: ModeConfiguration | undefined
+export class LanguageServiceDefaultsImpl implements monaco.languages.vue.LanguageServiceDefaults {
+	private _onDidChange = new Emitter<monaco.languages.vue.LanguageServiceDefaults>();
+	private _options!: Options;
+  private _modeConfiguration!: ModeConfiguration
   private _languageId: string
 
   constructor(languageId: string, options: Options, modeConfiguration: ModeConfiguration) {
@@ -115,7 +108,7 @@ class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
     this.setModeConfiguration(modeConfiguration)
   }
 
-  get onDidChange(): IEvent<LanguageServiceDefaults> {
+  get onDidChange(): IEvent<monaco.languages.vue.LanguageServiceDefaults> {
     return this._onDidChange.event
   }
 
@@ -142,35 +135,12 @@ class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
   }
 }
 
-const formatDefaults: Required<HTMLFormatConfiguration> = {
-  tabSize: 4,
-  insertSpaces: false,
-  wrapLineLength: 120,
-  unformatted: 'default": "a, abbr, acronym, b, bdo, big, br, button, cite, code, dfn, em, i, img, input, kbd, label, map, object, q, samp, select, small, span, strong, sub, sup, textarea, tt, var',
-  contentUnformatted: 'pre',
-  indentInnerHtml: false,
-  preserveNewLines: true,
-  maxPreserveNewLines: 1,
-  indentHandlebars: false,
-  endWithNewline: false,
-  extraLiners: 'head, body, /html',
-  wrapAttributes: 'auto',
+
+const vueOptionsDefault: monaco.languages.vue.Options = {
+	suggest: { html5: true }
 }
 
-const htmlOptionsDefault: Required<Options> = {
-  format: formatDefaults,
-  suggest: { html5: true, angular1: true, ionic: true },
-}
-
-const handlebarOptionsDefault: Required<Options> = {
-  format: formatDefaults,
-  suggest: { html5: true },
-}
-
-const razorOptionsDefault: Required<Options> = {
-  format: formatDefaults,
-  suggest: { html5: true, razor: true },
-}
+const vueLanguageId = 'vue'
 
 function getConfigurationDefault(languageId: string): Required<ModeConfiguration> {
   return {
@@ -183,29 +153,42 @@ function getConfigurationDefault(languageId: string): Required<ModeConfiguration
     colors: true,
     foldingRanges: true,
     selectionRanges: true,
-    diagnostics: languageId === htmlLanguageId, // turned off for Razor and Handlebar
-    documentFormattingEdits: languageId === htmlLanguageId, // turned off for Razor and Handlebar
-    documentRangeFormattingEdits: languageId === htmlLanguageId, // turned off for Razor and Handlebar
+    diagnostics: languageId === vueLanguageId, // turned off for Razor and Handlebar
+    documentFormattingEdits: languageId === vueLanguageId, // turned off for Razor and Handlebar
+    documentRangeFormattingEdits: languageId === vueLanguageId, // turned off for Razor and Handlebar
   }
 }
 
-const htmlLanguageId = 'html'
 
-export const htmlDefaults: LanguageServiceDefaults = new LanguageServiceDefaultsImpl(
-  htmlLanguageId,
-  htmlOptionsDefault,
-  getConfigurationDefault(htmlLanguageId),
+export const vueDefaults = new LanguageServiceDefaultsImpl(
+  vueLanguageId,
+  vueOptionsDefault,
+  getConfigurationDefault(vueLanguageId),
 )
 
 // export to the global based API
-;(<any>languages).html = { htmlDefaults }
+function createAPI(): typeof monaco.languages.vue {
+	return {
+		vueDefaults: vueDefaults
+	}
+}
+monaco.languages.vue = createAPI();
 
 // --- Registration to monaco editor ---
 
 function getMode(): Promise<typeof mode> {
-  return import('./modes/htmlMode')
+  return import('./vueMode')
 }
 
-languages.onLanguage(htmlLanguageId, () => {
-  getMode().then(mode => mode.setupMode(htmlDefaults))
+languages.register({
+	id: 'vue',
+	extensions: ['.vue'],
+	aliases: ['Vue', 'vuejs']
+});
+
+// languages.setMonarchTokensProvider('vue', language);
+// languages.setLanguageConfiguration('vue', conf);
+
+languages.onLanguage(vueLanguageId, () => {
+  getMode().then(mode => mode.setupMode(vueDefaults))
 })

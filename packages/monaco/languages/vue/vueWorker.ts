@@ -1,5 +1,5 @@
 import * as htmlService from 'vscode-html-languageservice'
-import type { worker } from './fillers/monaco-editor-core'
+import type { worker } from 'monaco-editor-core'
 import type { Options } from './monaco.contribution'
 import { htmlCompletionPlugins } from './plugins'
 
@@ -8,7 +8,7 @@ export interface ICreateData {
   languageSettings: Options
 }
 
-export class HTMLWorker {
+export class VueWorker {
   private _ctx: worker.IWorkerContext
   private _languageService: htmlService.LanguageService
   private _languageSettings: Options
@@ -135,6 +135,6 @@ export class HTMLWorker {
   }
 }
 
-export function create(ctx: worker.IWorkerContext, createData: ICreateData): HTMLWorker {
-  return new HTMLWorker(ctx, createData)
+export function create(ctx: worker.IWorkerContext, createData: ICreateData): VueWorker {
+  return new VueWorker(ctx, createData)
 }

@@ -1,14 +1,9 @@
-/* ---------------------------------------------------------------------------------------------
-*  Copyright (c) Microsoft Corporation. All rights reserved.
-*  Licensed under the MIT License. See License.txt in the project root for license information.
-*-------------------------------------------------------------------------------------------- */
-
 import * as vscodeHTMLService from 'vscode-html-languageservice'
 import { DiagnosticSeverity } from "vscode-languageserver-types"
 import { languages as Languages } from "monaco-editor"
 import { InsertReplaceEdit } from 'vscode-html-languageservice'
-import { LanguageServiceDefaults } from './monaco.contribution'
-import type { HTMLWorker } from './htmlWorker'
+import { LanguageServiceDefaultsImpl } from './monaco.contribution'
+import type { VueWorker } from './vueWorker'
 import {
   languages,
   editor,
@@ -19,12 +14,11 @@ import {
   IDisposable,
   MarkerSeverity,
   IMarkdownString,
-} from './fillers/monaco-editor-core'
+} from 'monaco-editor-core'
 
 type MonacoTextEdit = Languages.TextEdit
 
-export type WorkerAccessor = (...uris: Uri[]) => Promise<HTMLWorker>
-// --- diagnostics --- ---
+export type WorkerAccessor = (...uris: Uri[]) => Promise<VueWorker>
 
 export class DiagnosticsAdapter {
   private _disposables: IDisposable[] = []
@@ -33,7 +27,7 @@ export class DiagnosticsAdapter {
   constructor(
     private _languageId: string,
     private _worker: WorkerAccessor,
-    defaults: LanguageServiceDefaults,
+    defaults: LanguageServiceDefaultsImpl,
   ) {
     const onModelAdd = (model: editor.IModel): void => {
       const modeId = model.getModeId()
