@@ -195,27 +195,15 @@ function getConfigurationDefault(languageId: string): Required<ModeConfiguration
 }
 
 const htmlLanguageId = 'html'
-const handlebarsLanguageId = 'handlebars'
-const razorLanguageId = 'razor'
 
 export const htmlDefaults: LanguageServiceDefaults = new LanguageServiceDefaultsImpl(
   htmlLanguageId,
   htmlOptionsDefault,
   getConfigurationDefault(htmlLanguageId),
 )
-export const handlebarDefaults: LanguageServiceDefaults = new LanguageServiceDefaultsImpl(
-  handlebarsLanguageId,
-  handlebarOptionsDefault,
-  getConfigurationDefault(handlebarsLanguageId),
-)
-export const razorDefaults: LanguageServiceDefaults = new LanguageServiceDefaultsImpl(
-  razorLanguageId,
-  razorOptionsDefault,
-  getConfigurationDefault(razorLanguageId),
-);
 
 // export to the global based API
-(<any>languages).html = { htmlDefaults, razorDefaults, handlebarDefaults }
+;(<any>languages).html = { htmlDefaults }
 
 // --- Registration to monaco editor ---
 
@@ -225,10 +213,4 @@ function getMode(): Promise<typeof mode> {
 
 languages.onLanguage(htmlLanguageId, () => {
   getMode().then(mode => mode.setupMode(htmlDefaults))
-})
-languages.onLanguage(handlebarsLanguageId, () => {
-  getMode().then(mode => mode.setupMode(handlebarDefaults))
-})
-languages.onLanguage(razorLanguageId, () => {
-  getMode().then(mode => mode.setupMode(razorDefaults))
 })
