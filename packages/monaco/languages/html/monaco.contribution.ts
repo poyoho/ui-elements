@@ -3,7 +3,7 @@
 *  Licensed under the MIT License. See License.txt in the project root for license information.
 *-------------------------------------------------------------------------------------------- */
 
-import * as mode from './htmlMode'
+import * as mode from './modes/htmlMode'
 import { languages, Emitter, IEvent } from './fillers/monaco-editor-core'
 
 export interface HTMLFormatConfiguration {
@@ -208,7 +208,7 @@ export const htmlDefaults: LanguageServiceDefaults = new LanguageServiceDefaults
 // --- Registration to monaco editor ---
 
 function getMode(): Promise<typeof mode> {
-  return import('./htmlMode')
+  return import('./modes/htmlMode')
 }
 
 languages.onLanguage(htmlLanguageId, () => {
