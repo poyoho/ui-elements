@@ -9,7 +9,7 @@ import { LanguageServiceDefaults } from '../monaco.contribution'
 import * as languageFeatures from '../languageFeatures'
 import { Uri, IDisposable, languages } from '../fillers/monaco-editor-core'
 
-export function setupMode1(defaults: LanguageServiceDefaults): void {
+export function setupModel(defaults: LanguageServiceDefaults): void {
   const client = new WorkerManager(defaults)
 
   const worker: languageFeatures.WorkerAccessor = (...uris: Uri[]): Promise<HTMLWorker> => {
