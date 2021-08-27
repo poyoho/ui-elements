@@ -25,8 +25,22 @@ export default class CodeSandbox extends HTMLElement {
       'allow-top-navigation-by-user-activation',
     ].join(' '))
 
-    this.proxy = new SandboxProxy(sandbox, {
+    const dispatchEvent = (type: string, data: any) => {
+      console.log("dispatchEvent")
+      const event = document.createEvent("Events")
+      ;(event as any).value = data
+      event.initEvent(type, false, false)
+      this.dispatchEvent(event)
+    }
 
+    this.proxy = new SandboxProxy(sandbox, {
+      on_fetch_progress: (data: any) => dispatchEvent("on_fetch_progress", data),
+      on_error: (data: any) => dispatchEvent("on_error", data),
+      on_unhandled_rejection: (data: any) => dispatchEvent("on_unhandled_rejection", data),
+      on_console: (data: any) => dispatchEvent("on_console", data),
+      on_console_group: (data: any) => dispatchEvent("on_console_group", data),
+      on_console_group_collapsed: (data: any) => dispatchEvent("on_console_group_collapsed", data),
+      on_console_group_end: (data: any) => dispatchEvent("on_console_group_end", data),
     })
 
     sandbox.addEventListener('load', () => {
@@ -38,10 +52,10 @@ export default class CodeSandbox extends HTMLElement {
 
   disconnectedCallback() {}
 
-  setupDependency (importMap: Record<string, string>) {
+  setup (importMap?: Record<string, string>) {
     const { sandbox } = this
     // replace importMaps
-    Object.assign(this.importMaps.imports, importMap)
+    Object.assign(this.importMaps.imports, importMap || {})
     sandbox.srcdoc = srcdoc.replace(IMPORT_MAP, JSON.stringify(this.importMaps))
   }
 
