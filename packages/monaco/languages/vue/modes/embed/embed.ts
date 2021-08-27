@@ -1,4 +1,4 @@
-import { createScanner, TokenType, Scanner } from './htmlScanner'
+import { createScanner, TokenType, Scanner } from '../template/htmlScanner'
 import { Position, Range } from 'vscode-languageserver-types'
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -15,7 +15,6 @@ export interface VueDocumentRegions {
   getLanguagesInDocument(): string[]
   getImportedScripts(): string[]
 }
-
 
 export var CSS_STYLE_RULE = '__'
 

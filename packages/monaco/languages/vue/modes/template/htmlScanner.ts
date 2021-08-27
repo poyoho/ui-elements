@@ -169,7 +169,6 @@ const _LFD = '\f'.charCodeAt(0);
 const _WSP = ' '.charCodeAt(0);
 const _TAB = '\t'.charCodeAt(0);
 
-
 export enum ScannerState {
   WithinContent,
   AfterOpeningStartTag,

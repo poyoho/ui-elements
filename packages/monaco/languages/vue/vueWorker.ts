@@ -8,6 +8,7 @@ export interface ICreateData {
   languageSettings: Options
 }
 
+// TODO get other language worker
 export class VueWorker {
   private _ctx: worker.IWorkerContext
   private _languageService: htmlService.LanguageService

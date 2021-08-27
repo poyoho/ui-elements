@@ -1,5 +1,6 @@
 import * as mode from './vueMode'
 import { languages, Emitter, IEvent } from 'monaco-editor-core'
+import { language, conf } from './vueLanguage'
 
 declare module monaco.languages.vue {
   export interface CompletionConfiguration {
@@ -186,8 +187,8 @@ languages.register({
 	aliases: ['Vue', 'vuejs']
 });
 
-// languages.setMonarchTokensProvider('vue', language);
-// languages.setLanguageConfiguration('vue', conf);
+languages.setMonarchTokensProvider('vue', language);
+languages.setLanguageConfiguration('vue', conf);
 
 languages.onLanguage(vueLanguageId, () => {
   getMode().then(mode => mode.setupMode(vueDefaults))
