@@ -1,4 +1,4 @@
-import { LanguageModelCache, getLanguageModeCache } from './languageModeCache'
+import { LanguageModeCache, getLanguageModeCache } from './languageModeCache'
 import type { TextDocument, Position, LanguageMode, Settings } from "./types"
 import { VueDocumentRegions, CSS_STYLE_RULE } from './embed'
 import { getCSSLanguageService, Stylesheet } from 'vscode-css-languageservice'
@@ -8,7 +8,7 @@ export enum Priority {
 	Platform
 }
 
-export function getCSSMode(documentRegions: LanguageModelCache<VueDocumentRegions>): LanguageMode {
+export function getCSSMode(documentRegions: LanguageModeCache<VueDocumentRegions>): LanguageMode {
     let cssLanguageService = getCSSLanguageService();
 	let embeddedCSSDocuments = getLanguageModeCache<TextDocument>(10, 60, document => documentRegions.get(document).getEmbeddedDocument('css'));
 	let cssStylesheets = getLanguageModeCache<Stylesheet>(10, 60, document => cssLanguageService.parseStylesheet(document));

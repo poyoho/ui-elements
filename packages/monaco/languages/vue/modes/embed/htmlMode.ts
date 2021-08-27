@@ -21,7 +21,7 @@ export function getHTMLMode(htmlLanguageService: HTMLLanguageService): LanguageM
 			return htmlLanguageService.doComplete(document, position, htmlDocuments.get(document), options)
 		},
 		doHover(document: TextDocument, position: Position) {
-			return htmlLanguageService.doHover(document, position, htmlDocuments.get(document))
+			return htmlLanguageService.doHover(document, position, htmlDocuments.get(document))!
 		},
 		findDocumentHighlight(document: TextDocument, position: Position) {
 			return htmlLanguageService.findDocumentHighlights(document, position, htmlDocuments.get(document))

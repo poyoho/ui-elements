@@ -1,12 +1,12 @@
 import type { TextDocument } from './types'
 
-export interface LanguageModelCache<T> {
+export interface LanguageModeCache<T> {
 	get(document: TextDocument): T
 	onDocumentRemoved(document: TextDocument): void
 	dispose(): void
 }
 
-export function getLanguageModeCache<T>(maxEntries: number, cleanupIntervalTimeInSec: number, parse: (document: TextDocument) => T): LanguageModelCache<T> {
+export function getLanguageModeCache<T>(maxEntries: number, cleanupIntervalTimeInSec: number, parse: (document: TextDocument) => T): LanguageModeCache<T> {
 	let languageModels: { [uri: string]: { version: number, languageId: string, cTime: number, languageModel: T } } = {}
 	let nModels = 0
 
