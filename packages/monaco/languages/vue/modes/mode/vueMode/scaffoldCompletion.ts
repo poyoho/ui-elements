@@ -1,4 +1,4 @@
-import {CompletionList, CompletionItemKind, InsertTextFormat, CompletionItem} from '../../../types';
+import {CompletionList, CompletionItemKind, InsertTextFormat, CompletionItem} from '../../types';
 
 export function doScaffoldComplete(): CompletionList {
   const topLevelCompletions: CompletionItem[] = [

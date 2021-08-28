@@ -1,18 +1,16 @@
-import { LanguageModeCache, getLanguageModeCache } from '../../../languageModeCache'
+import { LanguageModeCache, getLanguageModeCache } from '../../languageModeCache'
 import {
   LanguageMode, Settings,
   IWorkerContext,
   SymbolInformation, SymbolKind, CompletionItem, Location, SignatureHelp, SignatureInformation, ParameterInformation,
   Definition, TextEdit, TextDocument, Diagnostic, DiagnosticSeverity, Range, CompletionItemKind,
-  Hover, MarkedString, DocumentHighlight, DocumentHighlightKind, CompletionList, Position, FormattingOptions } from '../../../types'
+  Hover, MarkedString, DocumentHighlight, DocumentHighlightKind, CompletionList, Position, FormattingOptions } from '../../types'
 import { VueDocumentRegions } from '../../embed'
 import ts from 'typescript'
 import { ComponentInfo, findComponents } from './findComponents'
 import { getWordAtText, startsWith, isWhitespaceOnly, repeat } from './strings'
 
 const FILE_NAME = 'vscode://javascript/1.js'
-
-const _extraLibs: { [fileName: string]: string } = Object.create(null)
 
 const JS_WORD_REGEX = /(-?\d*\.\d\w*)|([^\`\~\!\@\#\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\\:\'\"\,\.\<\>\/\?\s]+)/g
 
@@ -23,19 +21,20 @@ export interface ScriptMode extends LanguageMode {
 export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocumentRegions>, ctx?: IWorkerContext): ScriptMode {
 	let jsDocuments = getLanguageModeCache<TextDocument>(10, 60, document => documentRegions.get(document).getEmbeddedDocument('javascript'))
 
-	let compilerOptions: ts.CompilerOptions = { allowJs: true } // { allowNonTsExtensions: true, allowJs: true, lib: [ES6_LIB.NAME], target: ts.ScriptTarget.Latest, moduleResolution: ts.ModuleResolutionKind.Classic }
 	let currentTextDocument: TextDocument
-	let scriptFileVersion: number = 0
+	let scriptFileVersion: number = 0 // use document version judge is update
 	function updateCurrentTextDocument(doc: TextDocument) {
 		if (!currentTextDocument || doc.uri !== currentTextDocument.uri || doc.version !== currentTextDocument.version) {
 			currentTextDocument = jsDocuments.get(doc)
 			scriptFileVersion++
 		}
 	}
+
+	let compilerOptions: ts.CompilerOptions = { allowJs: true }
 	const host: ts.LanguageServiceHost = {
 		getCompilationSettings: () => compilerOptions,
 		getScriptFileNames: () => {
-			return [FILE_NAME, VUE_LIB.NAME]
+			return [FILE_NAME]
 		},
 		getScriptKind: (fileName: string) => ts.ScriptKind.JS,
 		getScriptVersion: (fileName: string) => {
@@ -76,7 +75,7 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 			updateCurrentTextDocument(document)
 			const syntaxDiagnostics = jsLanguageService.getSyntacticDiagnostics(FILE_NAME)
 			const semanticDiagnostics = jsLanguageService.getSemanticDiagnostics(FILE_NAME)
-			return syntaxDiagnostics.concat(semanticDiagnostics).map((diag): Diagnostic => {
+			return semanticDiagnostics.concat(syntaxDiagnostics).map((diag): Diagnostic => {
 				return {
 					range: convertRange(currentTextDocument, diag),
 					severity: DiagnosticSeverity.Error,
@@ -121,7 +120,7 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 			}
 			return item
 		},
-		doHover(document: TextDocument, position: Position): Hover {
+		doHover(document: TextDocument, position: Position): Hover | null {
 			updateCurrentTextDocument(document)
 			let info = jsLanguageService.getQuickInfoAtPosition(FILE_NAME, currentTextDocument.offsetAt(position))
 			if (info) {
@@ -133,7 +132,7 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 			}
 			return null
 		},
-		doSignatureHelp(document: TextDocument, position: Position): SignatureHelp {
+		doSignatureHelp(document: TextDocument, position: Position): SignatureHelp | null {
 			updateCurrentTextDocument(document)
 			let signHelp = jsLanguageService.getSignatureHelpItems(FILE_NAME, currentTextDocument.offsetAt(position), undefined)
 			if (signHelp) {
@@ -146,7 +145,7 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 
 					let signature: SignatureInformation = {
 						label: '',
-						documentation: null,
+						documentation: undefined,
 						parameters: []
 					}
 
@@ -158,7 +157,7 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 							documentation: ts.displayPartsToString(p.documentation)
 						}
 						signature.label += label
-						signature.parameters.push(parameter)
+						signature.parameters!.push(parameter)
 						if (i < a.length - 1) {
 							signature.label += ts.displayPartsToString(item.separatorDisplayParts)
 						}
@@ -170,7 +169,7 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 			}
 			return null
 		},
-		findDocumentHighlight(document: TextDocument, position: Position): DocumentHighlight[] {
+		findDocumentHighlight(document: TextDocument, position: Position): DocumentHighlight[] | null {
 			updateCurrentTextDocument(document)
 			let occurrences = jsLanguageService.getOccurrencesAtPosition(FILE_NAME, currentTextDocument.offsetAt(position))
 			if (occurrences) {
@@ -183,7 +182,7 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 			}
 			return null
 		},
-		findDocumentSymbols(document: TextDocument): SymbolInformation[] {
+		findDocumentSymbols(document: TextDocument): SymbolInformation[] | null {
 			updateCurrentTextDocument(document)
 			let items = jsLanguageService.getNavigationBarItems(FILE_NAME)
 			if (items) {
@@ -219,7 +218,7 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 			}
 			return null
 		},
-		findDefinition(document: TextDocument, position: Position): Definition {
+		findDefinition(document: TextDocument, position: Position): Definition | null {
 			updateCurrentTextDocument(document)
 			let definition = jsLanguageService.getDefinitionAtPosition(FILE_NAME, currentTextDocument.offsetAt(position))
 			if (definition) {
@@ -232,7 +231,7 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 			}
 			return null
 		},
-		findReferences(document: TextDocument, position: Position): Location[] {
+		findReferences(document: TextDocument, position: Position): Location[] | null {
 			updateCurrentTextDocument(document)
 			let references = jsLanguageService.getReferencesAtPosition(FILE_NAME, currentTextDocument.offsetAt(position))
 			if (references) {
@@ -245,7 +244,7 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 			}
 			return null
 		},
-		format(document: TextDocument, range: Range, formatParams: FormattingOptions, settings: Settings = globalSettings): TextEdit[] {
+		format(document: TextDocument, range: Range, formatParams: FormattingOptions, settings: Settings = globalSettings): TextEdit[] | null {
 			currentTextDocument = documentRegions.get(document).getEmbeddedDocument('javascript')
 			scriptFileVersion++
 
@@ -284,7 +283,7 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 		findComponents(document: TextDocument) {
 			updateCurrentTextDocument(document)
 			// const fileFsPath = getFileFsPath(doc.uri)
-			return findComponents(jsLanguageService, FILE_NAME) //TODO
+			return findComponents(jsLanguageService, FILE_NAME)
 		},
 		onDocumentRemoved(document: TextDocument) {
 			jsDocuments.onDocumentRemoved(document)
@@ -296,9 +295,9 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 	}
 }
 
-function convertRange(document: TextDocument, span: { start: number, length: number }): Range {
-	let startPosition = document.positionAt(span.start)
-	let endPosition = document.positionAt(span.start + span.length)
+function convertRange(document: TextDocument, span: { start: number | undefined, length: number | undefined }): Range {
+	let startPosition = document.positionAt(span.start || 0)
+	let endPosition = document.positionAt((span.start || 0) + (span.length || 0))
 	return Range.create(startPosition, endPosition)
 }
 

@@ -26,21 +26,21 @@ export interface Settings {
 }
 
 export interface LanguageMode {
-	getId(): string;
+	getId: () => null | string;
 	configure?: (options: Settings) => void;
-	doValidation?: (document: TextDocument, settings?: Settings) => Diagnostic[];
-	doComplete?: (document: TextDocument, position: Position, settings?: Settings) => CompletionList;
-	doResolve?: (document: TextDocument, item: CompletionItem) => CompletionItem;
-	doHover?: (document: TextDocument, position: Position) => Hover;
-	doSignatureHelp?: (document: TextDocument, position: Position) => SignatureHelp;
-	findDocumentHighlight?: (document: TextDocument, position: Position) => DocumentHighlight[];
-	findDocumentSymbols?: (document: TextDocument) => SymbolInformation[];
-	findDocumentLinks?: (document: TextDocument, documentContext: DocumentContext) => DocumentLink[];
-	findDefinition?: (document: TextDocument, position: Position) => Definition;
-	findReferences?: (document: TextDocument, position: Position) => Location[];
-	format?: (document: TextDocument, range: Range, options: FormattingOptions, settings: Settings) => TextEdit[];
-	// findDocumentColors?: (document: TextDocument) => ColorInformation[];
-	doAutoClose?: (document: TextDocument, position: Position) => string;
+	doValidation?: (document: TextDocument, settings?: Settings) => null | Diagnostic[];
+	doComplete?: (document: TextDocument, position: Position, settings?: Settings) => null | CompletionList;
+	doResolve?: (document: TextDocument, item: CompletionItem) => null | CompletionItem;
+	doHover?: (document: TextDocument, position: Position) => null | Hover;
+	doSignatureHelp?: (document: TextDocument, position: Position) => null | SignatureHelp;
+	findDocumentHighlight?: (document: TextDocument, position: Position) => null | DocumentHighlight[];
+	findDocumentSymbols?: (document: TextDocument) => null | SymbolInformation[];
+	findDocumentLinks?: (document: TextDocument, documentContext: DocumentContext) => null | DocumentLink[];
+	findDefinition?: (document: TextDocument, position: Position) => null | Definition;
+	findReferences?: (document: TextDocument, position: Position) => null | Location[];
+	format?: (document: TextDocument, range: Range, options: FormattingOptions, settings: Settings) => null | TextEdit[];
+	// findDocumentColors?: (document: TextDocument) => null | ColorInformation[];
+	doAutoClose?: (document: TextDocument, position: Position) => null | string;
 	onDocumentRemoved(document: TextDocument): void;
 	dispose(): void;
 }

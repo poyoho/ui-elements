@@ -1,12 +1,12 @@
 import type { IWorkerContext, LanguageMode, LanguageModeRange, LanguageModes, Range, TextDocument, Position} from "./types"
-import { getDocumentRegions, VueDocumentRegions } from './embed/embed'
+import { getDocumentRegions, VueDocumentRegions } from './embed'
 import { getLanguageModeCache, LanguageModeCache } from './languageModeCache'
 
-import { getCSSMode } from './embed/mode/cssMode'
-import { getHTMLMode } from './embed/mode/htmlMode'
-import { getJavascriptMode } from './embed/mode/javascriptMode'
-import { getVueHTMLMode } from './embed/mode/vueHTMLMode'
-import { getVueMode } from './embed/mode/vueMode'
+import { getCSSMode } from './mode/cssMode'
+import { getHTMLMode } from './mode/htmlMode'
+import { getJavascriptMode } from './mode/javascriptMode'
+// import { getVueHTMLMode } from './embed/mode/vueHTMLMode'
+import { getVueMode } from './mode/vueMode'
 
 
 export function getLanguageModes(_ctx: IWorkerContext): LanguageModes {
@@ -18,7 +18,8 @@ export function getLanguageModes(_ctx: IWorkerContext): LanguageModes {
   const jsMode = getJavascriptMode(documentRegions, _ctx)
   let modes: {[k: string]: LanguageMode} = {
     vue: getVueMode(),
-    'vue-html': getVueHTMLMode(documentRegions, _ctx, jsMode),
+    html: getHTMLMode(),
+    // 'vue-html': getVueHTMLMode(documentRegions, _ctx, jsMode),
     css: getCSSMode(documentRegions),
     javascript: jsMode,
     typescript: jsMode,

@@ -1,4 +1,4 @@
-import { LanguageMode } from '../../../types'
+import { LanguageMode } from '../../types'
 import { doScaffoldComplete } from './scaffoldCompletion'
 
 export function getVueMode(): LanguageMode {

@@ -1,5 +1,5 @@
-import { createScanner, TokenType, Scanner } from '../template/htmlScanner'
-import { Position, Range, TextDocument } from '../types'
+import { createScanner, TokenType, Scanner } from './mode/htmlMode/htmlScanner'
+import { Position, Range, TextDocument } from './types'
 
 export interface LanguageRange extends Range {
   languageId: string
@@ -27,7 +27,8 @@ interface EmbeddedRegion {
 }
 
 const defaultType: {[type: string]: string} = {
-  template: 'vue-html',
+  // template: 'vue-html',
+  template: 'html',
   script: 'javascript',
   style: 'css',
 }
@@ -109,7 +110,7 @@ export function getDocumentRegions(document: TextDocument): VueDocumentRegions {
 }
 
 function scanTemplateRegion(scanner: Scanner, text: string): EmbeddedRegion | null {
-  let languageId = 'vue-html'
+  let languageId = defaultType["template"]
 
   let token: number
   let start = 0

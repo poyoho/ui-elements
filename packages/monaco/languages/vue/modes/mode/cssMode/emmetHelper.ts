@@ -1,4 +1,4 @@
-import { TextDocument, Position, Range, CompletionItem, CompletionList, TextEdit, InsertTextFormat, CompletionItemKind } from '../../../types'
+import { TextDocument, Position, Range, CompletionItem, CompletionList, TextEdit, InsertTextFormat, CompletionItemKind } from '../../types'
 import { expand, createSnippetsRegistry, parse } from './expand-full'
 import { extractAbbreviation as extract }  from './extract-abbreviation'
 

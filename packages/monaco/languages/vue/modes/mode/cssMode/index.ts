@@ -1,7 +1,7 @@
-import { LanguageModeCache, getLanguageModeCache } from '../../../languageModeCache'
-import type { TextDocument, Position, LanguageMode, Settings } from "../../../types"
+import { LanguageModeCache, getLanguageModeCache } from '../../languageModeCache'
+import type { TextDocument, Position, LanguageMode, Settings } from "../../types"
 import { VueDocumentRegions, CSS_STYLE_RULE } from '../../embed'
-import * as emmet from "./emmetHelper"
+// import * as emmet from "./emmetHelper"
 import { getCSSLanguageService, Stylesheet } from 'vscode-css-languageservice'
 
 export enum Priority {
@@ -25,39 +25,39 @@ export function getCSSMode(documentRegions: LanguageModeCache<VueDocumentRegions
 			return cssLanguageService.doValidation(embedded, cssStylesheets.get(embedded), settings && settings.css)
 		},
 		doComplete(document: TextDocument, position: Position) {
-			let embedded = embeddedCSSDocuments.get(document)
-			const emmetSyntax = embedded.languageId === 'postcss' ? 'css' : embedded.languageId
-			const emmetCompletions = emmet.doComplete(document, position, emmetSyntax, {
-				showExpandedAbbreviation: 'always',
-				showAbbreviationSuggestions: true,
-				syntaxProfiles: {},
-				variables: {},
-				preferences: {}
-			})
-			const emmetItems = emmetCompletions.items.map(i => {
-				return {
-				  ...i,
-				  sortText: Priority.Emmet + i.label
-				}
-			})
+			// let embedded = embeddedCSSDocuments.get(document)
+			// const emmetSyntax = embedded.languageId === 'postcss' ? 'css' : embedded.languageId
+			// const emmetCompletions = emmet.doComplete(document, position, emmetSyntax, {
+			// 	showExpandedAbbreviation: 'always',
+			// 	showAbbreviationSuggestions: true,
+			// 	syntaxProfiles: {},
+			// 	variables: {},
+			// 	preferences: {}
+			// })
+			// const emmetItems = emmetCompletions.items.map(i => {
+			// 	return {
+			// 	  ...i,
+			// 	  sortText: Priority.Emmet + i.label
+			// 	}
+			// })
 
-			const lsCompletions = cssLanguageService.doComplete(embedded, position, cssStylesheets.get(embedded))
+			// const lsCompletions = cssLanguageService.doComplete(embedded, position, cssStylesheets.get(embedded))
 
-			const lsItems = lsCompletions ? lsCompletions.items.map(i => {
-				return {
-				  ...i,
-				  sortText: Priority.Platform + i.label
-				}
-			  }) : []
+			// const lsItems = lsCompletions ? lsCompletions.items.map(i => {
+			// 	return {
+			// 	  ...i,
+			// 	  sortText: Priority.Platform + i.label
+			// 	}
+			//   }) : []
 
 			return {
 				isIncomplete: true,
-				items: emmetItems.concat(lsItems)
+				items: [] // emmetItems.concat(lsItems)
 			}
 		},
 		doHover(document: TextDocument, position: Position) {
 			let embedded = embeddedCSSDocuments.get(document)
-			return cssLanguageService.doHover(embedded, position, cssStylesheets.get(embedded))!
+			return cssLanguageService.doHover(embedded, position, cssStylesheets.get(embedded))
 		},
 		findDocumentHighlight(document: TextDocument, position: Position) {
 			let embedded = embeddedCSSDocuments.get(document)
@@ -69,7 +69,7 @@ export function getCSSMode(documentRegions: LanguageModeCache<VueDocumentRegions
 		},
 		findDefinition(document: TextDocument, position: Position) {
 			let embedded = embeddedCSSDocuments.get(document)
-			return cssLanguageService.findDefinition(embedded, position, cssStylesheets.get(embedded))!
+			return cssLanguageService.findDefinition(embedded, position, cssStylesheets.get(embedded))
 		},
 		findReferences(document: TextDocument, position: Position) {
 			let embedded = embeddedCSSDocuments.get(document)
