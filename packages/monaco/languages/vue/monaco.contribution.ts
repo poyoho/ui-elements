@@ -1,6 +1,7 @@
 import * as mode from './vueMode'
 import { languages, Emitter, IEvent } from 'monaco-editor-core'
 import { language, conf } from './vueLanguage'
+import type * as lt from 'vscode-html-languageservice'
 
 declare module monaco.languages.vue {
   export interface CompletionConfiguration {
@@ -12,6 +13,7 @@ declare module monaco.languages.vue {
      * A list of known schemas and/or associations of schemas to file names.
      */
     readonly suggest?: CompletionConfiguration;
+    readonly format?: lt.HTMLFormatConfiguration
   }
 
   export interface LanguageServiceDefaults {

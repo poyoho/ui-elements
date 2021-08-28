@@ -1,67 +1,63 @@
-import * as htmlService from 'vscode-html-languageservice'
+import * as lt from 'vscode-html-languageservice'
 import type { worker } from 'monaco-editor-core'
 import type { Options } from './monaco.contribution'
-import { htmlCompletionPlugins } from './plugins'
+import { LanguageModes } from './modes/types'
+import { getLanguageModes } from './modes/languageMode'
 
 export interface ICreateData {
   languageId: string
   languageSettings: Options
 }
 
-// TODO get other language worker
 export class VueWorker {
   private _ctx: worker.IWorkerContext
-  private _languageService: htmlService.LanguageService
+  private _languageService: lt.LanguageService
   private _languageSettings: Options
   private _languageId: string
+  private languageModes: LanguageModes;
 
   constructor(ctx: worker.IWorkerContext, createData: ICreateData) {
     this._ctx = ctx
     this._languageSettings = createData.languageSettings
     this._languageId = createData.languageId
-    this._languageService = htmlService.getLanguageService()
+    this._languageService = lt.getLanguageService()
+
+    this.languageModes = getLanguageModes(this._ctx);
   }
 
-  async doValidation(code: string): Promise<htmlService.Diagnostic[]> {
+  async doValidation(code: string): Promise<lt.Diagnostic[]> {
     // not yet suported
     return Promise.resolve([])
   }
 
   async doComplete(
     uri: string,
-    position: htmlService.Position,
-  ): Promise<htmlService.CompletionList> {
+    position: lt.Position,
+  ): Promise<lt.CompletionList> {
     const document = this._getTextDocument(uri)
-    const htmlDocument = this._languageService.parseHTMLDocument(document)
-    const items = htmlCompletionPlugins.map(plugin => plugin.completions({ document, html: htmlDocument, position })).flat()
-    const completions = this._languageService.doComplete(
-      document,
-      position,
-      htmlDocument,
-      this._languageSettings && this._languageSettings.suggest,
-    )
-
+    let mode = this.languageModes.getModeAtPosition(document, position);
+    const modeResult = mode && mode.doComplete && mode.doComplete(document, position, {css: true,javascript:true})
+    if (modeResult) {
+      return Promise.resolve(modeResult)
+    }
     return Promise.resolve({
       isIncomplete: true,
-      items: [
-        ...completions.items,
-        ...items,
-      ],
+      items: [],
     })
   }
 
   async format(
     uri: string,
-    range: htmlService.Range | undefined,
-    options: htmlService.FormattingOptions,
-  ): Promise<htmlService.TextEdit[]> {
+    range: lt.Range | undefined,
+    options: lt.FormattingOptions,
+  ): Promise<lt.TextEdit[]> {
     const document = this._getTextDocument(uri)
     const formattingOptions = { ...this._languageSettings.format, ...options }
     const textEdits = this._languageService.format(document, range, formattingOptions)
     return Promise.resolve(textEdits)
   }
 
-  async doHover(uri: string, position: htmlService.Position): Promise<htmlService.Hover> {
+  async doHover(uri: string, position: lt.Position): Promise<lt.Hover> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
     const hover = this._languageService.doHover(document, position, htmlDocument)
@@ -70,21 +66,21 @@ export class VueWorker {
 
   async findDocumentHighlights(
     uri: string,
-    position: htmlService.Position,
-  ): Promise<htmlService.DocumentHighlight[]> {
+    position: lt.Position,
+  ): Promise<lt.DocumentHighlight[]> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
     const highlights = this._languageService.findDocumentHighlights(document, position, htmlDocument)
     return Promise.resolve(highlights)
   }
 
-  async findDocumentLinks(uri: string): Promise<htmlService.DocumentLink[]> {
+  async findDocumentLinks(uri: string): Promise<lt.DocumentLink[]> {
     const document = this._getTextDocument(uri)
     const links = this._languageService.findDocumentLinks(document, null!)
     return Promise.resolve(links)
   }
 
-  async findDocumentSymbols(uri: string): Promise<htmlService.SymbolInformation[]> {
+  async findDocumentSymbols(uri: string): Promise<lt.SymbolInformation[]> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
     const symbols = this._languageService.findDocumentSymbols(document, htmlDocument)
@@ -94,7 +90,7 @@ export class VueWorker {
   async getFoldingRanges(
     uri: string,
     context?: { rangeLimit?: number },
-  ): Promise<htmlService.FoldingRange[]> {
+  ): Promise<lt.FoldingRange[]> {
     const document = this._getTextDocument(uri)
     const ranges = this._languageService.getFoldingRanges(document, context)
     return Promise.resolve(ranges)
@@ -102,8 +98,8 @@ export class VueWorker {
 
   async getSelectionRanges(
     uri: string,
-    positions: htmlService.Position[],
-  ): Promise<htmlService.SelectionRange[]> {
+    positions: lt.Position[],
+  ): Promise<lt.SelectionRange[]> {
     const document = this._getTextDocument(uri)
     const ranges = this._languageService.getSelectionRanges(document, positions)
     return Promise.resolve(ranges)
@@ -111,20 +107,20 @@ export class VueWorker {
 
   async doRename(
     uri: string,
-    position: htmlService.Position,
+    position: lt.Position,
     newName: string,
-  ): Promise<htmlService.WorkspaceEdit> {
+  ): Promise<lt.WorkspaceEdit> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
     const renames = this._languageService.doRename(document, position, newName, htmlDocument)
     return Promise.resolve(renames!)
   }
 
-  private _getTextDocument(uri: string): htmlService.TextDocument {
+  private _getTextDocument(uri: string): lt.TextDocument {
     const models = this._ctx.getMirrorModels()
     for (const model of models) {
       if (model.uri.toString() === uri) {
-        return htmlService.TextDocument.create(
+        return lt.TextDocument.create(
           uri,
           this._languageId,
           model.version,

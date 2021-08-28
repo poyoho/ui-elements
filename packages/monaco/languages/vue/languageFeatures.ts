@@ -1,7 +1,4 @@
-import * as vscodeHTMLService from 'vscode-html-languageservice'
-import { DiagnosticSeverity } from "vscode-languageserver-types"
-import { languages as Languages } from "monaco-editor"
-import { InsertReplaceEdit } from 'vscode-html-languageservice'
+import * as lt from "vscode-languageserver-types"
 import { LanguageServiceDefaultsImpl } from './monaco.contribution'
 import type { VueWorker } from './vueWorker'
 import {
@@ -16,7 +13,7 @@ import {
   IMarkdownString,
 } from 'monaco-editor-core'
 
-type MonacoTextEdit = Languages.TextEdit
+type TextEdit = languages.TextEdit
 
 export type WorkerAccessor = (...uris: Uri[]) => Promise<VueWorker>
 
@@ -108,29 +105,29 @@ export class DiagnosticsAdapter {
   }
 }
 
-function isInsertReplaceEdit(edit: vscodeHTMLService.TextEdit | InsertReplaceEdit): edit is InsertReplaceEdit {
+function isInsertReplaceEdit(edit: lt.TextEdit | lt.InsertReplaceEdit): edit is lt.InsertReplaceEdit {
   return (
-    typeof (<InsertReplaceEdit>edit).insert !== 'undefined'
-  && typeof (<InsertReplaceEdit>edit).replace !== 'undefined'
+    typeof (<lt.InsertReplaceEdit>edit).insert !== 'undefined'
+  && typeof (<lt.InsertReplaceEdit>edit).replace !== 'undefined'
   )
 }
 
 function toSeverity(lsSeverity?: number): MarkerSeverity {
   switch (lsSeverity) {
-    case DiagnosticSeverity.Error:
+    case lt.DiagnosticSeverity.Error:
       return MarkerSeverity.Error
-    case DiagnosticSeverity.Warning:
+    case lt.DiagnosticSeverity.Warning:
       return MarkerSeverity.Warning
-    case DiagnosticSeverity.Information:
+    case lt.DiagnosticSeverity.Information:
       return MarkerSeverity.Info
-    case DiagnosticSeverity.Hint:
+    case lt.DiagnosticSeverity.Hint:
       return MarkerSeverity.Hint
     default:
       return MarkerSeverity.Info
   }
 }
 
-function toDiagnostics(resource: Uri, diag: vscodeHTMLService.Diagnostic): editor.IMarkerData {
+function toDiagnostics(resource: Uri, diag: lt.Diagnostic): editor.IMarkerData {
   const code = typeof diag.code === 'number' ? String(diag.code) : <string>diag.code
 
   return {
@@ -147,18 +144,18 @@ function toDiagnostics(resource: Uri, diag: vscodeHTMLService.Diagnostic): edito
 
 // --- completion ------
 
-function fromPosition(position: Position): vscodeHTMLService.Position {
+function fromPosition(position: Position): lt.Position {
   return { character: position.column - 1, line: position.lineNumber - 1 }
 }
 
-function fromRange(range: Range): vscodeHTMLService.Range {
+function fromRange(range: Range): lt.Range {
   return {
     start: fromPosition(range.getStartPosition()),
     end: fromPosition(range.getEndPosition()),
   }
 }
 
-function toRange(range: vscodeHTMLService.Range): Range {
+function toRange(range: lt.Range): Range {
   return new Range(
     range.start.line + 1,
     range.start.character + 1,
@@ -167,7 +164,7 @@ function toRange(range: vscodeHTMLService.Range): Range {
   )
 }
 
-function toTextEdit(textEdit: vscodeHTMLService.TextEdit): MonacoTextEdit {
+function toTextEdit(textEdit: lt.TextEdit): TextEdit {
   return {
     range: toRange(textEdit.range),
     text: textEdit.newText,
@@ -178,41 +175,41 @@ function toCompletionItemKind(kind?: number): languages.CompletionItemKind {
   const mItemKind = languages.CompletionItemKind
 
   switch (kind) {
-    case vscodeHTMLService.CompletionItemKind.Text:
+    case lt.CompletionItemKind.Text:
       return mItemKind.Text
-    case vscodeHTMLService.CompletionItemKind.Method:
+    case lt.CompletionItemKind.Method:
       return mItemKind.Method
-    case vscodeHTMLService.CompletionItemKind.Function:
+    case lt.CompletionItemKind.Function:
       return mItemKind.Function
-    case vscodeHTMLService.CompletionItemKind.Constructor:
+    case lt.CompletionItemKind.Constructor:
       return mItemKind.Constructor
-    case vscodeHTMLService.CompletionItemKind.Field:
+    case lt.CompletionItemKind.Field:
       return mItemKind.Field
-    case vscodeHTMLService.CompletionItemKind.Variable:
+    case lt.CompletionItemKind.Variable:
       return mItemKind.Variable
-    case vscodeHTMLService.CompletionItemKind.Class:
+    case lt.CompletionItemKind.Class:
       return mItemKind.Class
-    case vscodeHTMLService.CompletionItemKind.Interface:
+    case lt.CompletionItemKind.Interface:
       return mItemKind.Interface
-    case vscodeHTMLService.CompletionItemKind.Module:
+    case lt.CompletionItemKind.Module:
       return mItemKind.Module
-    case vscodeHTMLService.CompletionItemKind.Property:
+    case lt.CompletionItemKind.Property:
       return mItemKind.Property
-    case vscodeHTMLService.CompletionItemKind.Unit:
+    case lt.CompletionItemKind.Unit:
       return mItemKind.Unit
-    case vscodeHTMLService.CompletionItemKind.Value:
+    case lt.CompletionItemKind.Value:
       return mItemKind.Value
-    case vscodeHTMLService.CompletionItemKind.Enum:
+    case lt.CompletionItemKind.Enum:
       return mItemKind.Enum
-    case vscodeHTMLService.CompletionItemKind.Keyword:
+    case lt.CompletionItemKind.Keyword:
       return mItemKind.Keyword
-    case vscodeHTMLService.CompletionItemKind.Snippet:
+    case lt.CompletionItemKind.Snippet:
       return mItemKind.Snippet
-    case vscodeHTMLService.CompletionItemKind.Color:
+    case lt.CompletionItemKind.Color:
       return mItemKind.Color
-    case vscodeHTMLService.CompletionItemKind.File:
+    case lt.CompletionItemKind.File:
       return mItemKind.File
-    case vscodeHTMLService.CompletionItemKind.Reference:
+    case lt.CompletionItemKind.Reference:
       return mItemKind.Reference
   }
   return mItemKind.Property
@@ -220,48 +217,48 @@ function toCompletionItemKind(kind?: number): languages.CompletionItemKind {
 
 function fromCompletionItemKind(
   kind: languages.CompletionItemKind,
-): vscodeHTMLService.CompletionItemKind {
+): lt.CompletionItemKind {
   const mItemKind = languages.CompletionItemKind
 
   switch (kind) {
     case mItemKind.Text:
-      return vscodeHTMLService.CompletionItemKind.Text
+      return lt.CompletionItemKind.Text
     case mItemKind.Method:
-      return vscodeHTMLService.CompletionItemKind.Method
+      return lt.CompletionItemKind.Method
     case mItemKind.Function:
-      return vscodeHTMLService.CompletionItemKind.Function
+      return lt.CompletionItemKind.Function
     case mItemKind.Constructor:
-      return vscodeHTMLService.CompletionItemKind.Constructor
+      return lt.CompletionItemKind.Constructor
     case mItemKind.Field:
-      return vscodeHTMLService.CompletionItemKind.Field
+      return lt.CompletionItemKind.Field
     case mItemKind.Variable:
-      return vscodeHTMLService.CompletionItemKind.Variable
+      return lt.CompletionItemKind.Variable
     case mItemKind.Class:
-      return vscodeHTMLService.CompletionItemKind.Class
+      return lt.CompletionItemKind.Class
     case mItemKind.Interface:
-      return vscodeHTMLService.CompletionItemKind.Interface
+      return lt.CompletionItemKind.Interface
     case mItemKind.Module:
-      return vscodeHTMLService.CompletionItemKind.Module
+      return lt.CompletionItemKind.Module
     case mItemKind.Property:
-      return vscodeHTMLService.CompletionItemKind.Property
+      return lt.CompletionItemKind.Property
     case mItemKind.Unit:
-      return vscodeHTMLService.CompletionItemKind.Unit
+      return lt.CompletionItemKind.Unit
     case mItemKind.Value:
-      return vscodeHTMLService.CompletionItemKind.Value
+      return lt.CompletionItemKind.Value
     case mItemKind.Enum:
-      return vscodeHTMLService.CompletionItemKind.Enum
+      return lt.CompletionItemKind.Enum
     case mItemKind.Keyword:
-      return vscodeHTMLService.CompletionItemKind.Keyword
+      return lt.CompletionItemKind.Keyword
     case mItemKind.Snippet:
-      return vscodeHTMLService.CompletionItemKind.Snippet
+      return lt.CompletionItemKind.Snippet
     case mItemKind.Color:
-      return vscodeHTMLService.CompletionItemKind.Color
+      return lt.CompletionItemKind.Color
     case mItemKind.File:
-      return vscodeHTMLService.CompletionItemKind.File
+      return lt.CompletionItemKind.File
     case mItemKind.Reference:
-      return vscodeHTMLService.CompletionItemKind.Reference
+      return lt.CompletionItemKind.Reference
   }
-  return vscodeHTMLService.CompletionItemKind.Property
+  return lt.CompletionItemKind.Property
 }
 
 export class CompletionAdapter implements languages.CompletionItemProvider {
@@ -317,7 +314,7 @@ export class CompletionAdapter implements languages.CompletionItemProvider {
       if (entry.additionalTextEdits)
         item.additionalTextEdits = entry.additionalTextEdits.map(toTextEdit)
 
-      if (entry.insertTextFormat === vscodeHTMLService.InsertTextFormat.Snippet)
+      if (entry.insertTextFormat === lt.InsertTextFormat.Snippet)
         item.insertTextRules = languages.CompletionItemInsertTextRule.InsertAsSnippet
 
       return item
@@ -331,16 +328,16 @@ export class CompletionAdapter implements languages.CompletionItemProvider {
 
 // --- hover ------
 
-function isMarkupContent(thing: any): thing is vscodeHTMLService.MarkupContent {
+function isMarkupContent(thing: any): thing is lt.MarkupContent {
   return (
     thing
   && typeof thing === 'object'
-  && typeof (<vscodeHTMLService.MarkupContent>thing).kind === 'string'
+  && typeof (<lt.MarkupContent>thing).kind === 'string'
   )
 }
 
 function toMarkdownString(
-  entry: vscodeHTMLService.MarkupContent | vscodeHTMLService.MarkedString,
+  entry: lt.MarkupContent | lt.MarkedString,
 ): IMarkdownString {
   if (typeof entry === 'string') {
     return {
@@ -362,7 +359,7 @@ function toMarkdownString(
 }
 
 function toMarkedStringArray(
-  contents: vscodeHTMLService.MarkupContent | vscodeHTMLService.MarkedString | vscodeHTMLService.MarkedString[],
+  contents: lt.MarkupContent | lt.MarkedString | lt.MarkedString[],
 ): IMarkdownString[] {
   if (!contents) {
     return []
@@ -397,15 +394,15 @@ export class HoverAdapter implements languages.HoverProvider {
 
 // --- document highlights ------
 
-function toHighlighKind(kind?: vscodeHTMLService.DocumentHighlightKind): languages.DocumentHighlightKind {
+function toHighlighKind(kind?: lt.DocumentHighlightKind): languages.DocumentHighlightKind {
   const mKind = languages.DocumentHighlightKind
 
   switch (kind) {
-    case vscodeHTMLService.DocumentHighlightKind.Read:
+    case lt.DocumentHighlightKind.Read:
       return mKind.Read
-    case vscodeHTMLService.DocumentHighlightKind.Write:
+    case lt.DocumentHighlightKind.Write:
       return mKind.Write
-    case vscodeHTMLService.DocumentHighlightKind.Text:
+    case lt.DocumentHighlightKind.Text:
       return mKind.Text
     default:
       return mKind.Text
@@ -436,45 +433,45 @@ export class DocumentHighlightAdapter implements languages.DocumentHighlightProv
 
 // --- document symbols ------
 
-function toSymbolKind(kind: vscodeHTMLService.SymbolKind): languages.SymbolKind {
+function toSymbolKind(kind: lt.SymbolKind): languages.SymbolKind {
   const mKind = languages.SymbolKind
 
   switch (kind) {
-    case vscodeHTMLService.SymbolKind.File:
+    case lt.SymbolKind.File:
       return mKind.Array
-    case vscodeHTMLService.SymbolKind.Module:
+    case lt.SymbolKind.Module:
       return mKind.Module
-    case vscodeHTMLService.SymbolKind.Namespace:
+    case lt.SymbolKind.Namespace:
       return mKind.Namespace
-    case vscodeHTMLService.SymbolKind.Package:
+    case lt.SymbolKind.Package:
       return mKind.Package
-    case vscodeHTMLService.SymbolKind.Class:
+    case lt.SymbolKind.Class:
       return mKind.Class
-    case vscodeHTMLService.SymbolKind.Method:
+    case lt.SymbolKind.Method:
       return mKind.Method
-    case vscodeHTMLService.SymbolKind.Property:
+    case lt.SymbolKind.Property:
       return mKind.Property
-    case vscodeHTMLService.SymbolKind.Field:
+    case lt.SymbolKind.Field:
       return mKind.Field
-    case vscodeHTMLService.SymbolKind.Constructor:
+    case lt.SymbolKind.Constructor:
       return mKind.Constructor
-    case vscodeHTMLService.SymbolKind.Enum:
+    case lt.SymbolKind.Enum:
       return mKind.Enum
-    case vscodeHTMLService.SymbolKind.Interface:
+    case lt.SymbolKind.Interface:
       return mKind.Interface
-    case vscodeHTMLService.SymbolKind.Function:
+    case lt.SymbolKind.Function:
       return mKind.Function
-    case vscodeHTMLService.SymbolKind.Variable:
+    case lt.SymbolKind.Variable:
       return mKind.Variable
-    case vscodeHTMLService.SymbolKind.Constant:
+    case lt.SymbolKind.Constant:
       return mKind.Constant
-    case vscodeHTMLService.SymbolKind.String:
+    case lt.SymbolKind.String:
       return mKind.String
-    case vscodeHTMLService.SymbolKind.Number:
+    case lt.SymbolKind.Number:
       return mKind.Number
-    case vscodeHTMLService.SymbolKind.Boolean:
+    case lt.SymbolKind.Boolean:
       return mKind.Boolean
-    case vscodeHTMLService.SymbolKind.Array:
+    case lt.SymbolKind.Array:
       return mKind.Array
   }
   return mKind.Function
@@ -531,7 +528,7 @@ export class DocumentLinkAdapter implements languages.LinkProvider {
 
 function fromFormattingOptions(
   options: languages.FormattingOptions,
-): vscodeHTMLService.FormattingOptions {
+): lt.FormattingOptions {
   return {
     tabSize: options.tabSize,
     insertSpaces: options.insertSpaces,
@@ -545,7 +542,7 @@ export class DocumentFormattingEditProvider implements languages.DocumentFormatt
     model: editor.IReadOnlyModel,
     options: languages.FormattingOptions,
     token: CancellationToken,
-  ): Promise<MonacoTextEdit[]> {
+  ): Promise<TextEdit[]> {
     const resource = model.uri
 
     const worker = await this._worker(resource)
@@ -566,7 +563,7 @@ implements languages.DocumentRangeFormattingEditProvider {
     range: Range,
     options: languages.FormattingOptions,
     token: CancellationToken,
-  ): Promise<MonacoTextEdit[]> {
+  ): Promise<TextEdit[]> {
     const resource = model.uri
 
     const worker = await this._worker(resource)
@@ -596,7 +593,7 @@ export class RenameAdapter implements languages.RenameProvider {
   }
 }
 
-function toWorkspaceEdit(edit: vscodeHTMLService.WorkspaceEdit): languages.WorkspaceEdit {
+function toWorkspaceEdit(edit: lt.WorkspaceEdit): languages.WorkspaceEdit {
   if (!edit || !edit.changes) {
     return { edits: [] }
   }
@@ -640,20 +637,20 @@ export class FoldingRangeAdapter implements languages.FoldingRangeProvider {
         end: range.endLine + 1,
       }
       if (typeof range.kind !== 'undefined')
-        result.kind = toFoldingRangeKind(<vscodeHTMLService.FoldingRangeKind>range.kind)
+        result.kind = toFoldingRangeKind(<lt.FoldingRangeKind>range.kind)
 
       return result
     })
   }
 }
 
-function toFoldingRangeKind(kind: vscodeHTMLService.FoldingRangeKind): languages.FoldingRangeKind {
+function toFoldingRangeKind(kind: lt.FoldingRangeKind): languages.FoldingRangeKind {
   switch (kind) {
-    case vscodeHTMLService.FoldingRangeKind.Comment:
+    case lt.FoldingRangeKind.Comment:
       return languages.FoldingRangeKind.Comment
-    case vscodeHTMLService.FoldingRangeKind.Imports:
+    case lt.FoldingRangeKind.Imports:
       return languages.FoldingRangeKind.Imports
-    case vscodeHTMLService.FoldingRangeKind.Region:
+    case lt.FoldingRangeKind.Region:
       return languages.FoldingRangeKind.Region
   }
 }
