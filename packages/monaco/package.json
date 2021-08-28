@@ -8,6 +8,8 @@
     "monaco-editor-textmate": "^3.0.0",
     "monaco-textmate": "^3.0.1",
     "onigasm": "^2.2.5",
+    "typescript": "^4.4.2",
+    "vscode-css-languageservice": "^5.1.4",
     "vscode-html-languageservice": "^4.0.7"
   }
 }

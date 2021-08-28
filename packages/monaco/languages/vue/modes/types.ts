@@ -1,15 +1,20 @@
 import type {
-  CompletionItem, Location, SignatureHelp, Definition, TextEdit, Diagnostic, DocumentLink, Range,
-	Hover, DocumentHighlight, CompletionList, Position, FormattingOptions, SymbolInformation
+  CompletionItem, Location, SignatureHelp, Definition, Diagnostic, DocumentLink,
+	Hover, DocumentHighlight, CompletionList, FormattingOptions, SymbolInformation,
+  SignatureInformation, ParameterInformation,
+} from 'vscode-languageserver-types'
+import {
+  DiagnosticSeverity, TextEdit, MarkedString, DocumentHighlightKind, Range, Position, CompletionItemKind, SymbolKind, InsertTextFormat
 } from 'vscode-languageserver-types'
 import type { DocumentContext } from "vscode-html-languageservice"
-import type { TextDocument } from 'vscode-languageserver-textdocument'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 import type { worker } from "monaco-editor"
 
 export {
-  CompletionItem, Location, SignatureHelp, Definition, TextEdit, Diagnostic, DocumentLink, Range,
+  CompletionItem, Location, SignatureHelp, Definition, TextEdit, Diagnostic, DocumentLink, Range, InsertTextFormat,
 	Hover, DocumentHighlight, CompletionList, Position, FormattingOptions, SymbolInformation, TextDocument,
-  DocumentContext
+  DocumentContext, SignatureInformation, ParameterInformation, DiagnosticSeverity, CompletionItemKind,
+  MarkedString, DocumentHighlightKind, SymbolKind
 }
 
 export type IWorkerContext = worker.IWorkerContext

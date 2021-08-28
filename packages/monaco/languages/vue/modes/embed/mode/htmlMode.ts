@@ -1,5 +1,5 @@
-import type { LanguageMode, Settings, Position, Range, TextDocument, DocumentContext, FormattingOptions } from './types'
-import { getLanguageModeCache } from './languageModeCache'
+import type { LanguageMode, Settings, Position, Range, TextDocument, DocumentContext, FormattingOptions } from '../../types'
+import { getLanguageModeCache } from '../../languageModeCache'
 import { LanguageService as HTMLLanguageService, HTMLDocument } from 'vscode-html-languageservice'
 
 export function getHTMLMode(htmlLanguageService: HTMLLanguageService): LanguageMode {

@@ -1,12 +1,12 @@
-import type { IWorkerContext, LanguageMode, LanguageModeRange, LanguageModes, Range, TextDocument, Position} from "./embed/types"
+import type { IWorkerContext, LanguageMode, LanguageModeRange, LanguageModes, Range, TextDocument, Position} from "./types"
 import { getDocumentRegions, VueDocumentRegions } from './embed/embed'
-import { getLanguageModeCache, LanguageModeCache } from './embed/languageModeCache'
+import { getLanguageModeCache, LanguageModeCache } from './languageModeCache'
 
-import { getCSSMode } from './embed/cssMode'
-import { getHTMLMode } from './embed/htmlMode'
-import { getJavascriptMode } from './embed/javascriptMode'
-import { getVueHTMLMode } from './embed/vueHTMLMode'
-import { getVueMode } from './embed/vueMode'
+import { getCSSMode } from './embed/mode/cssMode'
+import { getHTMLMode } from './embed/mode/htmlMode'
+import { getJavascriptMode } from './embed/mode/javascriptMode'
+import { getVueHTMLMode } from './embed/mode/vueHTMLMode'
+import { getVueMode } from './embed/mode/vueMode'
 
 
 export function getLanguageModes(_ctx: IWorkerContext): LanguageModes {
@@ -20,10 +20,6 @@ export function getLanguageModes(_ctx: IWorkerContext): LanguageModes {
     vue: getVueMode(),
     'vue-html': getVueHTMLMode(documentRegions, _ctx, jsMode),
     css: getCSSMode(documentRegions),
-    // postcss: getPostCSSMode(documentRegions),
-    // scss: getSCSSMode(documentRegions),
-    // less: getLESSMode(documentRegions),
-    // stylus: getStylusMode(documentRegions),
     javascript: jsMode,
     typescript: jsMode,
     tsx: jsMode,

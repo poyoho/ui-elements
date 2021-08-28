@@ -1,6 +1,5 @@
 import { createScanner, TokenType, Scanner } from '../template/htmlScanner'
-import type { Position, Range } from 'vscode-languageserver-types'
-import { TextDocument } from "vscode-languageserver-textdocument"
+import { Position, Range, TextDocument } from '../types'
 
 export interface LanguageRange extends Range {
   languageId: string
