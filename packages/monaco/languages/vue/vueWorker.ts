@@ -3,12 +3,16 @@ import type { worker } from 'monaco-editor-core'
 import type { Options } from './monaco.contribution'
 import type { LanguageModes } from './modes/types'
 import { getLanguageModes } from './modes/languageMode'
+import type { languages } from "monaco-editor"
 
 export interface ICreateData {
   languageId: string
   languageSettings: Options
+
+  tsWorker: languages.typescript.TypeScriptWorker
 }
 
+// run in sub worker
 export class VueWorker {
   private _ctx: worker.IWorkerContext
   private _languageService: lt.LanguageService
@@ -24,6 +28,8 @@ export class VueWorker {
     this._languageService = lt.getLanguageService()
 
     this.languageModes = getLanguageModes(this._ctx);
+
+    console.log(createData.tsWorker)
   }
 
   async doValidation(code: string): Promise<lt.Diagnostic[]> {

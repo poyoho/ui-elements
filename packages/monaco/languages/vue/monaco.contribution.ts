@@ -93,6 +93,7 @@ export interface LanguageServiceDefaults {
 
 // --- HTML configuration and defaults ---------
 
+// new language service entry
 export class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
 	private _onDidChange = new monaco.Emitter<LanguageServiceDefaults>();
 	private _options!: Options;
@@ -103,6 +104,7 @@ export class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
     this._languageId = languageId
     this.setOptions(options)
     this.setModeConfiguration(modeConfiguration)
+    console.log(monaco)
   }
 
   get onDidChange(): monaco.IEvent<LanguageServiceDefaults> {
@@ -122,7 +124,7 @@ export class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
   }
 
   setOptions(options: Options): void {
-    this._options = options || Object.create(null)
+    this._options = Object.assign(options || Object.create(null))
     this._onDidChange.fire(this)
   }
 

@@ -4,6 +4,8 @@ import type { LanguageServiceDefaultsImpl } from './monaco.contribution'
 import * as languageFeatures from './languageFeatures'
 import { Uri, IDisposable, languages } from 'monaco-editor'
 
+// when editor create .vue Model will exec it to create vue mode
+// run in main worker
 export function setupMode(defaults: LanguageServiceDefaultsImpl): IDisposable {
   const disposables: IDisposable[] = []
   const providers: IDisposable[] = []

@@ -3,9 +3,12 @@ import { VueWorker } from './vueWorker'
 
 console.log("load vue work")
 self.onmessage = () => {
-  console.log("init vue work")
   // ignore the first message
   worker.initialize((ctx, createData) => {
+    console.log("init vue work", ctx, createData)
+    const useOtherWorker = {
+      // tsWorker:
+    }
     return new VueWorker(ctx, createData)
   })
 }

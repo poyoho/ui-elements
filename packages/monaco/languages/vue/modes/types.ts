@@ -9,7 +9,6 @@ import {
 import type { DocumentContext } from "vscode-html-languageservice"
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import type { worker } from "monaco-editor"
-import { extend } from 'vue/types/umd'
 
 export {
   CompletionItem, Location, SignatureHelp, Definition, TextEdit, Diagnostic, DocumentLink, Range, InsertTextFormat,
