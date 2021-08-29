@@ -52,7 +52,6 @@ export async function setupTheme (monaco: monaco, editor: editor.ICodeEditor) {
   await loadOnigasm
   const registry = new Registry({
     getGrammarDefinition: async (scopeName) => {
-      console.log(scopeName)
       return ({
         "source.ts": {
           format: 'json',

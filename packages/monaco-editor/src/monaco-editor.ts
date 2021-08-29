@@ -84,13 +84,14 @@ export default class MonacoEditor extends HTMLElement {
 
   async addDTS (options: Array<{name: string, version: string, entry: string}>) {
     const { monacoInstance } = this
-    const { addPackage } = await monacoInstance
+    const { addPackage,monaco } = await monacoInstance
     addPackage(
       await Promise.all(options.map(async option => ({
         name: option.name,
         types: await resolvePackageTypes(option.name, option.version, option.entry)
       })))
     )
+    console.log(monaco.languages.typescript.javascriptDefaults.getExtraLibs())
   }
 
   async deleteDTS (names: string[]) {
