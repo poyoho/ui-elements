@@ -1,4 +1,4 @@
-import { LanguageServiceDefaultsImpl } from './monaco.contribution'
+import type { LanguageServiceDefaultsImpl } from './monaco.contribution'
 import type { VueWorker } from './vueWorker'
 import { Uri, IDisposable, editor } from 'monaco-editor-core'
 

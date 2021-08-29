@@ -1,7 +1,7 @@
 import * as lt from 'vscode-html-languageservice'
 import type { worker } from 'monaco-editor-core'
 import type { Options } from './monaco.contribution'
-import { LanguageModes } from './modes/types'
+import type { LanguageModes } from './modes/types'
 import { getLanguageModes } from './modes/languageMode'
 
 export interface ICreateData {
@@ -17,6 +17,7 @@ export class VueWorker {
   private languageModes: LanguageModes;
 
   constructor(ctx: worker.IWorkerContext, createData: ICreateData) {
+    console.log("create vue worker")
     this._ctx = ctx
     this._languageSettings = createData.languageSettings
     this._languageId = createData.languageId
