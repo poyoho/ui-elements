@@ -9,6 +9,7 @@ import {
 import type { DocumentContext } from "vscode-html-languageservice"
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import type { worker } from "monaco-editor"
+import { extend } from 'vue/types/umd'
 
 export {
   CompletionItem, Location, SignatureHelp, Definition, TextEdit, Diagnostic, DocumentLink, Range, InsertTextFormat,
@@ -25,7 +26,14 @@ export interface Settings {
 	javascript?: any;
 }
 
-export interface LanguageMode {
+type AddReturnType<T, R> = T extends (...args: infer P) => any ? (...args: P) => R : never;
+type PromiseReturn<T> = T extends (...args: any[]) => any ? Promise<ReturnType<T>> : never
+
+type SupportPromiseReturn<T> = {
+  [P in keyof T]: T[P] | AddReturnType<T[P], PromiseReturn<T[P]>>;
+};
+
+export type LanguageMode = SupportPromiseReturn<{
 	getId: () => null | string;
 	configure?: (options: Settings) => void;
 	doValidation?: (document: TextDocument, settings?: Settings) => null | Diagnostic[];
@@ -43,7 +51,7 @@ export interface LanguageMode {
 	doAutoClose?: (document: TextDocument, position: Position) => null | string;
 	onDocumentRemoved(document: TextDocument): void;
 	dispose(): void;
-}
+}>
 
 export interface LanguageModes {
 	getModeAtPosition(document: TextDocument, position: Position): LanguageMode;

@@ -6,21 +6,19 @@ import {
   Definition, TextEdit, TextDocument, Diagnostic, DiagnosticSeverity, Range, CompletionItemKind,
   Hover, MarkedString, DocumentHighlight, DocumentHighlightKind, CompletionList, Position, FormattingOptions } from '../../types'
 import { VueDocumentRegions } from '../../embed'
-import ts from 'typescript'
 import { ComponentInfo, findComponents } from './findComponents'
 import { getWordAtText, startsWith, isWhitespaceOnly, repeat } from './strings'
+import ts from 'typescript'
 
 const FILE_NAME = 'vscode://javascript/1.js'
 
 const JS_WORD_REGEX = /(-?\d*\.\d\w*)|([^\`\~\!\@\#\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\\:\'\"\,\.\<\>\/\?\s]+)/g
-
 export interface ScriptMode extends LanguageMode {
 	findComponents(document: TextDocument): ComponentInfo[]
 }
 
 export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocumentRegions>, ctx?: IWorkerContext): ScriptMode {
 	let jsDocuments = getLanguageModeCache<TextDocument>(10, 60, document => documentRegions.get(document).getEmbeddedDocument('javascript'))
-
 	let currentTextDocument: TextDocument
 	let scriptFileVersion: number = 0 // use document version judge is update
 	function updateCurrentTextDocument(doc: TextDocument) {
@@ -51,7 +49,6 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 					text = currentTextDocument.getText()
 				}
 			}
-
 			return {
 				getText: (start, end) => text.substring(start, end),
 				getLength: () => text.length,
@@ -126,7 +123,8 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 			let info = jsLanguageService.getQuickInfoAtPosition(FILE_NAME, currentTextDocument.offsetAt(position))
 			if (info) {
 				let contents = ts.displayPartsToString(info.displayParts)
-				return {
+
+			return {
 					range: convertRange(currentTextDocument, info.textSpan),
 					contents: MarkedString.fromPlainText(contents)
 				}

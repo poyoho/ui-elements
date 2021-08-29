@@ -11,7 +11,7 @@ export function setupMode(defaults: LanguageServiceDefaultsImpl): IDisposable {
   const client = new WorkerManager(defaults)
   disposables.push(client)
 
-  const worker: languageFeatures.WorkerAccessor = (...uris: Uri[]): Promise<VueWorker> => {
+  const worker: languageFeatures.WorkerAccessor = async (...uris: Uri[]): Promise<VueWorker> => {
     return client.getLanguageServiceWorker(...uris)
   }
 

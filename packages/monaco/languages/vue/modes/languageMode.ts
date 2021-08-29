@@ -4,7 +4,8 @@ import { getLanguageModeCache, LanguageModeCache } from './languageModeCache'
 
 import { getCSSMode } from './mode/cssMode'
 import { getHTMLMode } from './mode/htmlMode'
-import { getJavascriptMode } from './mode/javascriptMode'
+// import { getJavascriptMode } from './mode/javascriptMode'
+import { getJSMode } from './mode/typescriptMode'
 // import { getVueHTMLMode } from './embed/mode/vueHTMLMode'
 import { getVueMode } from './mode/vueMode'
 
@@ -15,7 +16,8 @@ export function getLanguageModes(_ctx: IWorkerContext): LanguageModes {
   let modelCaches: LanguageModeCache<any>[] = []
   modelCaches.push(documentRegions)
 
-  const jsMode = getJavascriptMode(documentRegions, _ctx)
+  // const jsMode = getJavascriptMode(documentRegions, _ctx)
+  const jsMode = getJSMode(documentRegions, _ctx)
   let modes: {[k: string]: LanguageMode} = {
     vue: getVueMode(),
     html: getHTMLMode(),

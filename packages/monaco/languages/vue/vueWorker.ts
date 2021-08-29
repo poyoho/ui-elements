@@ -37,9 +37,9 @@ export class VueWorker {
   ): Promise<lt.CompletionList> {
     const document = this._getTextDocument(uri)
     let mode = this.languageModes.getModeAtPosition(document, position);
-    const modeResult = mode && mode.doComplete && mode.doComplete(document, position, {css: true, javascript:true})
+    const modeResult = mode && mode.doComplete && await mode.doComplete(document, position, {css: true, javascript:true})
     if (modeResult) {
-      return Promise.resolve(modeResult)
+      return modeResult
     }
     return Promise.resolve({
       isIncomplete: true,
@@ -60,7 +60,7 @@ export class VueWorker {
 
   async doHover(uri: string, position: lt.Position): Promise<lt.Hover | null> {
     const document = this._getTextDocument(uri)
-    let mode = this.languageModes.getModeAtPosition(document, position);
+    let mode = (await this.languageModes).getModeAtPosition(document, position);
     const modeResult = mode && mode.doHover && mode.doHover(document, position)
     if (modeResult) {
       return Promise.resolve(modeResult)
@@ -73,8 +73,8 @@ export class VueWorker {
     position: lt.Position,
   ): Promise<lt.DocumentHighlight[]> {
     const document = this._getTextDocument(uri)
-    let mode = this.languageModes.getModeAtPosition(document, position)
-    const modeResult = mode && mode.findDocumentHighlight && mode.findDocumentHighlight(document, position)
+    let mode = (await this.languageModes).getModeAtPosition(document, position)
+    const modeResult = mode && mode.findDocumentHighlight && await mode.findDocumentHighlight(document, position)
     if (modeResult) {
       return Promise.resolve(modeResult)
     }
