@@ -25,6 +25,7 @@ export function getJavascriptMode(documentRegions: LanguageModeCache<VueDocument
 	let scriptFileVersion: number = 0 // use document version judge is update
 	function updateCurrentTextDocument(doc: TextDocument) {
 		if (!currentTextDocument || doc.uri !== currentTextDocument.uri || doc.version !== currentTextDocument.version) {
+      console.log(jsDocuments.get(doc))
 			currentTextDocument = jsDocuments.get(doc)
 			scriptFileVersion++
 		}

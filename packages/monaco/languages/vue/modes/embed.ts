@@ -59,6 +59,7 @@ export function getDocumentRegions(document: TextDocument): VueDocumentRegions {
         languageIdFromType = ''
         break
       case TokenType.Script:
+        console.log(languageIdFromType)
         regions.push({
           languageId: languageIdFromType ? languageIdFromType : defaultType['script'],
           start: scanner.getTokenOffset(),
@@ -183,7 +184,7 @@ function scanTemplateRegion(scanner: Scanner, text: string): EmbeddedRegion | nu
 function getLanguageIdFromLangAttr(lang: string): string {
   let languageIdFromType = removeQuotes(lang)
   if (languageIdFromType === 'ts') {
-    languageIdFromType = 'typescript'
+    languageIdFromType = 'javascript' // Both JS and TS use the TS parser
   }
   return languageIdFromType
 }

@@ -34,13 +34,16 @@ export function getLanguageModes(_ctx: IWorkerContext): LanguageModes {
       }
       return null as any
     },
-    getModesInRange(document: TextDocument, range: Range): LanguageModeRange[] {
+    getModesInRange(document: TextDocument, range: Range | undefined): LanguageModeRange[] {
+      if (!range) {
+        return []
+      }
       return documentRegions.get(document).getLanguageRanges(range).map(r => {
           return {
-              start: r.start,
-              end: r.end,
-              mode: modes[r.languageId],
-              attributeValue: r.attributeValue
+            start: r.start,
+            end: r.end,
+            mode: modes[r.languageId],
+            attributeValue: r.attributeValue
           }
       })
     },

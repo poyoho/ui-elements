@@ -37,7 +37,7 @@ export class VueWorker {
   ): Promise<lt.CompletionList> {
     const document = this._getTextDocument(uri)
     let mode = this.languageModes.getModeAtPosition(document, position);
-    const modeResult = mode && mode.doComplete && mode.doComplete(document, position, {css: true,javascript:true})
+    const modeResult = mode && mode.doComplete && mode.doComplete(document, position, {css: true, javascript:true})
     if (modeResult) {
       return Promise.resolve(modeResult)
     }
@@ -58,11 +58,14 @@ export class VueWorker {
     return Promise.resolve(textEdits)
   }
 
-  async doHover(uri: string, position: lt.Position): Promise<lt.Hover> {
+  async doHover(uri: string, position: lt.Position): Promise<lt.Hover | null> {
     const document = this._getTextDocument(uri)
-    const htmlDocument = this._languageService.parseHTMLDocument(document)
-    const hover = this._languageService.doHover(document, position, htmlDocument)
-    return Promise.resolve(hover!)
+    let mode = this.languageModes.getModeAtPosition(document, position);
+    const modeResult = mode && mode.doHover && mode.doHover(document, position)
+    if (modeResult) {
+      return Promise.resolve(modeResult)
+    }
+    return Promise.resolve(null)
   }
 
   async findDocumentHighlights(
@@ -70,9 +73,12 @@ export class VueWorker {
     position: lt.Position,
   ): Promise<lt.DocumentHighlight[]> {
     const document = this._getTextDocument(uri)
-    const htmlDocument = this._languageService.parseHTMLDocument(document)
-    const highlights = this._languageService.findDocumentHighlights(document, position, htmlDocument)
-    return Promise.resolve(highlights)
+    let mode = this.languageModes.getModeAtPosition(document, position)
+    const modeResult = mode && mode.findDocumentHighlight && mode.findDocumentHighlight(document, position)
+    if (modeResult) {
+      return Promise.resolve(modeResult)
+    }
+    return Promise.resolve([])
   }
 
   async findDocumentLinks(uri: string): Promise<lt.DocumentLink[]> {

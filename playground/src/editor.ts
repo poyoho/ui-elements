@@ -16,7 +16,14 @@ import type { MonacoEditorChangeEvent, default as MonacoEditor } from "../../pac
 const elm2 = document.querySelector(".editor2") as any as MonacoEditor
 const { monaco } = await elm2.monacoInstance
 console.log(monaco.languages.getLanguages())
-const model2 = await elm2.createModel("vue", "test.vue", "")
+const model2 = await elm2.createModel("vue", "test.vue", `
+<script lang="ts">
+console.log("asda")
+export default {
+
+}
+</script>
+`)
 console.log("creat monaco vue mode")
 elm2.setModel(model2)
 elm2.addEventListener("code-change", (e) => {

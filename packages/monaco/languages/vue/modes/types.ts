@@ -47,7 +47,7 @@ export interface LanguageMode {
 
 export interface LanguageModes {
 	getModeAtPosition(document: TextDocument, position: Position): LanguageMode;
-	getModesInRange(document: TextDocument, range: Range): LanguageModeRange[];
+	getModesInRange(document: TextDocument, range: Range | undefined): LanguageModeRange[];
 	getAllModes(): LanguageMode[];
 	getAllModesInDocument(document: TextDocument): LanguageMode[];
 	getMode(languageId: string): LanguageMode;
