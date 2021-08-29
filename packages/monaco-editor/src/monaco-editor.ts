@@ -9,7 +9,7 @@ export type MonacoEditorChangeEvent = Event & {
 }
 
 export default class MonacoEditor extends HTMLElement {
-  private monacoInstance = setupMonaco()
+  public monacoInstance = setupMonaco()
   private editor: editor.IStandaloneCodeEditor | undefined
 
   constructor() {

@@ -1,31 +1,25 @@
 import * as mode from './vueMode'
-import { languages, Emitter, IEvent } from 'monaco-editor-core'
-import { language, conf } from './vueLanguage'
 import type * as lt from 'vscode-html-languageservice'
+import * as monaco from "monaco-editor"
+import { language, conf } from './vueLanguage'
 
-declare module monaco.languages.vue {
-  export interface CompletionConfiguration {
-      [provider: string]: boolean;
-  }
-
-  export interface Options {
-    /**
-     * A list of known schemas and/or associations of schemas to file names.
-     */
-    readonly suggest?: CompletionConfiguration;
-    readonly format?: lt.HTMLFormatConfiguration
-  }
-
-  export interface LanguageServiceDefaults {
-      readonly onDidChange: IEvent<LanguageServiceDefaults>;
-      readonly options: Options;
-      setOptions(options: Options): void;
-  }
-
-  export var vueDefaults: LanguageServiceDefaults;
+export interface LanguageServiceDefaults {
+  readonly onDidChange: monaco.IEvent<LanguageServiceDefaults>;
+  readonly options: Options;
+  setOptions(options: Options): void;
 }
 
-export type Options = monaco.languages.vue.Options
+export interface CompletionConfiguration {
+  [provider: string]: boolean;
+}
+
+export interface Options {
+  /**
+   * A list of known schemas and/or associations of schemas to file names.
+   */
+  readonly suggest?: CompletionConfiguration;
+  readonly format?: lt.HTMLFormatConfiguration
+}
 
 export interface ModeConfiguration {
 /**
@@ -92,15 +86,15 @@ export interface ModeConfiguration {
 export interface LanguageServiceDefaults {
   readonly languageId: string
   readonly modeConfiguration: ModeConfiguration
-  readonly onDidChange: IEvent<LanguageServiceDefaults>
+  readonly onDidChange: monaco.IEvent<LanguageServiceDefaults>
   readonly options: Options
   setOptions(options: Options): void
 }
 
 // --- HTML configuration and defaults ---------
 
-export class LanguageServiceDefaultsImpl implements monaco.languages.vue.LanguageServiceDefaults {
-	private _onDidChange = new Emitter<monaco.languages.vue.LanguageServiceDefaults>();
+export class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
+	private _onDidChange = new monaco.Emitter<LanguageServiceDefaults>();
 	private _options!: Options;
   private _modeConfiguration!: ModeConfiguration
   private _languageId: string
@@ -111,7 +105,7 @@ export class LanguageServiceDefaultsImpl implements monaco.languages.vue.Languag
     this.setModeConfiguration(modeConfiguration)
   }
 
-  get onDidChange(): IEvent<monaco.languages.vue.LanguageServiceDefaults> {
+  get onDidChange(): monaco.IEvent<LanguageServiceDefaults> {
     return this._onDidChange.event
   }
 
@@ -139,7 +133,7 @@ export class LanguageServiceDefaultsImpl implements monaco.languages.vue.Languag
 }
 
 
-const vueOptionsDefault: monaco.languages.vue.Options = {
+const vueOptionsDefault: Options = {
 	suggest: { html5: true }
 }
 
@@ -170,12 +164,12 @@ export const vueDefaults = new LanguageServiceDefaultsImpl(
 )
 
 // export to the global based API
-function createAPI(): typeof monaco.languages.vue {
+function createAPI() {
 	return {
 		vueDefaults: vueDefaults
 	}
 }
-monaco.languages.vue = createAPI();
+(monaco.languages as any).vue = createAPI();
 
 // --- Registration to monaco editor ---
 
@@ -183,15 +177,15 @@ function getMode(): Promise<typeof mode> {
   return import('./vueMode')
 }
 
-languages.register({
+monaco.languages.register({
 	id: 'vue',
 	extensions: ['.vue'],
 	aliases: ['Vue', 'vuejs']
 });
 
-languages.setMonarchTokensProvider('vue', language);
-languages.setLanguageConfiguration('vue', conf);
+monaco.languages.setMonarchTokensProvider('vue', language);
+monaco.languages.setLanguageConfiguration('vue', conf);
 
-languages.onLanguage(vueLanguageId, () => {
+monaco.languages.onLanguage(vueLanguageId, () => {
   getMode().then(mode => mode.setupMode(vueDefaults))
 })

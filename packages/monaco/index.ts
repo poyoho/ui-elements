@@ -27,6 +27,7 @@ export const SupportLanguage = {
 }
 
 export const loadWorkers = createSinglePromise(async () => {
+  await import("./languages/vue/monaco.contribution") // registe vue
   const [
     { default: EditorWorker },
     { default: JSONWorker },
@@ -42,7 +43,7 @@ export const loadWorkers = createSinglePromise(async () => {
     import('monaco-editor/esm/vs/language/html/html.worker?worker' as any),
     import('./languages/vue/vue.worker?worker' as any),
   ])
-
+  console.log("load monaco workers")
   // monaco要求将worker挂载到window上
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -83,6 +84,7 @@ export const setupMonaco = createSinglePromise(async () => {
     throw "can not load moncao"
   }
   await loadWorkers()
+
   monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
     ...monaco.languages.typescript.javascriptDefaults.getCompilerOptions(),
     noUnusedLocals: false,

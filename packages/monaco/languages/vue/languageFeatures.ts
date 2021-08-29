@@ -11,7 +11,7 @@ import {
   IDisposable,
   MarkerSeverity,
   IMarkdownString,
-} from 'monaco-editor-core'
+} from 'monaco-editor'
 
 type TextEdit = languages.TextEdit
 

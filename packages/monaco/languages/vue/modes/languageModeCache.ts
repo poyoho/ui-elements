@@ -12,7 +12,7 @@ export function getLanguageModeCache<T>(maxEntries: number, cleanupIntervalTimeI
 
 	let cleanupInterval = 0
 	if (cleanupIntervalTimeInSec > 0) {
-		cleanupInterval = window.setInterval(() => {
+		cleanupInterval = self.setInterval(() => {
 			let cutoffTime = Date.now() - cleanupIntervalTimeInSec * 1000
 			let uris = Object.keys(languageModels)
 			for (let uri of uris) {
