@@ -4,8 +4,7 @@ import { resolvePackage } from "../../packages/utils"
 const elm = document.querySelector(".editor") as any as MonacoEditor
 const pkgs = await resolvePackage("vue", "3.2.4")
 await elm.addDTS(pkgs.map(pkg => ({name: pkg.name, version: pkg.version, entry: pkg.types})).filter(el => el.entry))
-const model = await elm.createModel("ts", "test.ts", `import {} from "vue"`)
-console.log(model)
+const model = await elm.createModel("ts", "test.ts", `import { ref } from "vue"`)
 await elm.setModel(model)
 elm.addEventListener("code-change", (e) => {
   const {runnableJS, content} = (e as MonacoEditorChangeEvent).value

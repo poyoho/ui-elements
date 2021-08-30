@@ -110,12 +110,14 @@ export const setupMonaco = createSinglePromise(async () => {
         }
         packages.set(opt.name, lib)
       })
+      monaco.languages.typescript.typescriptDefaults.setExtraLibs(Array.from(packages.values()))
       monaco.languages.typescript.javascriptDefaults.setExtraLibs(Array.from(packages.values()))
     },
     deletePackage (names: string[]) {
       names.forEach(name => {
         packages.delete(name)
       })
+      monaco.languages.typescript.typescriptDefaults.setExtraLibs(Array.from(packages.values()))
       monaco.languages.typescript.javascriptDefaults.setExtraLibs(Array.from(packages.values()))
     }
   }
