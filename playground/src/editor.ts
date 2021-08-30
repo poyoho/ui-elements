@@ -1,5 +1,5 @@
 import type { MonacoEditorChangeEvent, default as MonacoEditor } from "../../packages/monaco-editor/src/monaco-editor"
-import { resolvePackage } from "../../packages/utils"
+import { resolvePackage } from "../../packages/unpkg"
 
 const elm = document.querySelector(".editor") as any as MonacoEditor
 const pkgs = await resolvePackage("vue", "3.2.4")

@@ -1,5 +1,6 @@
 import { setupMonaco, SupportLanguage, editor, getRunnableJS, setupTheme } from "@ui-elements/monaco"
-import { debounce, resolvePackageTypes } from "@ui-elements/utils"
+import { debounce } from "@ui-elements/utils"
+import { resolvePackageTypes } from "@ui-elements/unpkg"
 
 export type MonacoEditorChangeEvent = Event & {
   value: {
