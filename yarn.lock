@@ -5989,6 +5989,36 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
+vscode-html-languageservice@^4.0.7:
+  version "4.0.7"
+  resolved "https://registry.nlark.com/vscode-html-languageservice/download/vscode-html-languageservice-4.0.7.tgz#94f2ed22c821965f828222d13b5aa541b358d992"
+  integrity sha1-lPLtIsghll+CgiLRO1qlQbNY2ZI=
+  dependencies:
+    vscode-languageserver-textdocument "^1.0.1"
+    vscode-languageserver-types "^3.16.0"
+    vscode-nls "^5.0.0"
+    vscode-uri "^3.0.2"
+
+vscode-languageserver-textdocument@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npm.taobao.org/vscode-languageserver-textdocument/download/vscode-languageserver-textdocument-1.0.1.tgz#178168e87efad6171b372add1dea34f53e5d330f"
+  integrity sha1-F4Fo6H761hcbNyrdHeo09T5dMw8=
+
+vscode-languageserver-types@^3.16.0:
+  version "3.16.0"
+  resolved "https://registry.nlark.com/vscode-languageserver-types/download/vscode-languageserver-types-3.16.0.tgz?cache=0&sync_timestamp=1625836661336&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fvscode-languageserver-types%2Fdownload%2Fvscode-languageserver-types-3.16.0.tgz#ecf393fc121ec6974b2da3efb3155644c514e247"
+  integrity sha1-7POT/BIexpdLLaPvsxVWRMUU4kc=
+
+vscode-nls@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npm.taobao.org/vscode-nls/download/vscode-nls-5.0.0.tgz#99f0da0bd9ea7cda44e565a74c54b1f2bc257840"
+  integrity sha1-mfDaC9nqfNpE5WWnTFSx8rwleEA=
+
+vscode-uri@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.npm.taobao.org/vscode-uri/download/vscode-uri-3.0.2.tgz?cache=0&sync_timestamp=1609832401422&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fvscode-uri%2Fdownload%2Fvscode-uri-3.0.2.tgz#ecfd1d066cb8ef4c3a208decdbab9a8c23d055d0"
+  integrity sha1-7P0dBmy470w6II3s26uajCPQVdA=
+
 vue@*:
   version "2.6.14"
   resolved "https://registry.nlark.com/vue/download/vue-2.6.14.tgz?cache=0&sync_timestamp=1629217665911&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fvue%2Fdownload%2Fvue-2.6.14.tgz#e51aa5250250d569a3fbad3a8a5a687d6036e235"
