@@ -26,6 +26,7 @@ export default class MonacoEditor extends HTMLElement {
   async connectedCallback() {
     const { monacoInstance } = this
     const { monaco } = await monacoInstance
+
     this.editor = monaco.editor.create(this.container, {
       tabSize: 2,
       insertSpaces: true,
@@ -33,14 +34,11 @@ export default class MonacoEditor extends HTMLElement {
       detectIndentation: false,
       folding: false,
       automaticLayout: true,
-      theme: 'dark',
+      theme: 'vscode-dark',
       minimap: {
         enabled: false,
       },
     })
-
-    await setupTheme(monaco, this.editor)
-    monaco.editor.setTheme("dark")
 
     // send change event
     this.editor.onDidChangeModel(() => {
@@ -59,6 +57,9 @@ export default class MonacoEditor extends HTMLElement {
         this.dispatchEvent(event)
       }))
     })
+
+    await setupTheme(monaco, this.editor)
+    monaco.editor.setTheme("vscode-dark")
   }
 
   disconnectedCallback() {}
@@ -67,6 +68,7 @@ export default class MonacoEditor extends HTMLElement {
     extension: keyof typeof SupportLanguage,
     filename: string,
     code?: string) {
+    console.log("createModel")
     const { monacoInstance } = this
     const { monaco } = await monacoInstance
     return monaco.editor.createModel(
@@ -77,24 +79,26 @@ export default class MonacoEditor extends HTMLElement {
   }
 
   async setModel (model: editor.ITextModel) {
+    console.log("setModel")
     const { monacoInstance } = this
     await monacoInstance
     this.editor!.setModel(model)
   }
 
   async addDTS (options: Array<{name: string, version: string, entry: string}>) {
+    console.log("addDTS")
     const { monacoInstance } = this
-    const { addPackage,monaco } = await monacoInstance
+    const { addPackage } = await monacoInstance
     addPackage(
       await Promise.all(options.map(async option => ({
         name: option.name,
         types: await resolvePackageTypes(option.name, option.version, option.entry)
       })))
     )
-    console.log(monaco.languages.typescript.javascriptDefaults.getExtraLibs())
   }
 
   async deleteDTS (names: string[]) {
+    console.log("deleteDTS")
     const { monacoInstance } = this
     const { deletePackage } = await monacoInstance
     deletePackage(names)

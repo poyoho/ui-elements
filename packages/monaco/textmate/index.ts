@@ -8,8 +8,6 @@ const onigasm = new URL("./token/onigasm.wasm", import.meta.url)
 import type { editor } from 'monaco-editor'
 export type monaco = typeof import("monaco-editor")
 
-const loadOnigasm = loadWASM(onigasm.href) // See https://www.npmjs.com/package/onigasm#light-it-up
-
 // anyscript fork from https://github.com/Nishkalkashyap/monaco-vscode-textmate-theme-converter/blob/master/lib/cjs/index.js
 function convertTheme(theme: any): any {
   let monacoThemeRule: any[] = []
@@ -49,7 +47,7 @@ function convertTheme(theme: any): any {
 
 // any editor need setup
 export async function setupTheme (monaco: monaco, editor: editor.ICodeEditor) {
-  await loadOnigasm
+  await loadWASM(onigasm.href) // See https://www.npmjs.com/package/onigasm#light-it-up
   const registry = new Registry({
     getGrammarDefinition: async (scopeName) => {
       return ({
@@ -78,7 +76,7 @@ export async function setupTheme (monaco: monaco, editor: editor.ICodeEditor) {
   monaco.languages.register({id: 'css'})
   monaco.languages.register({id: 'typescript'})
   monaco.languages.register({id: 'javascript'})
-  monaco.editor.defineTheme("dark", convertTheme((await import("./theme/dark_plus.json")).default))
+  monaco.editor.defineTheme("vscode-dark", convertTheme((await import("./theme/dark_plus.json")).default))
   // monaco.editor.defineTheme("light", convertTheme((await import("./theme/light_plus.json")).default))
   await wireTmGrammars(monaco, registry, grammars, editor)
 }

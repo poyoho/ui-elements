@@ -106,7 +106,6 @@ export const setupMonaco = createSinglePromise(async () => {
           return
         }
         const lib =  {
-          filePath: opt.name,
           content: `declare module '${opt.name}' { ${opt.types} } `
         }
         packages.set(opt.name, lib)
