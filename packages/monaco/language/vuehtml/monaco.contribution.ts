@@ -1,7 +1,5 @@
 import * as mode from './vuehtmlMode'
-import type * as lt from 'vscode-html-languageservice'
 import * as monaco from "monaco-editor"
-import { language, conf } from './vuehtmlLanguage'
 
 export interface HTMLFormatConfiguration {
   readonly tabSize: number
@@ -208,9 +206,6 @@ monaco.languages.register({
 	extensions: ['.vuehtml'],
   aliases: ["vuehtml", "vue-html"],
 })
-
-monaco.languages.setMonarchTokensProvider(vuehtmlLanguageId, language)
-monaco.languages.setLanguageConfiguration(vuehtmlLanguageId, conf)
 
 monaco.languages.onLanguage(vuehtmlLanguageId, () => {
   console.log("[setupMode]", vuehtmlLanguageId)
