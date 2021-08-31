@@ -1,5 +1,6 @@
-import * as mode from './htmlMode'
-import { languages, Emitter, IEvent } from './fillers/monaco-editor-core'
+import * as mode from './vuehtmlMode'
+import { language, conf } from './vuehtmlLanguage'
+import * as monaco from "monaco-editor"
 
 export interface HTMLFormatConfiguration {
   readonly tabSize: number
@@ -96,7 +97,7 @@ export interface ModeConfiguration {
 export interface LanguageServiceDefaults {
   readonly languageId: string
   readonly modeConfiguration: ModeConfiguration
-  readonly onDidChange: IEvent<LanguageServiceDefaults>
+  readonly onDidChange: monaco.IEvent<LanguageServiceDefaults>
   readonly options: Options
   setOptions(options: Options): void
 }
@@ -104,7 +105,7 @@ export interface LanguageServiceDefaults {
 // --- HTML configuration and defaults ---------
 
 class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
-  private _onDidChange = new Emitter<LanguageServiceDefaults>()
+  private _onDidChange = new monaco.Emitter<LanguageServiceDefaults>()
   private _options: Options | undefined
   private _modeConfiguration: ModeConfiguration | undefined
   private _languageId: string
@@ -115,7 +116,7 @@ class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
     this.setModeConfiguration(modeConfiguration)
   }
 
-  get onDidChange(): IEvent<LanguageServiceDefaults> {
+  get onDidChange(): monaco.IEvent<LanguageServiceDefaults> {
     return this._onDidChange.event
   }
 
@@ -173,29 +174,38 @@ function getConfigurationDefault(languageId: string): Required<ModeConfiguration
     colors: true,
     foldingRanges: true,
     selectionRanges: true,
-    diagnostics: languageId === htmlLanguageId, // turned off for Razor and Handlebar
-    documentFormattingEdits: languageId === htmlLanguageId, // turned off for Razor and Handlebar
-    documentRangeFormattingEdits: languageId === htmlLanguageId, // turned off for Razor and Handlebar
+    diagnostics: languageId === vuehtmlLanguageId, // turned off for Razor and Handlebar
+    documentFormattingEdits: languageId === vuehtmlLanguageId, // turned off for Razor and Handlebar
+    documentRangeFormattingEdits: languageId === vuehtmlLanguageId, // turned off for Razor and Handlebar
   }
 }
 
-const htmlLanguageId = 'html'
+const vuehtmlLanguageId = 'vuehtml'
 
-export const htmlDefaults: LanguageServiceDefaults = new LanguageServiceDefaultsImpl(
-  htmlLanguageId,
+export const vuehtmlDefaults: LanguageServiceDefaults = new LanguageServiceDefaultsImpl(
+  vuehtmlLanguageId,
   htmlOptionsDefault,
-  getConfigurationDefault(htmlLanguageId),
+  getConfigurationDefault(vuehtmlLanguageId),
 )
 
 // export to the global based API
-;(<any>languages).html = { htmlDefaults }
+;(<any>monaco.languages).vuehtml = { vuehtmlDefaults }
 
 // --- Registration to monaco editor ---
 
 function getMode(): Promise<typeof mode> {
-  return import('./htmlMode')
+  return import('./vuehtmlMode')
 }
 
-languages.onLanguage(htmlLanguageId, () => {
-  getMode().then(mode => mode.setupMode(htmlDefaults))
+monaco.languages.register({
+	id: vuehtmlLanguageId,
+	extensions: ['.vuehtml'],
+  aliases: ["vuehtml", "vue-html"]
+})
+
+monaco.languages.setMonarchTokensProvider(vuehtmlLanguageId, language)
+monaco.languages.setLanguageConfiguration(vuehtmlLanguageId, conf)
+monaco.languages.onLanguage(vuehtmlLanguageId, () => {
+  console.log("[onLanguage]", vuehtmlLanguageId)
+  getMode().then(mode => mode.setupMode(vuehtmlDefaults))
 })

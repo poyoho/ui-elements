@@ -8,13 +8,14 @@ export interface ICreateData {
   languageSettings: Options
 }
 
-export class HTMLWorker {
+export class VueHTMLWorker {
   private _ctx: worker.IWorkerContext
   private _languageService: htmlService.LanguageService
   private _languageSettings: Options
   private _languageId: string
 
   constructor(ctx: worker.IWorkerContext, createData: ICreateData) {
+    console.log("create vuehtml worker")
     this._ctx = ctx
     this._languageSettings = createData.languageSettings
     this._languageId = createData.languageId
@@ -135,6 +136,6 @@ export class HTMLWorker {
   }
 }
 
-export function create(ctx: worker.IWorkerContext, createData: ICreateData): HTMLWorker {
-  return new HTMLWorker(ctx, createData)
+export function create(ctx: worker.IWorkerContext, createData: ICreateData): VueHTMLWorker {
+  return new VueHTMLWorker(ctx, createData)
 }

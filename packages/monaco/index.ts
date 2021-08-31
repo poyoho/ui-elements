@@ -19,6 +19,7 @@ export async function getRunnableJS (monaco: monaco, model: editor.ITextModel) {
 }
 
 export const SupportLanguage = {
+  "vuehtml": "vuehtml",
   "html": "html",
   "js": "javascript",
   "ts": "typescript",
@@ -28,17 +29,21 @@ export const SupportLanguage = {
 
 export const loadWorkers = createSinglePromise(async () => {
   const [
+    {},
     { default: EditorWorker },
     { default: JSONWorker },
     { default: TsWorker },
     { default: CSSWorker },
     { default: HTMLWorker },
+    { default: VueHTMLWorker },
   ] = await Promise.all([
+    import("./language/vuehtml/monaco.contribution" as any),
     import('monaco-editor/esm/vs/editor/editor.worker?worker' as any),
     import('monaco-editor/esm/vs/language/json/json.worker?worker' as any),
     import('monaco-editor/esm/vs/language/typescript/ts.worker?worker' as any),
     import('monaco-editor/esm/vs/language/css/css.worker?worker' as any),
     import('monaco-editor/esm/vs/language/html/html.worker?worker' as any),
+    import('./language/vuehtml/vuehtml.worker?worker' as any),
   ])
 
   // monaco要求将worker挂载到window上
@@ -46,20 +51,22 @@ export const loadWorkers = createSinglePromise(async () => {
   // @ts-ignore
   window.MonacoEnvironment = {
     getWorker(_: any, label: string) {
-      if (label === 'json') {
-        return new JSONWorker()
+      console.log("[load worker]", label)
+      switch(label) {
+        case 'json':
+          return new JSONWorker()
+        case 'vue-html':
+          return new VueHTMLWorker()
+        case 'html':
+          return new HTMLWorker()
+        case 'typescript':
+        case 'javascript':
+          return new TsWorker()
+        case 'css':
+          return new CSSWorker()
+        default:
+          return new EditorWorker()
       }
-      if (label === "html") {
-        return new HTMLWorker()
-      }
-      if (label === 'typescript' || label === 'javascript') {
-        return new TsWorker()
-      }
-      if (label === 'css') {
-        return new CSSWorker()
-      }
-
-      return new EditorWorker()
     },
   }
 })
@@ -97,7 +104,6 @@ export const setupMonaco = createSinglePromise(async () => {
   }>()
 
   await loadWorkers()
-
   return {
     monaco,
     addPackage (options: Array<{name: string, types: string}>) {

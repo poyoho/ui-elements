@@ -1,5 +1,5 @@
 import type { LanguageServiceDefaults } from './monaco.contribution'
-import type { HTMLWorker } from './htmlWorker'
+import type { VueHTMLWorker } from './vuehtmlWorker'
 import { Uri, IDisposable, editor } from './fillers/monaco-editor-core'
 
 const STOP_WHEN_IDLE_FOR = 2 * 60 * 1000 // 2min
@@ -10,8 +10,8 @@ export class WorkerManager {
   private _lastUsedTime: number
   private _configChangeListener: IDisposable
 
-  private _worker: editor.MonacoWebWorker<HTMLWorker> | null
-  private _client: Promise<HTMLWorker> | undefined
+  private _worker: editor.MonacoWebWorker<VueHTMLWorker> | null
+  private _client: Promise<VueHTMLWorker> | undefined
 
   constructor(defaults: LanguageServiceDefaults) {
     this._defaults = defaults
@@ -44,13 +44,13 @@ export class WorkerManager {
       this._stopWorker()
   }
 
-  private _getClient(): Promise<HTMLWorker> {
+  private _getClient(): Promise<VueHTMLWorker> {
     this._lastUsedTime = Date.now()
 
     if (!this._client) {
-      this._worker = editor.createWebWorker<HTMLWorker>({
-      // module that exports the create() method and returns a `HTMLWorker` instance
-        moduleId: 'vs/language/html/htmlWorker',
+      this._worker = editor.createWebWorker<VueHTMLWorker>({
+      // module that exports the create() method and returns a `VueHTMLWorker` instance
+        moduleId: 'vs/language/vuehtml/vuehtmlWorker',
 
         // passed in to the create() method
         createData: {
@@ -60,15 +60,14 @@ export class WorkerManager {
 
         label: this._defaults.languageId,
       })
-
-      this._client = <Promise<HTMLWorker>> this._worker.getProxy()
+      this._client = <Promise<VueHTMLWorker>> this._worker.getProxy()
     }
 
     return this._client
   }
 
-  getLanguageServiceWorker(...resources: Uri[]): Promise<HTMLWorker> {
-    let _client: HTMLWorker
+  getLanguageServiceWorker(...resources: Uri[]): Promise<VueHTMLWorker> {
+    let _client: VueHTMLWorker
     return this._getClient()
       .then((client) => {
         _client = client

@@ -1,57 +1,8 @@
 import { WorkerManager } from './workerManager'
-import type { HTMLWorker } from './htmlWorker'
+import type { VueHTMLWorker } from './vuehtmlWorker'
 import type { LanguageServiceDefaults } from './monaco.contribution'
 import * as languageFeatures from './languageFeatures'
 import { Uri, IDisposable, languages } from './fillers/monaco-editor-core'
-
-export function setupModel(defaults: LanguageServiceDefaults): void {
-  const client = new WorkerManager(defaults)
-
-  const worker: languageFeatures.WorkerAccessor = (...uris: Uri[]): Promise<HTMLWorker> => {
-    return client.getLanguageServiceWorker(...uris)
-  }
-
-  const languageId = defaults.languageId
-
-  // all modes
-  languages.registerCompletionItemProvider(
-    languageId,
-    new languageFeatures.CompletionAdapter(worker),
-  )
-  languages.registerHoverProvider(languageId, new languageFeatures.HoverAdapter(worker))
-
-  languages.registerDocumentHighlightProvider(
-    languageId,
-    new languageFeatures.DocumentHighlightAdapter(worker),
-  )
-  languages.registerLinkProvider(languageId, new languageFeatures.DocumentLinkAdapter(worker))
-  languages.registerFoldingRangeProvider(
-    languageId,
-    new languageFeatures.FoldingRangeAdapter(worker),
-  )
-  languages.registerDocumentSymbolProvider(
-    languageId,
-    new languageFeatures.DocumentSymbolAdapter(worker),
-  )
-  languages.registerSelectionRangeProvider(
-    languageId,
-    new languageFeatures.SelectionRangeAdapter(worker),
-  )
-  languages.registerRenameProvider(languageId, new languageFeatures.RenameAdapter(worker))
-
-  // only html
-  if (languageId === 'html') {
-    languages.registerDocumentFormattingEditProvider(
-      languageId,
-      new languageFeatures.DocumentFormattingEditProvider(worker),
-    )
-    languages.registerDocumentRangeFormattingEditProvider(
-      languageId,
-      new languageFeatures.DocumentRangeFormattingEditProvider(worker),
-    )
-    new languageFeatures.DiagnosticsAdapter(languageId, worker, defaults)
-  }
-}
 
 export function setupMode(defaults: LanguageServiceDefaults): IDisposable {
   const disposables: IDisposable[] = []
@@ -60,7 +11,7 @@ export function setupMode(defaults: LanguageServiceDefaults): IDisposable {
   const client = new WorkerManager(defaults)
   disposables.push(client)
 
-  const worker: languageFeatures.WorkerAccessor = (...uris: Uri[]): Promise<HTMLWorker> => {
+  const worker: languageFeatures.WorkerAccessor = (...uris: Uri[]): Promise<VueHTMLWorker> => {
     return client.getLanguageServiceWorker(...uris)
   }
 

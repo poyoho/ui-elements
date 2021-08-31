@@ -72,6 +72,7 @@ export default class MonacoEditor extends HTMLElement {
     console.log("createModel")
     const { monacoInstance } = this
     const { monaco } = await monacoInstance
+
     return monaco.editor.createModel(
       code || "",
       SupportLanguage[extension],

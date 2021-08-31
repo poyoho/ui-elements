@@ -1,9 +1,8 @@
 import * as ls from 'vscode-html-languageservice'
 import { DiagnosticSeverity } from "vscode-languageserver-types"
 import { languages as Languages } from "monaco-editor"
-import { InsertReplaceEdit } from 'vscode-html-languageservice'
-import { LanguageServiceDefaults } from './monaco.contribution'
-import type { HTMLWorker } from './htmlWorker'
+import type { LanguageServiceDefaults } from './monaco.contribution'
+import type { VueHTMLWorker } from './vuehtmlWorker'
 import {
   languages,
   editor,
@@ -18,7 +17,7 @@ import {
 
 type MonacoTextEdit = Languages.TextEdit
 
-export type WorkerAccessor = (...uris: Uri[]) => Promise<HTMLWorker>
+export type WorkerAccessor = (...uris: Uri[]) => Promise<VueHTMLWorker>
 // --- diagnostics --- ---
 
 export class DiagnosticsAdapter {
@@ -109,10 +108,10 @@ export class DiagnosticsAdapter {
   }
 }
 
-function isInsertReplaceEdit(edit: ls.TextEdit | InsertReplaceEdit): edit is InsertReplaceEdit {
+function isInsertReplaceEdit(edit: ls.TextEdit | ls.InsertReplaceEdit): edit is ls.InsertReplaceEdit {
   return (
-    typeof (<InsertReplaceEdit>edit).insert !== 'undefined'
-  && typeof (<InsertReplaceEdit>edit).replace !== 'undefined'
+    typeof (<ls.InsertReplaceEdit>edit).insert !== 'undefined'
+  && typeof (<ls.InsertReplaceEdit>edit).replace !== 'undefined'
   )
 }
 
