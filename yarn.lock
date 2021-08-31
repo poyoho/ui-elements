@@ -4137,11 +4137,6 @@ modify-values@^1.0.0:
   resolved "https://registry.nlark.com/modify-values/download/modify-values-1.0.1.tgz#b3939fa605546474e3e3e3c63d64bd43b4ee6022"
   integrity sha1-s5OfpgVUZHTj4+PGPWS9Q7TuYCI=
 
-monaco-editor-core@^0.27.0:
-  version "0.27.0"
-  resolved "https://registry.nlark.com/monaco-editor-core/download/monaco-editor-core-0.27.0.tgz#2a24d1155d6331f966525e82154a0591e4b179f3"
-  integrity sha1-KiTRFV1jMflmUl6CFUoFkeSxefM=
-
 monaco-editor-textmate@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/monaco-editor-textmate/-/monaco-editor-textmate-3.0.0.tgz#a90517380d5e52304aef780eebeab9f687ab9b67"

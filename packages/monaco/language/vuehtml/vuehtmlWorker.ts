@@ -1,5 +1,5 @@
 import * as ls from 'vscode-html-languageservice'
-import type { worker } from "./fillers/monaco-editor-core"
+import type { worker } from "monaco-editor"
 import type { Options } from './monaco.contribution'
 import { vueHTMLPlugin } from './vue'
 
@@ -62,6 +62,7 @@ export class VueHTMLWorker {
   }
 
   async doHover(uri: string, position: ls.Position): Promise<ls.Hover> {
+    console.log("doHover")
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
     const hover = this._languageService.doHover(document, position, htmlDocument)

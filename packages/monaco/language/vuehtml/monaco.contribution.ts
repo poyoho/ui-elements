@@ -195,7 +195,7 @@ function createAPI() {
 		vuehtmlDefaults
 	}
 }
-;(<any>monaco.languages).vuehtml = createAPI
+;(<any>monaco.languages).vuehtml = createAPI()
 
 // --- Registration to monaco editor ---
 

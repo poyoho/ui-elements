@@ -43,7 +43,7 @@ export const loadWorkers = createSinglePromise(async () => {
     import('monaco-editor/esm/vs/language/typescript/ts.worker?worker' as any),
     import('monaco-editor/esm/vs/language/css/css.worker?worker' as any),
     import('monaco-editor/esm/vs/language/html/html.worker?worker' as any),
-    import('./language/vuehtml/vuehtml.worker?worker' as any),
+    import('./language/vuehtml/vuehtml.worker.js?worker' as any),
   ])
 
   // monaco要求将worker挂载到window上
@@ -55,7 +55,7 @@ export const loadWorkers = createSinglePromise(async () => {
       switch(label) {
         case 'json':
           return new JSONWorker()
-        case 'vue-html':
+        case 'vuehtml':
           return new VueHTMLWorker()
         case 'html':
           return new HTMLWorker()

@@ -49,8 +49,7 @@ export class WorkerManager {
 
     if (!this._client) {
       this._worker = editor.createWebWorker<VueHTMLWorker>({
-        moduleId: 'vs/language/vuehtml/vuehtmlWorker',
-
+        moduleId: '', // never use it
         // passed in to the create() method
         createData: {
           languageSettings: this._defaults.options,
