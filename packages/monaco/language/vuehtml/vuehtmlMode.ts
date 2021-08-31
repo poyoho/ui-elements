@@ -1,17 +1,19 @@
 import { WorkerManager } from './workerManager'
 import type { VueHTMLWorker } from './vuehtmlWorker'
-import type { LanguageServiceDefaults } from './monaco.contribution'
+import type { LanguageServiceDefaultsImpl } from './monaco.contribution'
 import * as languageFeatures from './languageFeatures'
-import { Uri, IDisposable, languages } from 'monaco-editor'
+import { Uri, IDisposable, languages } from "monaco-editor"
 
-export function setupMode(defaults: LanguageServiceDefaults): IDisposable {
+// when editor create .vue Model will exec it to create vue mode
+// run in main worker
+export function setupMode(defaults: LanguageServiceDefaultsImpl): IDisposable {
   const disposables: IDisposable[] = []
   const providers: IDisposable[] = []
 
   const client = new WorkerManager(defaults)
   disposables.push(client)
 
-  const worker: languageFeatures.WorkerAccessor = (...uris: Uri[]): Promise<VueHTMLWorker> => {
+  const worker: languageFeatures.WorkerAccessor = async (...uris: Uri[]): Promise<VueHTMLWorker> => {
     return client.getLanguageServiceWorker(...uris)
   }
 

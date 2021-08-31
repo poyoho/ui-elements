@@ -1,6 +1,4 @@
-import * as ls from 'vscode-html-languageservice'
-import { DiagnosticSeverity } from "vscode-languageserver-types"
-import { languages as Languages } from "monaco-editor"
+import * as ls from 'vscode-languageserver-types'
 import type { LanguageServiceDefaults } from './monaco.contribution'
 import type { VueHTMLWorker } from './vuehtmlWorker'
 import {
@@ -15,7 +13,7 @@ import {
   IMarkdownString,
 } from 'monaco-editor'
 
-type MonacoTextEdit = Languages.TextEdit
+type TextEdit = languages.TextEdit
 
 export type WorkerAccessor = (...uris: Uri[]) => Promise<VueHTMLWorker>
 // --- diagnostics --- ---
@@ -117,13 +115,13 @@ function isInsertReplaceEdit(edit: ls.TextEdit | ls.InsertReplaceEdit): edit is 
 
 function toSeverity(lsSeverity?: number): MarkerSeverity {
   switch (lsSeverity) {
-    case DiagnosticSeverity.Error:
+    case ls.DiagnosticSeverity.Error:
       return MarkerSeverity.Error
-    case DiagnosticSeverity.Warning:
+    case ls.DiagnosticSeverity.Warning:
       return MarkerSeverity.Warning
-    case DiagnosticSeverity.Information:
+    case ls.DiagnosticSeverity.Information:
       return MarkerSeverity.Info
-    case DiagnosticSeverity.Hint:
+    case ls.DiagnosticSeverity.Hint:
       return MarkerSeverity.Hint
     default:
       return MarkerSeverity.Info
@@ -167,7 +165,7 @@ function toRange(range: ls.Range): Range {
   )
 }
 
-function toTextEdit(textEdit: ls.TextEdit): MonacoTextEdit {
+function toTextEdit(textEdit: ls.TextEdit): TextEdit {
   return {
     range: toRange(textEdit.range),
     text: textEdit.newText,
@@ -545,7 +543,7 @@ export class DocumentFormattingEditProvider implements languages.DocumentFormatt
     model: editor.IReadOnlyModel,
     options: languages.FormattingOptions,
     token: CancellationToken,
-  ): Promise<MonacoTextEdit[]> {
+  ): Promise<TextEdit[]> {
     const resource = model.uri
 
     const worker = await this._worker(resource)
@@ -566,7 +564,7 @@ implements languages.DocumentRangeFormattingEditProvider {
     range: Range,
     options: languages.FormattingOptions,
     token: CancellationToken,
-  ): Promise<MonacoTextEdit[]> {
+  ): Promise<TextEdit[]> {
     const resource = model.uri
 
     const worker = await this._worker(resource)

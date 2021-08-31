@@ -1,5 +1,5 @@
-import * as htmlService from 'vscode-html-languageservice'
-import type { worker } from 'monaco-editor'
+import * as ls from 'vscode-html-languageservice'
+import type { worker } from "./fillers/monaco-editor-core"
 import type { Options } from './monaco.contribution'
 import { vueHTMLPlugin } from './vue'
 
@@ -10,7 +10,7 @@ export interface ICreateData {
 
 export class VueHTMLWorker {
   private _ctx: worker.IWorkerContext
-  private _languageService: htmlService.LanguageService
+  private _languageService: ls.LanguageService
   private _languageSettings: Options
   private _languageId: string
 
@@ -19,18 +19,18 @@ export class VueHTMLWorker {
     this._ctx = ctx
     this._languageSettings = createData.languageSettings
     this._languageId = createData.languageId
-    this._languageService = htmlService.getLanguageService()
+    this._languageService = ls.getLanguageService()
   }
 
-  async doValidation(code: string): Promise<htmlService.Diagnostic[]> {
+  async doValidation(code: string): Promise<ls.Diagnostic[]> {
     // not yet suported
     return Promise.resolve([])
   }
 
   async doComplete(
     uri: string,
-    position: htmlService.Position,
-  ): Promise<htmlService.CompletionList> {
+    position: ls.Position,
+  ): Promise<ls.CompletionList> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
     const items = vueHTMLPlugin.completions({ document, html: htmlDocument, position }).flat()
@@ -52,16 +52,16 @@ export class VueHTMLWorker {
 
   async format(
     uri: string,
-    range: htmlService.Range | undefined,
-    options: htmlService.FormattingOptions,
-  ): Promise<htmlService.TextEdit[]> {
+    range: ls.Range | undefined,
+    options: ls.FormattingOptions,
+  ): Promise<ls.TextEdit[]> {
     const document = this._getTextDocument(uri)
     const formattingOptions = { ...this._languageSettings.format, ...options }
     const textEdits = this._languageService.format(document, range, formattingOptions)
     return Promise.resolve(textEdits)
   }
 
-  async doHover(uri: string, position: htmlService.Position): Promise<htmlService.Hover> {
+  async doHover(uri: string, position: ls.Position): Promise<ls.Hover> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
     const hover = this._languageService.doHover(document, position, htmlDocument)
@@ -70,21 +70,21 @@ export class VueHTMLWorker {
 
   async findDocumentHighlights(
     uri: string,
-    position: htmlService.Position,
-  ): Promise<htmlService.DocumentHighlight[]> {
+    position: ls.Position,
+  ): Promise<ls.DocumentHighlight[]> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
     const highlights = this._languageService.findDocumentHighlights(document, position, htmlDocument)
     return Promise.resolve(highlights)
   }
 
-  async findDocumentLinks(uri: string): Promise<htmlService.DocumentLink[]> {
+  async findDocumentLinks(uri: string): Promise<ls.DocumentLink[]> {
     const document = this._getTextDocument(uri)
     const links = this._languageService.findDocumentLinks(document, null!)
     return Promise.resolve(links)
   }
 
-  async findDocumentSymbols(uri: string): Promise<htmlService.SymbolInformation[]> {
+  async findDocumentSymbols(uri: string): Promise<ls.SymbolInformation[]> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
     const symbols = this._languageService.findDocumentSymbols(document, htmlDocument)
@@ -94,7 +94,7 @@ export class VueHTMLWorker {
   async getFoldingRanges(
     uri: string,
     context?: { rangeLimit?: number },
-  ): Promise<htmlService.FoldingRange[]> {
+  ): Promise<ls.FoldingRange[]> {
     const document = this._getTextDocument(uri)
     const ranges = this._languageService.getFoldingRanges(document, context)
     return Promise.resolve(ranges)
@@ -102,8 +102,8 @@ export class VueHTMLWorker {
 
   async getSelectionRanges(
     uri: string,
-    positions: htmlService.Position[],
-  ): Promise<htmlService.SelectionRange[]> {
+    positions: ls.Position[],
+  ): Promise<ls.SelectionRange[]> {
     const document = this._getTextDocument(uri)
     const ranges = this._languageService.getSelectionRanges(document, positions)
     return Promise.resolve(ranges)
@@ -111,20 +111,20 @@ export class VueHTMLWorker {
 
   async doRename(
     uri: string,
-    position: htmlService.Position,
+    position: ls.Position,
     newName: string,
-  ): Promise<htmlService.WorkspaceEdit> {
+  ): Promise<ls.WorkspaceEdit> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
     const renames = this._languageService.doRename(document, position, newName, htmlDocument)
     return Promise.resolve(renames!)
   }
 
-  private _getTextDocument(uri: string): htmlService.TextDocument {
+  private _getTextDocument(uri: string): ls.TextDocument {
     const models = this._ctx.getMirrorModels()
     for (const model of models) {
       if (model.uri.toString() === uri) {
-        return htmlService.TextDocument.create(
+        return ls.TextDocument.create(
           uri,
           this._languageId,
           model.version,

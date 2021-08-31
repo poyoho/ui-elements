@@ -1,6 +1,7 @@
 import * as mode from './vuehtmlMode'
-import { language, conf } from './vuehtmlLanguage'
+import type * as lt from 'vscode-html-languageservice'
 import * as monaco from "monaco-editor"
+import { language, conf } from './vuehtmlLanguage'
 
 export interface HTMLFormatConfiguration {
   readonly tabSize: number
@@ -182,14 +183,19 @@ function getConfigurationDefault(languageId: string): Required<ModeConfiguration
 
 const vuehtmlLanguageId = 'vuehtml'
 
-export const vuehtmlDefaults: LanguageServiceDefaults = new LanguageServiceDefaultsImpl(
+export const vuehtmlDefaults = new LanguageServiceDefaultsImpl(
   vuehtmlLanguageId,
   htmlOptionsDefault,
   getConfigurationDefault(vuehtmlLanguageId),
 )
 
 // export to the global based API
-;(<any>monaco.languages).vuehtml = { vuehtmlDefaults }
+function createAPI() {
+	return {
+		vuehtmlDefaults
+	}
+}
+;(<any>monaco.languages).vuehtml = createAPI
 
 // --- Registration to monaco editor ---
 
@@ -205,6 +211,8 @@ monaco.languages.register({
 
 monaco.languages.setMonarchTokensProvider(vuehtmlLanguageId, language)
 monaco.languages.setLanguageConfiguration(vuehtmlLanguageId, conf)
+
 monaco.languages.onLanguage(vuehtmlLanguageId, () => {
+  console.log("[setupMode]", vuehtmlLanguageId)
   getMode().then(mode => mode.setupMode(vuehtmlDefaults))
 })

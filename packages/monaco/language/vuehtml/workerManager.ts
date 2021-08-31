@@ -1,11 +1,11 @@
-import type { LanguageServiceDefaults } from './monaco.contribution'
+import type { LanguageServiceDefaultsImpl } from './monaco.contribution'
 import type { VueHTMLWorker } from './vuehtmlWorker'
-import { Uri, IDisposable, editor } from 'monaco-editor'
+import { Uri, IDisposable, editor } from "monaco-editor"
 
 const STOP_WHEN_IDLE_FOR = 2 * 60 * 1000 // 2min
 
 export class WorkerManager {
-  private _defaults: LanguageServiceDefaults
+  private _defaults: LanguageServiceDefaultsImpl
   private _idleCheckInterval: number
   private _lastUsedTime: number
   private _configChangeListener: IDisposable
@@ -13,7 +13,7 @@ export class WorkerManager {
   private _worker: editor.MonacoWebWorker<VueHTMLWorker> | null
   private _client: Promise<VueHTMLWorker> | undefined
 
-  constructor(defaults: LanguageServiceDefaults) {
+  constructor(defaults: LanguageServiceDefaultsImpl) {
     this._defaults = defaults
     this._worker = null
     this._idleCheckInterval = window.setInterval(() => this._checkIfIdle(), 30 * 1000)
@@ -49,8 +49,7 @@ export class WorkerManager {
 
     if (!this._client) {
       this._worker = editor.createWebWorker<VueHTMLWorker>({
-      // module that exports the create() method and returns a `VueHTMLWorker` instance
-        moduleId: 'vuehtml',
+        moduleId: 'vs/language/vuehtml/vuehtmlWorker',
 
         // passed in to the create() method
         createData: {
