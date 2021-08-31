@@ -5,7 +5,7 @@ import { resolvePackageTypes } from "@ui-elements/unpkg"
 export type MonacoEditorChangeEvent = Event & {
   value: {
     content: string
-    runnableJS: string
+    // runnableJS: string
   }
 }
 
@@ -53,7 +53,7 @@ export default class MonacoEditor extends HTMLElement {
         event.initEvent("code-change", false, false)
         event.value = {
           content: this.editor!.getValue(),
-          runnableJS: await getRunnableJS(monaco, model)
+          // runnableJS: await getRunnableJS(monaco, model)
         }
         this.dispatchEvent(event)
       }))

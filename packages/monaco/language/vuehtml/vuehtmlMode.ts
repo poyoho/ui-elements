@@ -2,7 +2,7 @@ import { WorkerManager } from './workerManager'
 import type { VueHTMLWorker } from './vuehtmlWorker'
 import type { LanguageServiceDefaults } from './monaco.contribution'
 import * as languageFeatures from './languageFeatures'
-import { Uri, IDisposable, languages } from './fillers/monaco-editor-core'
+import { Uri, IDisposable, languages } from 'monaco-editor'
 
 export function setupMode(defaults: LanguageServiceDefaults): IDisposable {
   const disposables: IDisposable[] = []

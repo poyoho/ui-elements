@@ -21,7 +21,8 @@
     "strictFunctionTypes": true, // 启用对函数类型的严格检查。
     "paths": {
       "*": ["typings/*"]
-    }
+    },
+    "allowJs": true
   },
   "exclude": [
     "dist",

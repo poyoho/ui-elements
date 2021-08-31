@@ -104,7 +104,7 @@ export interface LanguageServiceDefaults {
 
 // --- HTML configuration and defaults ---------
 
-class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
+export class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
   private _onDidChange = new monaco.Emitter<LanguageServiceDefaults>()
   private _options: Options | undefined
   private _modeConfiguration: ModeConfiguration | undefined
@@ -200,12 +200,11 @@ function getMode(): Promise<typeof mode> {
 monaco.languages.register({
 	id: vuehtmlLanguageId,
 	extensions: ['.vuehtml'],
-  aliases: ["vuehtml", "vue-html"]
+  aliases: ["vuehtml", "vue-html"],
 })
 
 monaco.languages.setMonarchTokensProvider(vuehtmlLanguageId, language)
 monaco.languages.setLanguageConfiguration(vuehtmlLanguageId, conf)
 monaco.languages.onLanguage(vuehtmlLanguageId, () => {
-  console.log("[onLanguage]", vuehtmlLanguageId)
   getMode().then(mode => mode.setupMode(vuehtmlDefaults))
 })

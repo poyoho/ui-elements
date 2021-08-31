@@ -1,5 +1,5 @@
 import * as htmlService from 'vscode-html-languageservice'
-import type { worker } from './fillers/monaco-editor-core'
+import type { worker } from 'monaco-editor'
 import type { Options } from './monaco.contribution'
 import { vueHTMLPlugin } from './vue'
 
@@ -136,6 +136,7 @@ export class VueHTMLWorker {
   }
 }
 
-export function create(ctx: worker.IWorkerContext, createData: ICreateData): VueHTMLWorker {
+export function create (ctx: worker.IWorkerContext, createData: ICreateData): VueHTMLWorker {
+  console.log("create vuehtml worker")
   return new VueHTMLWorker(ctx, createData)
 }

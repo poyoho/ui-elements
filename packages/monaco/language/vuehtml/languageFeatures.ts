@@ -13,7 +13,7 @@ import {
   IDisposable,
   MarkerSeverity,
   IMarkdownString,
-} from './fillers/monaco-editor-core'
+} from 'monaco-editor'
 
 type MonacoTextEdit = Languages.TextEdit
 

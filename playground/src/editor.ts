@@ -13,9 +13,8 @@ import type { MonacoEditorChangeEvent, default as MonacoEditor } from "../../pac
 
 const elm2 = document.querySelector(".editor2") as any as MonacoEditor
 const model2 = await elm2.createModel("vuehtml", "model2.vuehtml", `<div> {{ aaa }} </div>`)
-console.log(model2)
 await elm2.setModel(model2)
 elm2.addEventListener("code-change", (e) => {
-  const {runnableJS, content} = (e as MonacoEditorChangeEvent).value
-  console.log("html", runnableJS, content)
+  const {content} = (e as MonacoEditorChangeEvent).value
+  console.log("html", content)
 })
