@@ -82,11 +82,6 @@ export async function setupTheme (monaco: monaco, editor: editor.ICodeEditor) {
   const grammar = await registry.loadGrammar(grammars.get("vuehtml"));
   console.log(grammar)
 
-  // monaco.languages.register({id: 'css'})
-  // monaco.languages.register({id: 'typescript'})
-  // monaco.languages.register({id: 'javascript'})
-  // monaco.languages.register({id: 'vuehtml'})
-
   monaco.editor.defineTheme("vscode-dark", convertTheme((await import("./theme/dark_plus.json")).default))
   // monaco.editor.defineTheme("light", convertTheme((await import("./theme/light_plus.json")).default))
   await wireTmGrammars(monaco, registry, grammars, editor)

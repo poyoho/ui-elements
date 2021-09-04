@@ -34,7 +34,7 @@ export const Directives: CompletionItem[] = [
   },
 ]
 
-export const Events: string[] = [
+export const Events = [
   'abort',
   'animationend',
   'aimationiteration',
@@ -123,4 +123,8 @@ export const Events: string[] = [
   'volumechange',
   'waiting',
   'wheel',
-]
+].map(e => ({
+  label: `@${e}`,
+  insertText: `${e}=""`,
+  kind: CompletionItemKind.Event,
+}))
