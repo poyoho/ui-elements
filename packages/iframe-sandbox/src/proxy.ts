@@ -9,14 +9,22 @@ interface PendingCMD {
 }
 
 export type SandboxHandler =  Partial<{
-  on_fetch_progress: Function
-  on_error: Function
-  on_unhandled_rejection: Function
-  on_console: Function
-  on_console_group: Function
-  on_console_group_collapsed: Function
-  on_console_group_end: Function
+  on_fetch_progress: (data: SandboxHandleData) => void
+  on_error: (data: SandboxHandleData) => void
+  on_unhandled_rejection: (data: SandboxHandleData) => void
+  on_console: (data: SandboxHandleData) => void
+  on_console_group: (data: SandboxHandleData) => void
+  on_console_group_collapsed: (data: SandboxHandleData) => void
+  on_console_group_end: (data: SandboxHandleData) => void
 }>
+
+export interface SandboxHandleData {
+  action: string
+  level?: string
+  duplicate?: boolean
+  args?: any[]
+  label?: any
+}
 
 export class SandboxProxy {
   iframe: HTMLIFrameElement

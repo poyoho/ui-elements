@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script type="module" src="./src/vueplayground.ts"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    #vuehtml {
+      width: 100%;
+      height: 50%;
+    }
+    #vuets {
+      width: 100%;
+      height: 50%;
+    }
+    #sandbox {
+      width: 100%;
+      height: 100%;
+    }
+    .wrap {
+      height: 100%;
+      width: 100%;
+      background: #333;
+    }
+    .editor {
+      width: 50%;
+      height: 100%;
+    }
+    .sandbox {
+      width: 50%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="editor">
+      <monaco-editor id="vuehtml"></monaco-editor>
+      <monaco-editor id="vuets"></monaco-editor>
+    </div>
+    <div class="sandbox">
+      <iframe-sandbox id="sandbox"/>
+    </div>
+  </div>
+</body>
+</html>

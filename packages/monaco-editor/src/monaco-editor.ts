@@ -17,6 +17,8 @@ export default class MonacoEditor extends HTMLElement {
     super()
     const container = document.createElement("div")
     container.className = "editor"
+    container.style.width = "inherit"
+    container.style.height = "inherit"
     this.appendChild(container)
   }
 
