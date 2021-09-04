@@ -18,6 +18,10 @@ function convertTheme(theme: any): any {
     rules: monacoThemeRule,
     encodedTokensColors: []
   }
+  if (theme.include) {
+    console.log(theme.include)
+  }
+
   theme.tokenColors.map(function (color: any) {
     if (typeof color.scope == 'string') {
       let split = color.scope.split(',')
@@ -63,6 +67,10 @@ export async function setupTheme (monaco: monaco, editor: editor.ICodeEditor) {
           format: 'json',
           content: (await import("./token/css.tmGrammar.json")).default
         },
+        "source.vuehtml": {
+          format: 'json',
+          content: (await import("./token/vuehtml.tmLanguage.json")).default
+        },
       })[scopeName] as any
     }
   })
@@ -72,11 +80,13 @@ export async function setupTheme (monaco: monaco, editor: editor.ICodeEditor) {
   grammars.set('css', 'source.css')
   grammars.set('typescript', 'source.ts')
   grammars.set('javascript', 'source.js')
+  grammars.set('vuehtml', 'source.vuehtml')
 
-  monaco.languages.register({id: 'css'})
-  monaco.languages.register({id: 'typescript'})
-  monaco.languages.register({id: 'javascript'})
-  monaco.editor.defineTheme("vscode-dark", convertTheme((await import("./theme/dark_plus.json")).default))
+  console.log(registry)
+  const grammar = await registry.loadGrammar(grammars.get("vuehtml"));
+  console.log(grammar)
+
+  monaco.editor.defineTheme("vscode-dark", convertTheme((await import("./theme/dark_vs.json")).default))
   // monaco.editor.defineTheme("light", convertTheme((await import("./theme/light_plus.json")).default))
   await wireTmGrammars(monaco, registry, grammars, editor)
 }
