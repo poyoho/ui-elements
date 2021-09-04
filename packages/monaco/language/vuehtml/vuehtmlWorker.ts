@@ -15,7 +15,7 @@ export class VueHTMLWorker {
   private _languageId: string
 
   constructor(ctx: worker.IWorkerContext, createData: ICreateData) {
-    console.log("create vuehtml worker")
+    console.log("[vuehtml worker] create vuehtml worker")
     this._ctx = ctx
     this._languageSettings = createData.languageSettings
     this._languageId = createData.languageId

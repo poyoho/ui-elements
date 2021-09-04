@@ -11,7 +11,7 @@ async function setupVueTypescriptMonaco () {
   await elm.setModel(model)
   elm.addEventListener("code-change", (e) => {
     const { content } = (e as MonacoEditorChangeEvent).value
-    console.log("ts", content)
+    console.log("[vueplayground] ts", content)
   })
 }
 
@@ -21,7 +21,7 @@ async function setupVueHTMLMonaco () {
   await elm.setModel(model)
   elm.addEventListener("code-change", (e) => {
     const {content} = (e as MonacoEditorChangeEvent).value
-    console.log("html", content)
+    console.log("[vueplayground] html", content)
   })
 }
 
@@ -30,31 +30,31 @@ function setupIframesandbox () {
 
   sandbox.addEventListener("on_fetch_progress", (e) => {
     const event = e as SandboxEvent
-    console.log("on_fetch_progress", event.data)
+    console.log("[vueplayground] on_fetch_progress", event.data)
   })
   sandbox.addEventListener("on_error", (e) => {
     const event = e as SandboxEvent
-    console.log("on_error", event.data)
+    console.log("[vueplayground] on_error", event.data)
   })
   sandbox.addEventListener("on_unhandled_rejection", (e) => {
     const event = e as SandboxEvent
-    console.log("on_unhandled_rejection", event.data)
+    console.log("[vueplayground] on_unhandled_rejection", event.data)
   })
   sandbox.addEventListener("on_console", (e) => {
     const event = e as SandboxEvent
-    console.log("on_console", event.data)
+    console.log("[vueplayground] on_console", event.data)
   })
   sandbox.addEventListener("on_console_group", (e) => {
     const event = e as SandboxEvent
-    console.log("on_console_group", event.data)
+    console.log("[vueplayground] on_console_group", event.data)
   })
   sandbox.addEventListener("on_console_group_collapsed", (e) => {
     const event = e as SandboxEvent
-    console.log("on_console_group_collapsed", event.data)
+    console.log("[vueplayground] on_console_group_collapsed", event.data)
   })
   sandbox.addEventListener("on_console_group_end", (e) => {
     const event = e as SandboxEvent
-    console.log("on_console_group_end", event.data)
+    console.log("[vueplayground] on_console_group_end", event.data)
   })
 
   sandbox.eval([

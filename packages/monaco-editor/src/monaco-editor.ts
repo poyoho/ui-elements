@@ -71,7 +71,7 @@ export default class MonacoEditor extends HTMLElement {
     extension: keyof typeof SupportLanguage,
     filename: string,
     code?: string) {
-    console.log("createModel")
+    console.log("[monaco-editor] createModel")
     const { monacoInstance } = this
     const { monaco } = await monacoInstance
 
@@ -83,14 +83,14 @@ export default class MonacoEditor extends HTMLElement {
   }
 
   async setModel (model: editor.ITextModel) {
-    console.log("setModel")
+    console.log("[monaco-editor] setModel")
     const { monacoInstance } = this
     await monacoInstance
     this.editor!.setModel(model)
   }
 
   async addDTS (options: Array<{name: string, version: string, entry: string}>) {
-    console.log("addDTS")
+    console.log("[monaco-editor] addDTS")
     const { monacoInstance } = this
     const { addPackage } = await monacoInstance
     addPackage(
@@ -102,7 +102,7 @@ export default class MonacoEditor extends HTMLElement {
   }
 
   async deleteDTS (names: string[]) {
-    console.log("deleteDTS")
+    console.log("[monaco-editor] deleteDTS")
     const { monacoInstance } = this
     const { deletePackage } = await monacoInstance
     deletePackage(names)
