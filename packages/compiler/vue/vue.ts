@@ -1,9 +1,9 @@
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
 import { PACKAGE_CDN } from "@ui-elements/unpkg"
-import { parseFileModules } from "../module"
 import boostrap from "./bootstrap/main.js?raw"
 import appvue from "./bootstrap/app.vue?raw"
 import { compileFile as compileSFCFile } from "./compile/sfc"
+import { parseFileModules } from "@ui-elements/compiler"
 
 export function getRuntimeImportMap () {
   return {
@@ -34,6 +34,8 @@ export async function getProjectRunableJS (filesystem: FileSystem<CompiledFile>)
   const appEntry = getAppEntry(filesystem)
   await compileFile(appEntry)
   const modules = parseFileModules(appEntry, filesystem)
+  console.log(modules);
+
   const scripts = [
     'window.__modules__ = {};window.__css__ = \'\'',
     ...modules.reverse(),

@@ -1,4 +1,5 @@
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
+export * from "./module"
 
 interface Compiler {
   getRuntimeImportMap: () => Record<string, string>

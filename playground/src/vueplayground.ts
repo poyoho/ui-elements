@@ -1,57 +1,50 @@
 import { install } from "../../packages/ui-elements"
 import type { MonacoEditorChangeEvent, default as MonacoEditor } from "../../packages/monaco-editor/src/monaco-editor"
-import IframeSandbox, { SandboxEvent } from "../../packages/iframe-sandbox/src/iframe-sandbox"
+import type { SandboxEvent, default as IframeSandbox } from "../../packages/iframe-sandbox/src/iframe-sandbox"
+
 import { resolvePackage } from "../../packages/unpkg"
 import { FileSystem, CompiledFile } from "../../packages/vfs"
 import { importCompiler } from "../../packages/compiler"
 
 const sandbox = document.querySelector("#sandbox") as any as IframeSandbox
 const compile = await importCompiler("vue")
-const fs = new FileSystem<CompiledFile>()
-const vuefile = fs.writeFile(new CompiledFile({
+const vuefs = new FileSystem<CompiledFile>()
+const vuefile = vuefs.writeFile(new CompiledFile({
   name: "test.vue"
 }))
-const updateFile = (() => {
-  const cache = {js: '', html: ''}
-  return async (js: string, html: string) => {
-    js && (cache.js = js)
-    html && (cache.html = html)
-    vuefile.updateFile(`
-<template>
-${cache.html}
-</template>
-<script>
-${cache.js}
-</script>
-    `)
-    console.log(await compile.compileFile(vuefile))
-    console.log(await compile.getProjectRunableJS(fs))
-  }
-})()
-
-async function setupVueTypescriptMonaco () {
-  const elm = document.querySelector("#vuets") as any as MonacoEditor
-  const pkgs = await resolvePackage("vue", "3.2.4")
-  await elm.addDTS(pkgs.map(pkg => ({name: pkg.name, version: pkg.version, entry: pkg.types})).filter(el => el.entry))
-  const model = await elm.createModel("ts", "test.vue.ts", `import { ref } from "vue"`)
-  await elm.setModel(model)
-  elm.addEventListener("code-change", async (e) => {
-    const { content } = (e as MonacoEditorChangeEvent).value
-    const js = await elm.getRunnableJS(model)
-    console.log("[vueplayground] ts", content)
-    console.log("[vueplayground] js", js)
-    updateFile(js, "")
-  })
+const updateFile = async (cache: {js: string, html: string}) => {
+  vuefile.updateFile([
+    `<template>`,
+    `${cache.html}`,
+    `</template>`,
+    `<script>`,
+    `${cache.js}`,
+    `</script>`,
+  ].join("\n"))
+  // console.log(await compile.compileFile(vuefile))
+  const vueProjectJS = await compile.getProjectRunableJS(vuefs)
+  console.log(vueProjectJS.join("\n"))
+  sandbox.eval(vueProjectJS)
 }
 
-async function setupVueHTMLMonaco () {
-  const elm = document.querySelector("#vuehtml") as any as MonacoEditor
-  const model = await elm.createModel("vuehtml", "test.vue.vuehtml", `<div> {{ aaa }} </div>`)
-  await elm.setModel(model)
-  elm.addEventListener("code-change", (e) => {
-    const {content} = (e as MonacoEditorChangeEvent).value
-    console.log("[vueplayground] html", content)
-    updateFile("", content)
+async function setupVueMonaco () {
+  const tselm = document.querySelector("#vuets") as any as MonacoEditor
+  const pkgs = await resolvePackage("vue", "3.2.4")
+  await tselm.addDTS(pkgs.map(pkg => ({name: pkg.name, version: pkg.version, entry: pkg.types})).filter(el => el.entry))
+  const tsmodel = await tselm.createModel("ts", "test.vue.ts", `export default {}`)
+  await tselm.setModel(tsmodel)
+  const elmhtml = document.querySelector("#vuehtml") as any as MonacoEditor
+  const htmlmodel = await elmhtml.createModel("vuehtml", "test.vue.vuehtml", `<div> hello world </div>`)
+  await elmhtml.setModel(htmlmodel)
+  const cache = {js: tsmodel.getValue(), html: htmlmodel.getValue()}
+  updateFile(cache)
+  tselm.addEventListener("code-change", async (e) => {
+    cache.js = await tselm.getRunnableJS(tsmodel)
+    updateFile(cache)
+  })
+  elmhtml.addEventListener("code-change", (e) => {
+    cache.html = (e as MonacoEditorChangeEvent).value.content
+    updateFile(cache)
   })
 }
 
@@ -84,14 +77,13 @@ function setupIframesandbox () {
     const event = e as SandboxEvent
     console.log("[vueplayground] on_console_group_end", event.data)
   })
+  sandbox.setupDependency(compile.getRuntimeImportMap())
 }
-
 
 function main () {
   install()
-  setupVueTypescriptMonaco()
-  setupVueHTMLMonaco()
   setupIframesandbox()
+  setupVueMonaco()
 }
 
 main()

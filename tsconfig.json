@@ -25,6 +25,7 @@
     "allowJs": true
   },
   "exclude": [
+    "lib",
     "dist",
     "node_modules"
   ],

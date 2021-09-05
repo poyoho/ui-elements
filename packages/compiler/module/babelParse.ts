@@ -1,14 +1,4 @@
-import {
-  isReferenced,
-  Identifier,
-  Node,
-  Function,
-  ObjectProperty,
-  BlockStatement,
-  Program
-} from '@babel/types'
-import { walk } from 'estree-walker'
-export { walk }
+import { Identifier, Node, Function, ObjectProperty, BlockStatement, Program, isReferenced, walk } from "./env"
 
 export function walkIdentifiers(
   root: Node,

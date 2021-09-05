@@ -1,9 +1,8 @@
 import {
   modulesKey, exportKey, dynamicImportKey, moduleKey, globalCSS,
-  babelParse, babelParserDefaultPlugins, walkIdentifiers, walk, MagicString
+  babelParse, babelParserDefaultPlugins, walkIdentifiers, MagicString,
+  ExportSpecifier, Identifier, Node, ObjectProperty, walk
 } from "./env"
-import type { ExportSpecifier, Identifier, Node, ObjectProperty } from '@babel/types'
-
 export interface CompiledFile {
   filename: string
   compiled: {
@@ -238,8 +237,7 @@ export function processFile(
   const { js, css } = file.compiled
 
   const { code: jscode, importedFiles } = processJavaScriptModule(file.filename, js, filesystem)
-  const { code: csscode } = processJavaScriptModule(file.filename, css, filesystem)
-
+  const { code: csscode } = procssCSSModule(file.filename, css, filesystem)
 
   const processed = [jscode + csscode]
   if (importedFiles.size) {
