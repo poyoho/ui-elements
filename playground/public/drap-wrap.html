@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>drag-wrap</title>
+  <script type="module" src="./src/main.ts"></script>
+  <style>
+    html, body {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background: #333;
+      color: #e3e3e3;
+    }
+    .wrap {
+      width: 80%;
+      margin: 0 auto;
+    }
+    [slot="item"] {
+      background: #000;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <a href="/">back</a>
+  <div class="wrap">
+    <h3>drag-wrap</h3>
+    <drag-wrap direction="row">
+      <div slot="item">1</div>
+      <div slot="item">2</div>
+      <div slot="item">3</div>
+      <div slot="item">4</div>
+      <div slot="item">5</div>
+      </div>
+    </drag-wrap>
+  </div>
+</body>
+
+</html>
