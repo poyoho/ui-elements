@@ -12,7 +12,8 @@ export default html`
     display: flex;
     justify-content: space-between;
     gap: 10px;
-    cursor: pointer;
+    width: 100%;
+    height: 100%;
   }
 </style>
 `

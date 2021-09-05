@@ -34,6 +34,8 @@ export default class DrapWrap extends HTMLElement {
     super()
     const shadowRoot = this.attachShadow({ mode: "open" })
     const wrap = this.ownerDocument.createElement("div")
+    wrap.style.width = "100%"
+    wrap.style.height = "100%"
     wrap.innerHTML = teamplateElement
     shadowRoot.appendChild(wrap)
   }
@@ -60,18 +62,20 @@ export default class DrapWrap extends HTMLElement {
   }
 
   attributeChangedCallback () {
+    const { wrap } = this
     const attr = this.attributes.getNamedItem("direction")
     this.#direction = attr ? formatDirection(attr.value) : "row"
-    this.wrap.style.flexDirection = this.#direction
+    wrap.style.cursor = this.#direction === "row" ? "col-resize" : "row-resize"
+    wrap.style.flexDirection = this.#direction
   }
 
   updateItems () {
     const { items, wrap } = this
-    const itemWidth = (100 / items.length) + "%"
+    const itemWidth = Math.round((100 / items.length) / 100)
     console.log(items);
 
     items.forEach((item) => {
-      item.style.width = itemWidth
+      item.style.flex = 1 + ""
       item.style.cursor = "auto"
       item.addEventListener("mousedown", (e) => e.stopPropagation())
     })
