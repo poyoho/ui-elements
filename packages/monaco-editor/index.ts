@@ -1,4 +1,5 @@
 import MonacoEditor from "./src/monaco-editor"
+export * from "./src/monaco-editor"
 
 declare global {
   interface Window {

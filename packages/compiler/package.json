@@ -5,5 +5,10 @@
   "devDependencies": {
     "@vue/compiler-sfc": "^3.2.4",
     "@vue/shared": "^3.2.4"
+  },
+  "peerDependencies": {
+    "@babel/parser": "^7.15.0",
+    "@babel/types": "^7.15.0",
+    "estree-walker": "^2.0.2"
   }
 }

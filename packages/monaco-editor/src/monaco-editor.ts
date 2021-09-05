@@ -1,17 +1,15 @@
-import { setupMonaco, SupportLanguage, editor, getRunnableJS, setupTheme } from "@ui-elements/monaco"
-import { debounce } from "@ui-elements/utils"
+import { setupMonaco, SupportLanguage, editor, setupTheme, getRunnableJS } from "@ui-elements/monaco"
+import { createDefer, debounce } from "@ui-elements/utils"
 import { resolvePackageTypes } from "@ui-elements/unpkg"
 
 export type MonacoEditorChangeEvent = Event & {
   value: {
     content: string
-    // runnableJS: string
   }
 }
-
 export default class MonacoEditor extends HTMLElement {
   private monacoInstance = setupMonaco()
-  private editor: editor.IStandaloneCodeEditor | undefined
+  private editor = createDefer<editor.IStandaloneCodeEditor>()
 
   constructor() {
     super()
@@ -30,7 +28,7 @@ export default class MonacoEditor extends HTMLElement {
     const { monacoInstance } = this
     const { monaco } = await monacoInstance
 
-    this.editor = monaco.editor.create(this.container, {
+    const editor = monaco.editor.create(this.container, {
       tabSize: 2,
       insertSpaces: true,
       autoClosingQuotes: 'always',
@@ -44,8 +42,8 @@ export default class MonacoEditor extends HTMLElement {
     })
 
     // send change event
-    this.editor.onDidChangeModel(() => {
-      const model = this.editor!.getModel()
+    editor.onDidChangeModel(() => {
+      const model = editor.getModel()
       if (!model) {
         return
       }
@@ -54,14 +52,13 @@ export default class MonacoEditor extends HTMLElement {
         const event = document.createEvent("events") as MonacoEditorChangeEvent
         event.initEvent("code-change", false, false)
         event.value = {
-          content: this.editor!.getValue(),
-          // runnableJS: await getRunnableJS(monaco, model)
+          content: editor.getValue(),
         }
         this.dispatchEvent(event)
       }))
     })
-
-    await setupTheme(monaco, this.editor)
+    this.editor.resolve(editor)
+    await setupTheme(monaco, editor)
     monaco.editor.setTheme("vscode-dark")
   }
 
@@ -86,7 +83,7 @@ export default class MonacoEditor extends HTMLElement {
     console.log("[monaco-editor] setModel")
     const { monacoInstance } = this
     await monacoInstance
-    this.editor!.setModel(model)
+    await this.editor.promise.then(editor => editor.setModel(model))
   }
 
   async addDTS (options: Array<{name: string, version: string, entry: string}>) {
@@ -106,5 +103,12 @@ export default class MonacoEditor extends HTMLElement {
     const { monacoInstance } = this
     const { deletePackage } = await monacoInstance
     deletePackage(names)
+  }
+
+  async getRunnableJS (model: editor.ITextModel) {
+    console.log("[monaco-editor] getRunnableJS")
+    const { monacoInstance } = this
+    const { monaco } = await monacoInstance
+    return getRunnableJS(monaco, model)
   }
 }

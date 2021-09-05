@@ -1,16 +1,18 @@
-import { importVuePackage, modulesKey, exportKey, dynamicImportKey, moduleKey, globalCSS } from "./env"
+import {
+  modulesKey, exportKey, dynamicImportKey, moduleKey, globalCSS,
+  babelParse, babelParserDefaultPlugins, walkIdentifiers, walk, MagicString
+} from "./env"
 import type { ExportSpecifier, Identifier, Node, ObjectProperty } from '@babel/types'
 
-interface CompiledFile {
+export interface CompiledFile {
   filename: string
   compiled: {
     js: string
-    ssr: string
     css: string
   }
 }
 
-interface FileSystem {
+export interface FileSystem {
   isExist: (filename: string) => boolean
   readFile: (filename: string) => CompiledFile | undefined
 }
@@ -19,30 +21,26 @@ const isStaticProperty = (node: Node): node is ObjectProperty => {
   return node.type === 'ObjectProperty' && !node.computed
 }
 
-export function parseFileModules (file: CompiledFile, filesystem: FileSystem) {
-  return processFile(file, filesystem)
+export function procssCSSModule (
+  filename: string,
+  css: string | undefined,
+  filesystem: FileSystem,) {
+  return {
+    code: css ? `\n${globalCSS} += ${JSON.stringify(css)}` : '',
+  }
 }
 
-async function processFile(
-  file: CompiledFile,
+export function processJavaScriptModule (
+  filename: string,
+  js: string,
   filesystem: FileSystem,
-  seen = new Set<CompiledFile>()
 ) {
-  const { compiler, shared } = await importVuePackage()
-  if (seen.has(file)) {
-    return []
-  }
+  const s = new MagicString(js)
 
-  seen.add(file)
-
-  const { js, css } = file.compiled
-
-  const s = new compiler.MagicString(js)
-
-  const ast = compiler.babelParse(js, {
-    sourceFilename: file.filename,
+  const ast = babelParse(js, {
+    sourceFilename: filename,
     sourceType: 'module',
-    plugins: [...shared.babelParserDefaultPlugins],
+    plugins: [...babelParserDefaultPlugins],
   }).program.body
 
   const idToImportMap = new Map<string, string>()
@@ -77,7 +75,7 @@ async function processFile(
   // 0. instantiate module
   s.prepend(
     `const ${moduleKey} = __modules__[${JSON.stringify(
-      file.filename,
+      filename,
     )}] = { [Symbol.toStringTag]: "Module" }\n\n`,
   )
 
@@ -172,7 +170,7 @@ async function processFile(
     if (node.type === 'ImportDeclaration') {
       continue
     }
-    compiler.walkIdentifiers(node, (id, parent, parentStack) => {
+    walkIdentifiers(node, (id, parent, parentStack) => {
       const binding = idToImportMap.get(id.name)
       if (!binding) {
         return
@@ -205,7 +203,7 @@ async function processFile(
   }
 
   // 4. convert dynamic imports
-  (compiler.walk as any)(ast, {
+  (walk as any)(ast, {
     enter(node: Node, parent: Node) {
       if (node.type === 'Import' && parent.type === 'CallExpression') {
         const arg = parent.arguments[0]
@@ -220,16 +218,33 @@ async function processFile(
       }
     },
   })
+  return {
+    code: s.toString(),
+    importedFiles,
+  }
+}
 
-  // append CSS injection code
-  if (css) {
-    s.append(`\n${globalCSS} += ${JSON.stringify(css)}`)
+export function processFile(
+  file: CompiledFile,
+  filesystem: FileSystem,
+  seen = new Set<CompiledFile>()
+) {
+  if (seen.has(file)) {
+    return []
   }
 
-  const processed = [s.toString()]
+  seen.add(file)
+
+  const { js, css } = file.compiled
+
+  const { code: jscode, importedFiles } = processJavaScriptModule(file.filename, js, filesystem)
+  const { code: csscode } = processJavaScriptModule(file.filename, css, filesystem)
+
+
+  const processed = [jscode + csscode]
   if (importedFiles.size) {
     for (const imported of importedFiles) {
-      const processedFile = await processFile(
+      const processedFile = processFile(
         filesystem.readFile(imported)!,
         filesystem,
         seen
@@ -237,7 +252,6 @@ async function processFile(
       processed.push(...processedFile)
     }
   }
-
   // return a list of files to further process
   return processed
 }
