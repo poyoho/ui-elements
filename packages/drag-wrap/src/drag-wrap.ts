@@ -1,18 +1,69 @@
 import { getShadowHost } from "@ui-elements/utils"
-import { couldStartTrivia } from "typescript"
 import teamplateElement from "./drag-wrap-element"
 
 type direction = "row" | "column"
 
+function calcPostion (
+  clickPostion: number,
+  items: NodeListOf<HTMLElement>,
+  clientSize: (elm: HTMLElement) => number,
+) {
+  const postion = {
+    start: 0,
+    end: 0
+  }
+  let sum = 0
+  for(const idx in items) {
+    const item = items[idx]
+    sum += clientSize(item)
+    if (sum >= clickPostion) {
+      postion.end = +idx
+      break
+    } else {
+      postion.start = +idx
+    }
+  }
+  console.log(postion);
+  return {
+    start: items[postion.start],
+    end: items[postion.end]
+  }
+}
+
 function mouseDown (e: MouseEvent) {
   const target = e.currentTarget! as HTMLElement
   const hostElement = getShadowHost(target) as DrapWrap
-  const { items } = hostElement
-  console.log("mouseDown", e, items)
+  const { items, wrap, direction } = hostElement
 
-  const startX = e.clientX
+  const clientOffset = (e: MouseEvent) =>
+    direction === "row" ? e.offsetX : e.offsetY
+  const clientPostion = (e: MouseEvent) =>
+    direction === "row" ? e.clientX : e.clientY
+  const clientSize = (elm: HTMLElement) =>
+    direction === "row" ? elm.clientWidth : elm.clientHeight
+  const changeSize = (elm: HTMLElement, size: string) =>
+    direction === "row" ? (elm.style.width = size) : (elm.style.height = size);
+
+  const startPostion = clientPostion(e)
+  const postion = calcPostion(clientOffset(e), items, clientSize)
+  const wrapSize = clientSize(wrap)
+  const startSize = clientSize(postion.start)
+  const maxSize = clientSize(postion.start) + clientSize(postion.end)
+  const maxPercent = maxSize * 100 / wrapSize
+  console.log(postion)
   const mounseMove = (e: MouseEvent) => {
-    console.log("mounseMove", e)
+    const startOffsetSize = startSize + (clientPostion(e) - startPostion)
+    if (startOffsetSize > maxSize || startOffsetSize < 0) {
+      return
+    }
+    let startPercentSize = (startOffsetSize * 100) / wrapSize
+    if (startPercentSize < 2) {
+      startPercentSize = 0
+    } else if (startPercentSize > maxPercent - 2) {
+      startPercentSize = maxPercent
+    }
+    changeSize(postion.start, startPercentSize + "%")
+    changeSize(postion.end, (maxPercent - startPercentSize) + "%")
   }
 
   document.addEventListener("mousemove", mounseMove)
@@ -70,13 +121,12 @@ export default class DrapWrap extends HTMLElement {
   }
 
   updateItems () {
-    const { items, wrap } = this
-    const itemWidth = Math.round((100 / items.length) / 100)
-    console.log(items);
+    const { items, wrap, direction } = this
+    const itemSize = (100 / items.length) + "%"
 
     items.forEach((item) => {
-      item.style.flex = 1 + ""
       item.style.cursor = "auto"
+      direction === "row" ? (item.style.width = itemSize) : (item.style.height = itemSize)
       item.addEventListener("mousedown", (e) => e.stopPropagation())
     })
 
