@@ -13,15 +13,21 @@ function calcPostion (
     end: 0
   }
   let sum = 0
-  for(const idx in items) {
+
+  for(let idx = 0; idx < items.length; idx++) {
     const item = items[idx]
-    sum += clientSize(item)
+    const itemSize = clientSize(item)
+    sum += itemSize
     if (sum >= clickPostion) {
-      postion.end = +idx
+      postion.end = idx
       break
-    } else {
-      postion.start = +idx
+    } else if (itemSize !== 0) {
+      postion.start = idx
     }
+  }
+  console.log(postion);
+  if (postion.start >= postion.end) {
+    postion.end = postion.start + 1
   }
   console.log(postion);
   return {
@@ -31,6 +37,7 @@ function calcPostion (
 }
 
 function mouseDown (e: MouseEvent) {
+  console.log("mousedown");
   const target = e.currentTarget! as HTMLElement
   const hostElement = getShadowHost(target) as DrapWrap
   const { items, wrap, direction } = hostElement
@@ -64,10 +71,19 @@ function mouseDown (e: MouseEvent) {
     }
     changeSize(postion.start, startPercentSize + "%")
     changeSize(postion.end, (maxPercent - startPercentSize) + "%")
+    console.log(startPercentSize, maxPercent)
+    // if (maxPercent === startPercentSize) {
+    //   // mouseup
+    //   const event = document.createEvent("MouseEvent")
+    //   event.initEvent("mouseup", false, false)
+    //   document.dispatchEvent(event)
+    //   console.log(calcPostion(clientOffset(e), items, clientSize));
+    // }
   }
 
   document.addEventListener("mousemove", mounseMove)
   document.addEventListener("mouseup", () => {
+    console.log("mouse up")
     document.removeEventListener("mousemove", mounseMove)
   })
 }
@@ -124,9 +140,14 @@ export default class DrapWrap extends HTMLElement {
     const { items, wrap, direction } = this
     const itemSize = (100 / items.length) + "%"
 
-    items.forEach((item) => {
+    items.forEach((item, idx) => {
       item.style.cursor = "auto"
-      direction === "row" ? (item.style.width = itemSize) : (item.style.height = itemSize)
+      if (!idx) {
+        item.style.width = "100%"
+      } else {
+        item.style.width = "0"
+      }
+      // direction === "row" ? (item.style.width = itemSize) : (item.style.height = itemSize)
       item.addEventListener("mousedown", (e) => e.stopPropagation())
     })
 
