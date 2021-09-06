@@ -15,43 +15,39 @@
       height: 100%;
       overflow: hidden;
     }
-    #vuehtml {
-      width: 100%;
-      height: 50%;
+    .sandbox {
+      height: 100%;
+      background: #333;
     }
-    #vuets {
-      width: 100%;
-      height: 50%;
-    }
-    #sandbox {
+    #vuehtml, #vuets {
       width: 100%;
       height: 100%;
     }
     .wrap {
-      display: flex;
       height: 100%;
       width: 100%;
       background: #333;
-    }
-    .editor {
-      width: 50%;
-      height: 100%;
-    }
-    .sandbox {
-      width: 50%;
-      height: 100%;
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="editor">
-      <monaco-editor id="vuehtml"></monaco-editor>
-      <monaco-editor id="vuets"></monaco-editor>
-    </div>
-    <div class="sandbox">
-      <iframe-sandbox id="sandbox"/>
-    </div>
+    <drag-wrap direction="row">
+      <div slot="item" class="editor">
+        <drag-wrap direction="column">
+          <div slot="item">
+            <monaco-editor id="vuehtml"></monaco-editor>
+          </div>
+          <div slot="item">
+            <monaco-editor id="vuets"></monaco-editor>
+          </div>
+        </drag-wrap>
+      </div>
+
+      <div slot="item" class="sandbox">
+        <iframe-sandbox id="sandbox"/>
+      </div>
+    </drag-wrap>
   </div>
 </body>
 </html>

@@ -25,19 +25,27 @@ function calcPostion (
       postion.start = idx
     }
   }
-  console.log(postion);
-  if (postion.start >= postion.end) {
+  if (postion.start - postion.end >= 0) {
     postion.end = postion.start + 1
+  } else if (
+    postion.end - postion.start > 1
+    // && clientSize(items[postion.end]) === sum
+  ) {
+    postion.start = postion.end - 1
   }
-  console.log(postion);
   return {
     start: items[postion.start],
     end: items[postion.end]
   }
 }
 
+function itemsUserSelect (items: NodeListOf<HTMLElement>, enable: boolean) {
+  items.forEach(item => {
+    item.style.userSelect = enable ? "auto" : "none"
+  })
+}
+
 function mouseDown (e: MouseEvent) {
-  console.log("mousedown");
   const target = e.currentTarget! as HTMLElement
   const hostElement = getShadowHost(target) as DrapWrap
   const { items, wrap, direction } = hostElement
@@ -49,43 +57,51 @@ function mouseDown (e: MouseEvent) {
   const clientSize = (elm: HTMLElement) =>
     direction === "row" ? elm.clientWidth : elm.clientHeight
   const changeSize = (elm: HTMLElement, size: string) =>
-    direction === "row" ? (elm.style.width = size) : (elm.style.height = size);
+    direction === "row" ? (elm.style.width = size) : (elm.style.height = size)
+  const updatePostion = (e: MouseEvent) => {
+    const wrapSize = clientSize(wrap)
+    const postion = calcPostion(clientOffset(e), items, clientSize)
+    const maxSize = clientSize(postion.start) + clientSize(postion.end)
+    const startSize = clientSize(postion.start)
+    const maxPercent = maxSize * 100 / wrapSize
+    const startPostion = clientPostion(e)
+    return {
+      startPostion,
+      postion,
+      maxSize,
+      startSize,
+      maxPercent,
+      wrapSize
+    }
+  }
 
-  const startPostion = clientPostion(e)
-  const postion = calcPostion(clientOffset(e), items, clientSize)
-  const wrapSize = clientSize(wrap)
-  const startSize = clientSize(postion.start)
-  const maxSize = clientSize(postion.start) + clientSize(postion.end)
-  const maxPercent = maxSize * 100 / wrapSize
-  console.log(postion)
+  itemsUserSelect(items, false)
+  let cItem = updatePostion(e)
   const mounseMove = (e: MouseEvent) => {
-    const startOffsetSize = startSize + (clientPostion(e) - startPostion)
-    if (startOffsetSize > maxSize || startOffsetSize < 0) {
+    const startOffsetSize = cItem.startSize + (clientPostion(e) - cItem.startPostion)
+    if (startOffsetSize > cItem.maxSize || startOffsetSize < 0) {
+      // cItem = updatePostion(e)
       return
     }
-    let startPercentSize = (startOffsetSize * 100) / wrapSize
+    let startPercentSize = (startOffsetSize * 100) / cItem.wrapSize
     if (startPercentSize < 2) {
       startPercentSize = 0
-    } else if (startPercentSize > maxPercent - 2) {
-      startPercentSize = maxPercent
+    } else if (startPercentSize > cItem.maxPercent - 2) {
+      startPercentSize = cItem.maxPercent
     }
-    changeSize(postion.start, startPercentSize + "%")
-    changeSize(postion.end, (maxPercent - startPercentSize) + "%")
-    console.log(startPercentSize, maxPercent)
-    // if (maxPercent === startPercentSize) {
-    //   // mouseup
-    //   const event = document.createEvent("MouseEvent")
-    //   event.initEvent("mouseup", false, false)
-    //   document.dispatchEvent(event)
-    //   console.log(calcPostion(clientOffset(e), items, clientSize));
-    // }
+    changeSize(cItem.postion.start, startPercentSize + "%")
+    changeSize(cItem.postion.end, (cItem.maxPercent - startPercentSize) + "%")
   }
 
   document.addEventListener("mousemove", mounseMove)
   document.addEventListener("mouseup", () => {
-    console.log("mouse up")
+    itemsUserSelect(items, true)
     document.removeEventListener("mousemove", mounseMove)
   })
+}
+
+function stopPropagation (e: Event) {
+  e.stopPropagation()
 }
 
 function formatDirection (item: string): direction {
@@ -95,8 +111,11 @@ function formatDirection (item: string): direction {
   return "row"
 }
 
+let id = 0
+
 export default class DrapWrap extends HTMLElement {
   #direction: "row" | "column" = "row"
+  #id = ++id
   constructor() {
     super()
     const shadowRoot = this.attachShadow({ mode: "open" })
@@ -105,6 +124,7 @@ export default class DrapWrap extends HTMLElement {
     wrap.style.height = "100%"
     wrap.innerHTML = teamplateElement
     shadowRoot.appendChild(wrap)
+    this.setAttribute("data-index", `${this.#id}`)
   }
 
   get direction () {
@@ -112,7 +132,7 @@ export default class DrapWrap extends HTMLElement {
   }
 
   get items (): NodeListOf<HTMLElement> {
-    return this.querySelectorAll("[slot='item']")
+    return this.querySelectorAll(`[data-index='${this.#id}']>[slot='item']`)
   }
 
   get wrap (): HTMLElement {
@@ -125,7 +145,9 @@ export default class DrapWrap extends HTMLElement {
   }
 
   disconnectedCallback () {
-
+    const { wrap, items } = this
+    items.forEach(item => item.removeEventListener("mousedown", stopPropagation))
+    wrap.removeEventListener("mousedown", mouseDown)
   }
 
   attributeChangedCallback () {
@@ -139,16 +161,12 @@ export default class DrapWrap extends HTMLElement {
   updateItems () {
     const { items, wrap, direction } = this
     const itemSize = (100 / items.length) + "%"
+    console.log(items);
 
-    items.forEach((item, idx) => {
+    items.forEach((item) => {
       item.style.cursor = "auto"
-      if (!idx) {
-        item.style.width = "100%"
-      } else {
-        item.style.width = "0"
-      }
-      // direction === "row" ? (item.style.width = itemSize) : (item.style.height = itemSize)
-      item.addEventListener("mousedown", (e) => e.stopPropagation())
+      direction === "row" ? (item.style.width = itemSize) : (item.style.height = itemSize)
+      item.addEventListener("mousedown", stopPropagation)
     })
 
     wrap.addEventListener("mousedown", mouseDown)

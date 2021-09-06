@@ -13,6 +13,11 @@
       background: #333;
       color: #e3e3e3;
     }
+    h2 {
+      padding: 20px;
+      width: 80%;
+      margin: 0 auto;
+    }
     .wrap {
       width: 80%;
       margin: 0 auto;
@@ -26,14 +31,41 @@
 </head>
 <body>
   <a href="/">back</a>
+  <h2>drag-wrap row</h2>
   <div class="wrap">
-    <h3>drag-wrap</h3>
     <drag-wrap direction="row">
       <div slot="item">1</div>
       <div slot="item">2</div>
       <div slot="item">3</div>
       <div slot="item">4</div>
       <div slot="item">5</div>
+    </drag-wrap>
+  </div>
+  <h2>drag-wrap column</h2>
+  <div class="wrap">
+    <drag-wrap direction="column">
+      <div slot="item">1</div>
+      <div slot="item">2</div>
+      <div slot="item">3</div>
+      <div slot="item">4</div>
+      <div slot="item">5</div>
+    </drag-wrap>
+  </div>
+  <h2>drap-wrao row & column</h2>
+  <div class="wrap">
+    <drag-wrap direction="row" class="a">
+      <div slot="item">
+        <drag-wrap direction="column">
+          <div slot="item">1</div>
+          <div slot="item">2</div>
+        </drag-wrap>
+      </div>
+
+      <div slot="item">
+        <drag-wrap direction="column">
+          <div slot="item">3</div>
+          <div slot="item">4</div>
+        </drag-wrap>
       </div>
     </drag-wrap>
   </div>
