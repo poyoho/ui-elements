@@ -3,7 +3,7 @@ import * as MonacoEditor from "@ui-elements/monaco-editor"
 import * as CodeComment from "@ui-elements/code-comment"
 import * as IframeSandbox from "@ui-elements/iframe-sandbox"
 import * as DragWrap from "@ui-elements/drag-wrap"
-import * as Tree from "@ui-elements/tree"
+import * as TabContainer from "@ui-elements/tab-container"
 
 export function install () {
   DemoBlock.install()
@@ -11,5 +11,5 @@ export function install () {
   CodeComment.install()
   IframeSandbox.install()
   DragWrap.install()
-  Tree.install()
+  TabContainer.install()
 }
