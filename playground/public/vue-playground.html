@@ -47,22 +47,9 @@
     <drag-wrap direction="row">
       <div slot="item" class="editor">
         <tab-container class="tab">
-          <div role="tablist" class="tablist">
-            <button id="tab-one" role="tab" aria-selected="true">test.vue</button>
-            <button id="tab-two" role="tab" tabindex="-1">Tab two</button>
-          </div>
+          <div role="tablist" class="tablist" id="tab"></div>
           <div role="tabpanel" aria-labelledby="tab-one">
-            <drag-wrap direction="column">
-              <div slot="item">
-                <monaco-editor id="vuehtml"></monaco-editor>
-              </div>
-              <div slot="item">
-                <monaco-editor id="vuets"></monaco-editor>
-              </div>
-            </drag-wrap>
-          </div>
-          <div role="tabpanel" aria-labelledby="tab-two" hidden>
-            Panel 2
+            <drag-wrap direction="column" id="editor"></drag-wrap>
           </div>
         </tab-container>
       </div>

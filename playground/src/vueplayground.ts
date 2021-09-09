@@ -1,51 +1,89 @@
 import { install } from "../../packages/ui-elements"
 import type { MonacoEditorChangeEvent, default as MonacoEditor } from "../../packages/monaco-editor/src/monaco-editor"
 import type { SandboxEvent, default as IframeSandbox } from "../../packages/iframe-sandbox/src/iframe-sandbox"
+import type { default as DragWrap } from "../../packages/drag-wrap/src/drag-wrap"
 
 import { resolvePackage } from "../../packages/unpkg"
 import { FileSystem, CompiledFile } from "../../packages/vfs"
 import { importCompiler } from "../../packages/compiler"
+import { debounce } from "../../packages/utils"
+
+const compile = await importCompiler("vue")
+const fs = new FileSystem<CompiledFile>()
 
 const sandbox = document.querySelector("#sandbox") as any as IframeSandbox
-const compile = await importCompiler("vue")
-const vuefs = new FileSystem<CompiledFile>()
-const vuefile = vuefs.writeFile(new CompiledFile({
-  name: "test.vue"
-}))
-const updateFile = async (cache: {js: string, html: string}) => {
-  vuefile.updateFile([
-    `<template>`,
-    `${cache.html}`,
-    `</template>`,
-    `<script>`,
-    `${cache.js}`,
-    `</script>`,
-  ].join("\n"))
-  // console.log(await compile.compileFile(vuefile))
-  const vueProjectJS = await compile.getProjectRunableJS(vuefs)
-  console.log(vueProjectJS.join("\n"))
+const editorWrap = document.querySelector("#editor") as any as DragWrap
+const tabWrap = document.querySelector("#tab") as HTMLDivElement
+
+const vuehtmlEditor = createMonacoEditor()
+const tsEditor = createMonacoEditor()
+
+function createMonacoEditor () {
+  const elm = document.createElement("div")
+  elm.setAttribute("slot", "item")
+  const editor = document.createElement("monaco-editor")
+  elm.appendChild(editor)
+  editorWrap.appendChild(elm)
+  return editor
+}
+
+function createFileTab (filename: string) {
+  const filetab = document.createElement("button")
+  filetab.innerHTML = filename
+  tabWrap.appendChild(filetab)
+}
+
+async function execVueProject () {
+  const vueProjectJS = await compile.getProjectRunableJS(fs)
   sandbox.eval(vueProjectJS)
 }
 
-async function setupVueMonaco () {
-  const tselm = document.querySelector("#vuets") as any as MonacoEditor
+async function tsEditorAddDTS() {
   const pkgs = await resolvePackage("vue", "3.2.4")
-  await tselm.addDTS(pkgs.map(pkg => ({name: pkg.name, version: pkg.version, entry: pkg.types})).filter(el => el.entry))
-  const tsmodel = await tselm.createModel("ts", "test.vue.ts", `export default {}`)
-  await tselm.setModel(tsmodel)
-  const elmhtml = document.querySelector("#vuehtml") as any as MonacoEditor
-  const htmlmodel = await elmhtml.createModel("vuehtml", "test.vue.vuehtml", `<div> hello world </div>`)
-  await elmhtml.setModel(htmlmodel)
-  const cache = {js: tsmodel.getValue(), html: htmlmodel.getValue()}
-  updateFile(cache)
-  tselm.addEventListener("code-change", async (e) => {
-    cache.js = await tselm.getRunnableJS(tsmodel)
-    updateFile(cache)
-  })
-  elmhtml.addEventListener("code-change", (e) => {
-    cache.html = (e as MonacoEditorChangeEvent).value.content
-    updateFile(cache)
-  })
+  await tsEditor.addDTS(pkgs.map(pkg => ({name: pkg.name, version: pkg.version, entry: pkg.types})).filter(el => el.entry))
+}
+
+async function createFile (filename: string) {
+  const file = fs.writeFile(new CompiledFile({ name: filename }))
+
+  if (file.filename.endsWith(".vue")) {
+    const tsmodel = await tsEditor.createModel("ts", "test.vue.ts", `export default {}`)
+    const htmlmodel = await vuehtmlEditor.createModel("vuehtml", "test.vue.vuehtml", `<div> hello world </div>`)
+    const updateFile = async (cache: {js: string, html: string}) => {
+      file.updateFile([
+        `<template>`,
+        `${cache.html}`,
+        `</template>`,
+        `<script>`,
+        `${cache.js}`,
+        `</script>`,
+      ].join("\n"))
+    }
+    await tsEditor.setModel(tsmodel)
+    await vuehtmlEditor.setModel(htmlmodel)
+    tsmodel.onDidChangeContent(debounce(() => {
+
+    }))
+
+  } else if (file.filename.endsWith("ts")) {
+    const tsmodel = await tsEditor.createModel("ts", "test.vue.ts", `export default {}`)
+    const updateFile = () => {}
+    await tsEditor.setModel(tsmodel)
+  }
+
+
+
+  // const cache = {js: tsmodel.getValue(), html: htmlmodel.getValue()}
+  // tselm.addEventListener("code-change", async (e) => {
+  //   cache.js = await tselm.getRunnableJS(tsmodel)
+  //   updateFile(cache)
+  // })
+  // htmlelm.addEventListener("code-change", (e) => {
+  //   cache.html = (e as MonacoEditorChangeEvent).value.content
+  //   updateFile(cache)
+  // })
+
+  // updateFile(cache)
 }
 
 function setupIframesandbox () {
@@ -83,7 +121,6 @@ function setupIframesandbox () {
 function main () {
   install()
   setupIframesandbox()
-  setupVueMonaco()
 }
 
 main()
