@@ -15,49 +15,16 @@
       height: 100%;
       overflow: hidden;
     }
-    .sandbox {
-      height: 100%;
-      background: #333;
-    }
-    #vuehtml, #vuets {
-      width: 100%;
-      height: 100%;
-    }
     .wrap {
       height: 100%;
       width: 100%;
       background: #333;
     }
-    .tab {
-      width: 100%;
-      height: 100%;
-    }
-    .tablist {
-      font-size: 0;
-    }
-    .tablist button {
-      font-size: 14px;
-      padding: 7px;
-    }
-
   </style>
 </head>
 <body>
   <div class="wrap">
-    <drag-wrap direction="row">
-      <div slot="item" class="editor">
-        <tab-container class="tab">
-          <div role="tablist" class="tablist" id="tab"></div>
-          <div role="tabpanel" aria-labelledby="tab-one">
-            <drag-wrap direction="column" id="editor"></drag-wrap>
-          </div>
-        </tab-container>
-      </div>
-
-      <div slot="item" class="sandbox">
-        <iframe-sandbox id="sandbox"/>
-      </div>
-    </drag-wrap>
+    <code-playground />
   </div>
 </body>
 </html>

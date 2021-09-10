@@ -9,7 +9,7 @@ interface Compiler {
 
 type CompilerType = "vue"
 
-export async function importCompiler (type: CompilerType): Promise<Compiler> {
+export async function createProjectManager (type: CompilerType): Promise<Compiler> {
   switch(type) {
     case "vue": return await import("./vue/vue")
   }
