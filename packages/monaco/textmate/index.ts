@@ -1,12 +1,14 @@
 import { Registry } from 'monaco-textmate'
 import { wireTmGrammars } from 'monaco-editor-textmate'
-
+import { createSinglePromise } from "@ui-elements/utils"
 import { loadWASM } from 'onigasm'
 
 const onigasm = new URL("./token/onigasm.wasm", import.meta.url)
 
 import type { editor } from 'monaco-editor'
 export type monaco = typeof import("monaco-editor")
+
+const loadOnigasm = createSinglePromise(() => loadWASM(onigasm.href))
 
 // anyscript fork from https://github.com/Nishkalkashyap/monaco-vscode-textmate-theme-converter/blob/master/lib/cjs/index.js
 function convertTheme(theme: any): any {
@@ -51,7 +53,7 @@ function convertTheme(theme: any): any {
 
 // any editor need setup
 export async function setupTheme (monaco: monaco, editor: editor.ICodeEditor) {
-  await loadWASM(onigasm.href) // See https://www.npmjs.com/package/onigasm#light-it-up
+  await loadOnigasm() // See https://www.npmjs.com/package/onigasm#light-it-up
   const registry = new Registry({
     getGrammarDefinition: async (scopeName) => {
       return ({

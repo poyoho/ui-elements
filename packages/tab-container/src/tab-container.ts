@@ -1,5 +1,3 @@
-import "./tab-container.css"
-
 function getTabs(el: TabContainerElement): HTMLElement[] {
   return Array.from(el.querySelectorAll<HTMLElement>('[role="tablist"] [role="tab"]')).filter(
     tab => tab instanceof HTMLElement && tab.closest(el.tagName) === el

@@ -1,6 +1,6 @@
 import type { default as IframeSandbox, SandboxEvent } from "@ui-elements/iframe-sandbox/src/iframe-sandbox"
 import type { default as DragWrap } from "@ui-elements/drag-wrap/src/drag-wrap"
-import type { default as MonacoEditor } from "@ui-elements/monaco-editor/src/monaco-editor"
+import MonacoEditor from "@ui-elements/monaco-editor/src/monaco-editor"
 import teamplateElement from "./code-playground-element"
 import { FileSystem, CompiledFile } from "@ui-elements/vfs"
 import { createProjectManager } from "@ui-elements/compiler"
@@ -8,41 +8,105 @@ import { createProjectManager } from "@ui-elements/compiler"
 interface MonacoEditorItem {
   wrap: HTMLDivElement
   editor: MonacoEditor
+  status: boolean
 }
 
-function setupMonacoEditor (host: CodePlayground, needSize: number) {
-  const { editorWrap, editors } = host
-  if (needSize > editors.length) {
-    for (let i = 0; i < needSize - editors.length; i++) {
-      const editor = document.createElement("monaco-editor")
-      const wrap = document.createElement("div")
-      // wrap.setAttribute("slot", "item")
-      // wrap.append(editor)
-      // editorWrap.append(wrap)
-      console.log(editor)
-      editors.push({
-        wrap,
-        editor
-      })
+type SupportEditorType = "vuehtml" | "ts"
+
+async function createFile (host: CodePlayground,  filename: string) {
+  const { editorManage, tabWrap, fs, editorWrap } = host
+
+  async function activeMonacoEditor () {
+    let isCreate = false
+    let file: CompiledFile
+    if (fs.isExist(filename)) {
+      isCreate = false
+      file = fs.readFile(filename)!
+    } else {
+      isCreate = true
+      file = fs.writeFile(new CompiledFile({ name: filename }))
     }
-  } else {
-    for (let i = needSize; i < editors.length; i++) {
-      const node = editors[i]
-      node.wrap.remove()
-      editors.splice(i, 1)
+
+    const setModel = async (editor: MonacoEditor, type: SupportEditorType, filename: string) => {
+      let model
+      if (isCreate) {
+        model = await editor.createModel(type, filename)
+      } else {
+        model = (await editor.findModel(filename))!
+      }
+      await editor.setModel(model)
+      return model
+    }
+
+    if (filename.endsWith(".vue")) {
+      const vuehtmlEditor = editorManage.show("vuehtml")
+      const tsEditor = editorManage.show("ts")
+      editorWrap.updateItems()
+
+      const vuehtmlModel = await setModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml")
+      const tsModel = await setModel(tsEditor.editor, "ts", filename+".ts")
+      if (isCreate) {
+        const cache = {html: "", ts: ""}
+        vuehtmlModel.onDidChangeContent(e => {
+          cache.html = vuehtmlModel.getValue()
+          file.updateFile([
+            "<teamplate>",
+            cache.html,
+            "</teamplate>",
+            "<script>",
+            cache.ts,
+            "</script>"
+          ].join("\n"))
+        })
+        tsModel.onDidChangeContent(async e => {
+          cache.ts = await tsEditor.editor.getRunnableJS(tsModel)
+          file.updateFile([
+            "<teamplate>",
+            cache.html,
+            "</teamplate>",
+            "<script>",
+            cache.ts,
+            "</script>"
+          ].join("\n"))
+          console.log(fs)
+        })
+      }
+    } else if (filename.endsWith(".ts")) {
+      editorManage.hide("vuehtml")
+      const tsEditor = editorManage.show("ts")
+      editorWrap.updateItems()
+
+      const tsModel = await setModel(tsEditor.editor, "ts", filename)
+      if (isCreate) {
+        tsModel.onDidChangeContent(e => {
+          file.updateFile(tsModel.getValue())
+        })
+      }
+    } else {
+      throw "don't support create ${filename}, only support create *.vue/*.ts."
     }
   }
-  console.log(editors, needSize, editors.length)
-  return editors
-}
 
-function insertFileTab (host: CodePlayground, filename: string) {
-  const { tabWrap } = host
+  function insertFileTab () {
+    const filetab = document.createElement("button")
+    filetab.innerHTML = filename
+    tabWrap.appendChild(filetab)
+    return filetab
+  }
 
-  const filetab = document.createElement("button")
-  filetab.innerHTML = filename
-  tabWrap.appendChild(filetab)
-  return filetab
+  const tabBtn = insertFileTab()
+  tabBtn.addEventListener("click", activeMonacoEditor)
+
+  activeMonacoEditor()
+  return {
+    active() {
+      activeMonacoEditor()
+    },
+
+    remove () {
+
+    }
+  }
 }
 
 function setupIframesandbox (host: CodePlayground) {
@@ -76,53 +140,34 @@ function setupIframesandbox (host: CodePlayground) {
     const event = e as SandboxEvent
     console.log("[vueplayground] on_console_group_end", event.data)
   })
-}
 
-async function createFile (host: CodePlayground, filename: string) {
-  const { fs } = host
-  if (filename.endsWith(".vue")) {
-    fs.writeFile(new CompiledFile({ name: filename }))
-    insertFileTab(host, filename)
-    const [vuehtmlEditor, tsEditor] = setupMonacoEditor(host, 2)
-    const tsModel = await tsEditor.editor.createModel("ts", filename)
-    await tsEditor.editor.setModel(tsModel)
-    tsModel.onDidChangeContent(e => {
-      console.log(e);
-    })
-
-    const vuehtmlModel = await vuehtmlEditor.editor.createModel("ts", filename)
-    await vuehtmlEditor.editor.setModel(vuehtmlModel)
-    vuehtmlModel.onDidChangeContent(e => {
-      console.log(e);
-    })
-  } else if (filename.endsWith(".ts")) {
-    insertFileTab(host, filename)
-    fs.writeFile(new CompiledFile({ name: filename }))
-    const [tsEditor] = setupMonacoEditor(host, 1)
-    const tsmodel = await tsEditor.editor.createModel("ts", filename)
-    await tsEditor.editor.setModel(tsmodel)
-    tsmodel.onDidChangeContent(e => {
-      console.log(e);
-    })
-  } else {
-    throw "don't support create ${filename}, only support create *.vue/*.ts."
-  }
+  return sandbox
 }
 
 export default class CodePlayground extends HTMLElement {
-  public fs = new FileSystem ()
-  public editors: MonacoEditorItem[] = []
+  private project = createProjectManager("vue")
+  private editors: Record<string, MonacoEditorItem> = {}
+  public fs = new FileSystem<CompiledFile>()
+  public editorManage
+
   constructor() {
     super()
-    const shadowRoot = this.attachShadow({ mode: "open" })
     const wrap = this.ownerDocument.createElement("div")
     wrap.innerHTML = teamplateElement
-    shadowRoot.appendChild(wrap)
+    wrap.style.width = "inherit"
+    wrap.style.height = "inherit"
+    this.appendChild(wrap)
+    this.editorManage = this.createMonacoEditorManager()
   }
 
-  connectedCallback () {
-    setupIframesandbox(this)
-    createFile(this, "test.vue")
+  async connectedCallback () {
+    const project = await this.project
+
+    const sandbox = setupIframesandbox(this)
+    sandbox.setupDependency(project.getRuntimeImportMap())
+
+    await createFile(this, "test.ts")
+    await createFile(this, "test.vue")
   }
 
   disconnectedCallback () {
@@ -132,12 +177,51 @@ export default class CodePlayground extends HTMLElement {
   }
 
   get sandbox (): IframeSandbox {
-    return this.shadowRoot!.querySelector("#sandbox")!
+    return this.ownerDocument.querySelector("#sandbox")!
   }
   get editorWrap (): DragWrap {
-    return this.shadowRoot!.querySelector("#editor")!
+    return this.ownerDocument.querySelector("#editor-wrap")!
   }
   get tabWrap (): HTMLDivElement {
-    return this.shadowRoot!.querySelector("#tab")!
+    return this.ownerDocument.querySelector("#tab")!
+  }
+
+  private createMonacoEditorManager () {
+    const { editors, editorWrap } = this
+    return {
+      show: (type: SupportEditorType): MonacoEditorItem => {
+        let state = editors[type]
+        if (!state) {
+          const editor = new MonacoEditor()
+          editor.style.width = "100%"
+          editor.style.height = "100%"
+
+          const wrap = this.ownerDocument.createElement("div")
+          wrap.style.width = "100%"
+          wrap.style.height = "100%"
+          wrap.setAttribute("slot", "item")
+          wrap.appendChild(editor)
+
+          state = { wrap, editor, status: false }
+          editors[type] = state
+          editorWrap.appendChild(state.wrap)
+        }
+        if (!state.status) {
+          state.status = true
+          state.wrap.style.display = "block"
+          state.wrap.removeAttribute("hidden")
+        }
+        return state
+      },
+
+      hide: (type: SupportEditorType) => {
+        const state = editors[type]
+        if (state && state.status) {
+          state.status = false
+          state.wrap.style.display = "none"
+          state.wrap.setAttribute("hidden", "")
+        }
+      },
+    }
   }
 }

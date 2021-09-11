@@ -47,8 +47,9 @@ export default class MonacoEditor extends HTMLElement {
       if (!model) {
         return
       }
-
+      console.log("[monaco-editor] change model")
       model.onDidChangeContent(debounce(async () => {
+        // model.uri.path
         const event = document.createEvent("events") as MonacoEditorChangeEvent
         event.initEvent("code-change", false, false)
         event.value = {
@@ -71,7 +72,6 @@ export default class MonacoEditor extends HTMLElement {
     console.log("[monaco-editor] createModel")
     const { monacoInstance } = this
     const { monaco } = await monacoInstance
-
     return monaco.editor.createModel(
       code || "",
       SupportLanguage[extension],
@@ -83,7 +83,15 @@ export default class MonacoEditor extends HTMLElement {
     console.log("[monaco-editor] setModel")
     const { monacoInstance } = this
     await monacoInstance
-    await this.editor.promise.then(editor => editor.setModel(model))
+    await this.editor.promise.then(editor => {
+      editor.setModel(model)
+    })
+  }
+
+  async findModel (filename: string) {
+    const { monacoInstance } = this
+    const { monaco } = await monacoInstance
+    return monaco.editor.getModel(monaco.Uri.parse(`file://${filename}`))
   }
 
   async addDTS (options: Array<{name: string, version: string, entry: string}>) {

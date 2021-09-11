@@ -5,7 +5,7 @@ type direction = "row" | "column"
 
 function calcPostion (
   clickPostion: number,
-  items: NodeListOf<HTMLElement>,
+  items: Array<HTMLElement>,
   clientSize: (elm: HTMLElement) => number,
 ) {
   const postion = {
@@ -39,7 +39,7 @@ function calcPostion (
   }
 }
 
-function itemsUserSelect (items: NodeListOf<HTMLElement>, enable: boolean) {
+function itemsUserSelect (items: Array<HTMLElement>, enable: boolean) {
   items.forEach(item => {
     item.style.userSelect = enable ? "auto" : "none"
   })
@@ -131,8 +131,9 @@ export default class DrapWrap extends HTMLElement {
     return this.#direction
   }
 
-  get items (): NodeListOf<HTMLElement> {
-    return this.querySelectorAll(`[data-index='${this.#id}']>[slot='item']`)
+  get items (): Array<HTMLElement> {
+    return Array.from(this.ownerDocument.querySelectorAll(`[data-index='${this.#id}']>[slot='item']`))
+      .filter(item => !item.hasAttribute("hidden")) as Array<HTMLElement>
   }
 
   get wrap (): HTMLElement {
@@ -161,8 +162,8 @@ export default class DrapWrap extends HTMLElement {
   updateItems () {
     const { items, wrap, direction } = this
     const itemSize = (100 / items.length) + "%"
-    console.log(items);
 
+    console.log("[drag-wrap] update item");
     items.forEach((item) => {
       item.style.cursor = "auto"
       direction === "row" ? (item.style.width = itemSize) : (item.style.height = itemSize)

@@ -4,13 +4,12 @@ function html(...args: any) {
 
 export default html`
 <drag-wrap direction="row">
-  <div slot="item" class="editor">
-    <tab-container class="tab">
-      <div role="tablist" class="tablist" id="tab"></div>
-      <div role="tabpanel" aria-labelledby="tab-one">
-        <drag-wrap direction="column" id="editor"></drag-wrap>
-      </div>
-    </tab-container>
+  <div slot="item">
+    <div id="tab">
+
+    </div>
+    <drag-wrap direction="column" id="editor-wrap">
+    </drag-wrap>
   </div>
 
   <div slot="item" class="sandbox">

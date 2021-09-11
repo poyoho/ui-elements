@@ -5,6 +5,7 @@ import type * as VueCompiler from '@vue/compiler-sfc'
 export interface SFCFile {
   filename: string
   content: string
+  change: boolean
   compiled: {
     js: string
     css: string
