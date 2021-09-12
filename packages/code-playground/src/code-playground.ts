@@ -13,7 +13,7 @@ interface MonacoEditorItem {
 
 type SupportEditorType = "vuehtml" | "ts"
 
-async function createFile (host: CodePlayground,  filename: string) {
+async function createFile (host: CodePlayground,  filename: string, keepalive?: boolean) {
   const { editorManage, tabWrap, fs, editorWrap, sandbox } = host
   const project = await host.project
 
@@ -53,9 +53,9 @@ async function createFile (host: CodePlayground,  filename: string) {
       const [vuehtmlEditor, tsEditor] = createOrGetEditor(["vuehtml", "ts"])
 
       const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", isNotExistFile)
-      await vuehtmlEditor.editor.setModel(vuehtmlModel)
       const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename+".ts", isNotExistFile)
-      await tsEditor.editor.setModel(tsModel)
+      vuehtmlEditor.editor.setModel(vuehtmlModel)
+      tsEditor.editor.setModel(tsModel)
 
       if (isNotExistFile) {
         const cache = { html: vuehtmlModel.getValue(), ts: tsModel.getValue() }
@@ -84,7 +84,7 @@ async function createFile (host: CodePlayground,  filename: string) {
       const [tsEditor] = createOrGetEditor(["ts"])
 
       const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename, isNotExistFile)
-      await tsEditor.editor.setModel(tsModel)
+      tsEditor.editor.setModel(tsModel)
 
       if (isNotExistFile) {
         tsModel.onDidChangeContent(e => {
@@ -110,30 +110,35 @@ async function createFile (host: CodePlayground,  filename: string) {
     return activeMonacoEditor()
   }
 
-  function removeMonacoEditorModel () {
-
-  }
-
   function insertFileTab () {
     const filetab = document.createElement("button")
     filetab.innerHTML = filename
-      + `<svg t="1631378872341" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1198" width="14" height="14"><path d="M466.773333 512l-254.72 254.72 45.226667 45.226667L512 557.226667l254.72 254.72 45.226667-45.226667L557.226667 512l254.72-254.72-45.226667-45.226667L512 466.773333 257.28 212.053333 212.053333 257.28 466.773333 512z" fill="#e1e1e1" p-id="1199"></path></svg>`
-    tabWrap.appendChild(filetab)
-    const closeBtn = filetab.querySelector("svg")!
-    return {filetab, closeBtn}
+      + (keepalive ? '' : `<svg t="1631378872341" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1198" width="14" height="14"><path d="M466.773333 512l-254.72 254.72 45.226667 45.226667L512 557.226667l254.72 254.72 45.226667-45.226667L557.226667 512l254.72-254.72-45.226667-45.226667L512 466.773333 257.28 212.053333 212.053333 257.28 466.773333 512z" fill="#e1e1e1" p-id="1199"></path></svg>`)
+    tabWrap.insertBefore(filetab, tabWrap.lastElementChild!)
+    return filetab
+  }
+
+  function removeMonacoEditorModel () {
+    const activeEditor = editorManage.getActive()
+    activeEditor.forEach(async editorState => {
+      await editorState.editor.removeModel()
+    })
   }
 
   function removeFile(e: MouseEvent) {
-    console.log("remove");
     removeMonacoEditorModel()
     filetab.remove()
+    ;(<HTMLButtonElement>tabWrap.children.item(tabWrap.children.length - 2)).click()
     e.stopPropagation()
   }
 
-  const { filetab, closeBtn } = insertFileTab()
+  const filetab = insertFileTab()
   filetab.addEventListener("click", clickActiveMonacoEditor)
-  closeBtn.addEventListener("click", removeFile, false)
-  filetab.click()
+  await clickActiveMonacoEditor(filetab)
+  if (!keepalive) {
+    const closeBtn = filetab.querySelector("svg")!
+    closeBtn.addEventListener("click", removeFile, false)
+  }
 }
 
 function setupIframesandbox (host: CodePlayground) {
@@ -192,7 +197,7 @@ export default class CodePlayground extends HTMLElement {
 
     const sandbox = setupIframesandbox(this)
     sandbox.setupDependency(project.getRuntimeImportMap())
-    await createFile(this, "app.vue")
+    await createFile(this, "app.vue", true)
     await createFile(this, "app.ts")
   }
 
@@ -240,6 +245,17 @@ export default class CodePlayground extends HTMLElement {
         return state
       },
 
+      getActive: () => {
+        const result = []
+        for (let key in editors) {
+          const editor = editors[key]
+          if (editor.status) {
+            result.push(editor)
+          }
+        }
+        return result
+      },
+
       hide: (type: SupportEditorType) => {
         const state = editors[type]
         if (state && state.status) {
@@ -252,11 +268,6 @@ export default class CodePlayground extends HTMLElement {
       hideAll: () => {
         Object.keys(editors).forEach(editorType => manager.hide(editorType as any))
       },
-
-      remove: (type: SupportEditorType) => {
-        editors[type].wrap.remove()
-        delete editors[type]
-      }
     }
     return manager
   }

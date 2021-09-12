@@ -6,7 +6,7 @@ export default html`
 <drag-wrap direction="row">
   <div slot="item">
     <div id="tab">
-
+      <button>add</button>
     </div>
     <drag-wrap direction="column" id="editor-wrap">
     </drag-wrap>
@@ -45,7 +45,7 @@ export default html`
   padding-right: 8px;
 }
 #tab button .icon {
-  transform: translate(4px, 2px)
+  transform: translate(4px, 3px)
 }
 #tab button[active] {
   color: #e1e1e1;

@@ -78,11 +78,9 @@ export default class MonacoEditor extends HTMLElement {
     )
   }
 
-  async setModel (model: editor.ITextModel) {
+  setModel (model: editor.ITextModel) {
     console.log("[monaco-editor] setModel")
-    const { monacoInstance } = this
-    await monacoInstance
-    await this.editor.promise.then(editor => {
+    this.editor.promise.then(editor => {
       editor.setModel(model)
     })
   }
@@ -93,10 +91,9 @@ export default class MonacoEditor extends HTMLElement {
     return monaco.editor.getModel(monaco.Uri.parse(`file://${filename}`))
   }
 
-  async removeModel () {
-    const { editor } = this
-    return await editor.promise.then(editor => {
-      return editor.getModel()?.dispose()
+  removeModel () {
+    this.editor.promise.then(editor => {
+     editor.getModel()?.dispose()
     })
   }
 
