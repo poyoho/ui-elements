@@ -40,7 +40,6 @@ export default class MonacoEditor extends HTMLElement {
         enabled: false,
       },
     })
-
     // send change event
     editor.onDidChangeModel(() => {
       const model = editor.getModel()
@@ -92,6 +91,13 @@ export default class MonacoEditor extends HTMLElement {
     const { monacoInstance } = this
     const { monaco } = await monacoInstance
     return monaco.editor.getModel(monaco.Uri.parse(`file://${filename}`))
+  }
+
+  async removeModel () {
+    const { editor } = this
+    return await editor.promise.then(editor => {
+      return editor.getModel()?.dispose()
+    })
   }
 
   async addDTS (options: Array<{name: string, version: string, entry: string}>) {

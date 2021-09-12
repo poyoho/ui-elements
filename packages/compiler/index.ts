@@ -1,7 +1,7 @@
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
 export * from "./module"
 
-interface Compiler {
+export interface Compiler {
   getRuntimeImportMap: () => Record<string, string>
   compileFile: (file: CompiledFile) => Promise<CompiledFile>
   getProjectRunableJS: (filesystem: FileSystem<CompiledFile>) => Promise<string[]>

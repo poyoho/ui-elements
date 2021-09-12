@@ -25,16 +25,31 @@ export default html`
   width: 100%;
   height: 100%;
 }
-.tab {
-  width: 100%;
-  height: 100%;
-}
 .tablist {
   font-size: 0;
+  cursor: pointer;
 }
 .tablist button {
   font-size: 14px;
   padding: 7px;
+}
+#tab {
+  background: #1e1e1e;
+}
+#tab button {
+  border: 0;
+  outline: 0;
+  background: #666;
+  color: #e1e1e1;
+  padding: 5px;
+  padding-right: 8px;
+}
+#tab button .icon {
+  transform: translate(4px, 2px)
+}
+#tab button[active] {
+  color: #e1e1e1;
+  background: #333;
 }
 </style>
 `
