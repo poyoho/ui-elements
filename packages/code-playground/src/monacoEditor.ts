@@ -2,7 +2,7 @@ import CodePlayground from "./code-playground"
 import MonacoEditor from "@ui-elements/monaco-editor/src/monaco-editor"
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
 import { MonacoEditorItem, SupportEditorType } from "./types"
-import { resolvePackageTypes } from "@ui-elements/unpkg"
+import { vuePackages } from "@ui-elements/unpkg"
 
 type EditorManage = ReturnType<typeof createMonacoEditorManager>
 
@@ -97,24 +97,7 @@ function createOrGetFile (fs: FileSystem<CompiledFile>, filename: string, isNotE
 }
 
 async function setupTypescriptLanaguageService (editor: MonacoEditor) {
-  ;(await editor.monacoAccessor).typescript.addDTS([
-    {
-      name: "@vue/runtime-dom",
-      types: await resolvePackageTypes("@vue/runtime-dom", "dist/runtime-dom.d.ts", "3.2.6")
-    },
-    {
-      name: "@vue/runtime-core",
-      types: await resolvePackageTypes("@vue/runtime-core", "dist/runtime-core.d.ts", "3.2.6")
-    },
-    {
-      name: "@vue/reactivity",
-      types: await resolvePackageTypes("@vue/reactivity", "dist/reactivity.d.ts", "3.2.6")
-    },
-    {
-      name: "vue",
-      types: await resolvePackageTypes("vue", "dist/vue.d.ts", "3.2.6")
-    }
-  ])
+  ;(await editor.monacoAccessor).typescript.addDTS(vuePackages)
 }
 
 export async function activeMonacoEditor (
