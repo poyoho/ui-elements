@@ -5,6 +5,7 @@ export interface Compiler {
   getRuntimeImportMap: () => Record<string, string>
   compileFile: (file: CompiledFile) => Promise<CompiledFile>
   getProjectRunableJS: (filesystem: FileSystem<CompiledFile>) => Promise<string[]>
+  setupLanguageServices: () => void
 }
 
 type CompilerType = "vue"

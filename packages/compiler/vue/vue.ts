@@ -4,6 +4,7 @@ import boostrap from "./bootstrap/main.js?raw"
 import appvue from "./bootstrap/app.vue?raw"
 import { compileFile as compileSFCFile } from "./compile/sfc"
 import { parseFileModules } from "@ui-elements/compiler"
+import { resolvePackageTypes } from "@ui-elements/unpkg"
 
 export function getRuntimeImportMap () {
   return {
@@ -44,3 +45,6 @@ export async function getProjectRunableJS (filesystem: FileSystem<CompiledFile>)
   return scripts
 }
 
+export function setupLanguageServices () {
+  resolvePackageTypes("@vue", "3.2.6", "runtime-core.d.ts")
+}

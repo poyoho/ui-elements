@@ -22,7 +22,7 @@ export class BaseFile {
     this.content = options.content || ""
   }
 
-  public updateFile(valule: string) {
+  public updateContent(valule: string) {
     this.content = valule
     // set it to false after external processing
     this.change = true
