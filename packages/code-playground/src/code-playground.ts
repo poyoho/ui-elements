@@ -64,4 +64,3 @@ export default class CodePlayground extends HTMLElement {
     return this.ownerDocument.querySelector("#filename-input")!
   }
 }
-

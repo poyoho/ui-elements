@@ -4,7 +4,7 @@ import type { editor } from "monaco-editor"
 export type { editor }
 export type monaco = typeof import("monaco-editor")
 export * from "./textmate"
-export * from "./setup"
+import { setupTypescriptLanguageService } from "./setup"
 
 export async function getEmitResult (monaco: monaco, model: editor.ITextModel) {
   const worker = await monaco.languages.typescript.getTypeScriptWorker()
@@ -87,7 +87,10 @@ export const setupMonaco = createSinglePromise(async () => {
 
   await loadWorkers()
 
-  return monaco
+  return {
+    monaco,
+    typescript: setupTypescriptLanguageService(monaco),
+  }
 })
 
 export default setupMonaco

@@ -15,6 +15,7 @@ function createFileTab (filename: string, keepalive?: boolean) {
   return filetab
 }
 
+// TODO add DTS
 export async function createFile (host: CodePlayground,  filename: string, keepalive?: boolean) {
   const { editorManage, tabWrap, fs, editorWrap } = host
 

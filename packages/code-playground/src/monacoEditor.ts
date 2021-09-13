@@ -2,6 +2,7 @@ import CodePlayground from "./code-playground"
 import MonacoEditor from "@ui-elements/monaco-editor/src/monaco-editor"
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
 import { MonacoEditorItem, SupportEditorType } from "./types"
+import { resolvePackageTypes } from "@ui-elements/unpkg"
 
 type EditorManage = ReturnType<typeof createMonacoEditorManager>
 
@@ -95,7 +96,6 @@ function createOrGetFile (fs: FileSystem<CompiledFile>, filename: string, isNotE
   return file
 }
 
-// TODO add dts
 export async function activeMonacoEditor (
   editorManage: EditorManage,
   fs: FileSystem<CompiledFile>,

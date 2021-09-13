@@ -8,7 +8,7 @@ export type MonacoEditorChangeEvent = Event & {
 }
 
 export default class MonacoEditor extends HTMLElement {
-  public monaco = setupMonaco()
+  public monacoAccessor = setupMonaco()
   private editor = createDefer<editor.IStandaloneCodeEditor>()
 
   constructor() {
@@ -25,7 +25,7 @@ export default class MonacoEditor extends HTMLElement {
   }
 
   async connectedCallback() {
-    const monaco = await this.monaco
+    const { monaco } = await this.monacoAccessor
 
     const editor = monaco.editor.create(this.container, {
       tabSize: 2,
@@ -66,9 +66,10 @@ export default class MonacoEditor extends HTMLElement {
   async createModel (
     extension: keyof typeof SupportLanguage,
     filename: string,
-    code?: string) {
+    code?: string
+  ) {
     console.log("[monaco-editor] createModel")
-    const monaco = await this.monaco
+    const { monaco } = await this.monacoAccessor
     return monaco.editor.createModel(
       code || "",
       SupportLanguage[extension],
@@ -84,7 +85,7 @@ export default class MonacoEditor extends HTMLElement {
   }
 
   async findModel (filename: string) {
-    const monaco = await this.monaco
+    const { monaco } = await this.monacoAccessor
     return monaco.editor.getModel(monaco.Uri.parse(`file://${filename}`))
   }
 
@@ -96,7 +97,7 @@ export default class MonacoEditor extends HTMLElement {
 
   async getRunnableJS (model: editor.ITextModel) {
     console.log("[monaco-editor] getRunnableJS")
-    const monaco = await this.monaco
+    const { monaco } = await this.monacoAccessor
     return getRunnableJS(monaco, model)
   }
 }

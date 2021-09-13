@@ -45,6 +45,6 @@ export async function getProjectRunableJS (filesystem: FileSystem<CompiledFile>)
   return scripts
 }
 
-export function setupLanguageServices () {
-  resolvePackageTypes("@vue", "3.2.6", "runtime-core.d.ts")
+export function setupLanguageServices (monacoAccessor: any) {
+  resolvePackageTypes("@vue", "dist/runtime-core.d.ts", "3.2.6")
 }

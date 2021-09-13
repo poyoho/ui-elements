@@ -1,8 +1,7 @@
 type monaco = typeof import("monaco-editor")
 
 export function setupTypescriptLanguageService (monaco: monaco) {
-  monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-    ...monaco.languages.typescript.javascriptDefaults.getCompilerOptions(),
+  const localConfig = {
     noUnusedLocals: false,
     noUnusedParameters: false,
     allowUnreachableCode: true,
@@ -12,6 +11,14 @@ export function setupTypescriptLanguageService (monaco: monaco) {
     allowJs: true,
     importHelpers: true,
     noImplicitUseStrict: false,
+  }
+  monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+    ...monaco.languages.typescript.typescriptDefaults.getCompilerOptions(),
+    ...localConfig,
+  })
+  monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+    ...monaco.languages.typescript.javascriptDefaults.getCompilerOptions(),
+    ...localConfig,
   })
 
   const packages = new Map<string, {
