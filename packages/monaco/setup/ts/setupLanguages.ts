@@ -28,6 +28,7 @@ export function setupTypescriptLanguageService (monaco: monaco) {
 
   return {
     addDTS (options: Array<{name: string, types: string}>) {
+      console.log(options)
       options.forEach(opt => {
         if (packages.has(opt.name)) {
           return

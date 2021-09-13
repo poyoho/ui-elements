@@ -96,6 +96,27 @@ function createOrGetFile (fs: FileSystem<CompiledFile>, filename: string, isNotE
   return file
 }
 
+async function setupTypescriptLanaguageService (editor: MonacoEditor) {
+  ;(await editor.monacoAccessor).typescript.addDTS([
+    {
+      name: "@vue/runtime-dom",
+      types: await resolvePackageTypes("@vue/runtime-dom", "dist/runtime-dom.d.ts", "3.2.6")
+    },
+    {
+      name: "@vue/runtime-core",
+      types: await resolvePackageTypes("@vue/runtime-core", "dist/runtime-core.d.ts", "3.2.6")
+    },
+    {
+      name: "@vue/reactivity",
+      types: await resolvePackageTypes("@vue/reactivity", "dist/reactivity.d.ts", "3.2.6")
+    },
+    {
+      name: "vue",
+      types: await resolvePackageTypes("vue", "dist/vue.d.ts", "3.2.6")
+    }
+  ])
+}
+
 export async function activeMonacoEditor (
   editorManage: EditorManage,
   fs: FileSystem<CompiledFile>,
@@ -131,6 +152,7 @@ export async function activeMonacoEditor (
         cache.ts = await tsEditor.editor.getRunnableJS(tsModel)
         updateVueFile()
       })
+      setupTypescriptLanaguageService(tsEditor.editor)
     }
   } else if (filename.endsWith(".ts")) {
     const [tsEditor] = createOrGetEditor(editorManage, ["ts"])
@@ -142,6 +164,7 @@ export async function activeMonacoEditor (
       tsModel.onDidChangeContent(async () => {
         file.updateContent(await tsEditor.editor.getRunnableJS(tsModel))
       })
+      setupTypescriptLanaguageService(tsEditor.editor)
     }
   } else {
     throw "don't support create ${filename}, only support create *.vue/*.ts."
