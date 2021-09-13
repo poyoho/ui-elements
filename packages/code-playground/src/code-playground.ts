@@ -101,10 +101,10 @@ async function createFile (host: CodePlayground,  filename: string, keepalive?: 
     return editors
   }
 
-  async function createOrGetModel (editor: MonacoEditor, type: SupportEditorType, filename: string, isNotExistFile: boolean) {
+  async function createOrGetModel (editor: MonacoEditor, type: SupportEditorType, filename: string, code: string, isNotExistFile: boolean) {
     let model
     if (isNotExistFile) {
-      model = await editor.createModel(type, filename)
+      model = await editor.createModel(type, filename, code)
     } else {
       model = (await editor.findModel(filename))!
     }
@@ -120,8 +120,8 @@ async function createFile (host: CodePlayground,  filename: string, keepalive?: 
     if (filename.endsWith(".vue")) {
       const [vuehtmlEditor, tsEditor] = createOrGetEditor(["vuehtml", "ts"])
 
-      const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", isNotExistFile)
-      const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename+".ts", isNotExistFile)
+      const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", "<template></template>", isNotExistFile)
+      const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename+".ts", "export default {}", isNotExistFile)
       vuehtmlEditor.editor.setModel(vuehtmlModel)
       tsEditor.editor.setModel(tsModel)
 
@@ -129,9 +129,7 @@ async function createFile (host: CodePlayground,  filename: string, keepalive?: 
         const cache = { html: vuehtmlModel.getValue(), ts: tsModel.getValue() }
         const updateVueFile = async () => {
           file.updateFile([
-            "<template>",
             cache.html,
-            "</template>",
             "<script>",
             cache.ts,
             "</script>"
@@ -151,7 +149,7 @@ async function createFile (host: CodePlayground,  filename: string, keepalive?: 
     } else if (filename.endsWith(".ts")) {
       const [tsEditor] = createOrGetEditor(["ts"])
 
-      const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename, isNotExistFile)
+      const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename, "", isNotExistFile)
       tsEditor.editor.setModel(tsModel)
 
       if (isNotExistFile) {
