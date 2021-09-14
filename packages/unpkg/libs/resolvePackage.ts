@@ -21,6 +21,7 @@ export interface PacakgeVersions {
 }
 
 export const PACKAGE_CDN = (path: string) => `https://unpkg.com/${path}`
+export const SKYPACK_RECOMMEND = (keyword: string) => `https://api.skypack.dev/v1/search?q=${keyword}&count=12`
 
 export async function resolvePackageMetadata(name: string, version: string): Promise<PackageMetadata | Error> {
   const response = await fetch(PACKAGE_CDN(`${name}${version ? `@${version}` : ''}/package.json`))
@@ -65,4 +66,14 @@ export async function resolvePackage(name: string, version: string) {
   }
 
   return packages.filter((p, i) => packages.findIndex(x => x.name === p.name) === i)
+}
+
+export async function resolveRecommendPackage (keyword: string) {
+  const response = await fetch(SKYPACK_RECOMMEND(keyword))
+  if (!response.ok) {
+    return new Error('Error Resolving Keyword')
+  }
+  const data = await response.json()
+  console.log(data)
+  return []
 }
