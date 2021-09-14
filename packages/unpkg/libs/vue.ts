@@ -1,4 +1,4 @@
-import { resolvePackageTypes } from "../resolvePackage";
+import { resolvePackageTypes } from "./resolvePackage";
 
 export const vuePackages = [
   {

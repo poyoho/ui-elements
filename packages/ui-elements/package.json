@@ -8,6 +8,7 @@
     "@ui-elements/code-comment": "^0.0.0",
     "@ui-elements/iframe-sandbox": "^0.0.0",
     "@ui-elements/drag-wrap": "^0.0.0",
-    "@ui-elements/tab-container": "^0.0.0"
+    "@ui-elements/tab-container": "^0.0.0",
+    "@ui-elements/unpkg": "^0.0.0"
   }
 }
