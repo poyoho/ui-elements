@@ -1,11 +1,16 @@
-import { SandboxProxy } from "./proxy"
+import { createDefer } from "@ui-elements/utils"
+import { SandboxHandleData, SandboxProxy } from "./proxy"
 import srcdoc from "./srcdoc.html?raw"
 
 const IMPORT_MAP = "<!-- IMPORT_MAP -->"
 
+export interface SandboxEvent extends Event {
+  data: SandboxHandleData
+}
+
 export default class CodeSandbox extends HTMLElement {
   private importMaps = { imports: {} }
-  private proxy: SandboxProxy | undefined
+  private proxy = createDefer<SandboxProxy>()
 
   get sandbox (): HTMLIFrameElement {
     return this.querySelector("iframe")!
@@ -14,6 +19,9 @@ export default class CodeSandbox extends HTMLElement {
   async connectedCallback() {
     const sandbox = document.createElement("iframe")
     sandbox.className = "sandbox"
+    sandbox.style.width = "inherit"
+    sandbox.style.height = "inherit"
+    sandbox.style.border = "0"
     sandbox.setAttribute('sandbox', [
       'allow-forms',
       'allow-modals',
@@ -25,15 +33,30 @@ export default class CodeSandbox extends HTMLElement {
       'allow-top-navigation-by-user-activation',
     ].join(' '))
 
-    this.proxy = new SandboxProxy(sandbox, {
+    const emit = (eventType: string, data: SandboxHandleData) => {
+      const event = this.ownerDocument.createEvent("Events") as SandboxEvent
+      event.initEvent(eventType, false, false)
+      event.data = data
+      this.dispatchEvent(event)
+    }
 
+    const sandboxProxy = new SandboxProxy(sandbox, {
+      on_fetch_progress: (data: SandboxHandleData) => emit("on_fetch_progress", data),
+      on_error: (data: SandboxHandleData) => emit("on_error", data),
+      on_unhandled_rejection: (data: SandboxHandleData) => emit("on_unhandled_rejection", data),
+      on_console: (data: SandboxHandleData) => emit("on_console", data),
+      on_console_group: (data: SandboxHandleData) => emit("on_console_group", data),
+      on_console_group_collapsed: (data: SandboxHandleData) => emit("on_console_group_collapsed", data),
+      on_console_group_end: (data: SandboxHandleData) => emit("on_console_group_end", data),
     })
 
     sandbox.addEventListener('load', () => {
-      this.proxy!.handle_links()
+      sandboxProxy.handle_links()
+      console.log("[iframe-sandbox] sandbox load")
+      this.proxy.resolve(sandboxProxy)
     })
-
     this.appendChild(sandbox)
+    this.setupDependency({})
   }
 
   disconnectedCallback() {}
@@ -46,6 +69,8 @@ export default class CodeSandbox extends HTMLElement {
   }
 
   eval (script: string | string[]) {
-    this.proxy!.eval(script)
+    this.proxy.promise.then((proxy) => {
+      proxy.eval(script)
+    })
   }
 }

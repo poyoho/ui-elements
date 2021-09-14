@@ -31,8 +31,8 @@ export async function resolvePackageMetadata(name: string, version: string): Pro
   return await response.json()
 }
 
-export async function resolvePackageTypes(name: string, version: string, entry: string): Promise<string> {
-  const response = await fetch(PACKAGE_CDN(`${name}@${version}/${entry}`))
+export async function resolvePackageTypes(name: string, entry: string, version?: string): Promise<string> {
+  const response = await fetch(PACKAGE_CDN(`${name}${version ? "@"+version : ""}/${entry}`))
 
   if (!response.ok)
     return ''

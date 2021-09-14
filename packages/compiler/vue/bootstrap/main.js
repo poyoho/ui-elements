@@ -1,5 +1,6 @@
 
 import { createApp as _createApp } from "vue"
+const App = __modules__["app.vue"].default
 
 if (window.__app__) {
   window.__app__.unmount()
@@ -7,17 +8,7 @@ if (window.__app__) {
 }
 document.getElementById('__sfc-styles').innerHTML = window.__css__
 
-
-const app = window.__app__ = _createApp(__modules__["app.vue"].default)
+const app = window.__app__ = _createApp(App)
 app.config.errorHandler = e => console.error(e)
-
-// App enhancements
-const mainFile = __modules__['main.js']
-
-if (mainFile && mainFile.default) {
-  if (mainFile.default.enhanceApp) {
-    mainFile.default.enhanceApp(app)
-  }
-}
 
 app.mount('#app')

@@ -21,7 +21,10 @@ const { convertCompilerOptionsFromJson } = require("typescript")
  */
 async function componentBuilder (pkgName) {
   const entry = path.resolve(packagePath, pkgName)
-  const deps = Object.keys(require(path.resolve(entry, "package.json")).dependencies || {})
+  const packageJSON = require(path.resolve(entry, "package.json"))
+  const deps = Object.keys(
+    Object.assign({}, packageJSON.dependencies || {}, packageJSON.peerDependencies || {})
+  )
   const bundle = await rollup.rollup({
     input: path.resolve(entry, "index.ts"),
     plugins: [

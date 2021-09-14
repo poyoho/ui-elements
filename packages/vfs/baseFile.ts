@@ -12,20 +12,20 @@ export interface FileCompile {
 export class BaseFile {
   public type = "base"
   public filename: string
-  private text = ""
+  public content = ""
+  public change = false
+
   protected _onUpdate: ((filename: string) => void) | undefined
 
   constructor(options: FileOptions) {
     this.filename = options.name
-    this.text = options.content || ""
+    this.content = options.content || ""
   }
 
-  public get content() {
-    return this.text
-  }
-
-  public updateFile(valule: string) {
-    this.text = valule
+  public updateContent(valule: string) {
+    this.content = valule
+    // set it to false after external processing
+    this.change = true
   }
 }
 
@@ -33,7 +33,7 @@ export class CompiledFile extends BaseFile {
   public compiled: FileCompile = {
     js: '',
     ssr: '',
-    css: ''
+    css: '',
   }
 
 }

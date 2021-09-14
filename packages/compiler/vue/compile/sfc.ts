@@ -2,25 +2,27 @@ import type { SFCDescriptor, BindingMetadata } from '@vue/compiler-sfc'
 import { importVuePackage, COMP_IDENTIFIER, SFCFile } from "./env"
 
 export async function compileFile(
-  { filename, compiled, content }: SFCFile
+  file: SFCFile
 ): Promise<Error[]> {
   const { compiler } = await importVuePackage()
 
-  if (!content.trim()) {
+  if (!file.content.trim() || !file.change) {
     return []
   }
 
-  if (!filename.endsWith('.vue')) {
-    compiled.js = compiled.ssr = content
+  if (!file.filename.endsWith('.vue')) {
+    file.compiled.js = file.compiled.ssr = file.content
+    file.change = false
     return []
   }
 
-  const id = await hashId(filename)
-  const { errors, descriptor } = compiler.parse(content, {
-    filename,
+  const id = await hashId(file.filename)
+  const { errors, descriptor } = compiler.parse(file.content, {
+    filename: file.filename,
     sourceMap: true,
   })
   if (errors.length) {
+    file.change = false
     return errors
   }
 
@@ -30,6 +32,7 @@ export async function compileFile(
     || descriptor.styles.some(s => s.lang)
     || (descriptor.template && descriptor.template.lang)
   ) {
+    file.change = false
     return [
       Error('lang="x" pre-processors are not supported in the in-browser playground.'),
     ]
@@ -46,6 +49,7 @@ export async function compileFile(
 
   const clientScriptResult = await doCompileScript(descriptor, id, false)
   if (!clientScriptResult) {
+    file.change = false
     return []
   }
 
@@ -57,6 +61,7 @@ export async function compileFile(
   if (descriptor.scriptSetup) {
     const ssrScriptResult = doCompileScript(descriptor, id, true)
     if (!ssrScriptResult) {
+      file.change = false
       return []
     }
 
@@ -76,6 +81,7 @@ export async function compileFile(
       false,
     )
     if (!clientTemplateResult) {
+      file.change = false
       return []
     }
 
@@ -83,6 +89,7 @@ export async function compileFile(
 
     const ssrTemplateResult = await doCompileTemplate(descriptor, id, bindings, true)
     if (!ssrTemplateResult) {
+      file.change = false
       return []
     }
 
@@ -97,15 +104,15 @@ export async function compileFile(
 
   if (clientCode || ssrCode) {
     appendSharedCode(
-      `\n${COMP_IDENTIFIER}.__file = ${JSON.stringify(filename)}`
+      `\n${COMP_IDENTIFIER}.__file = ${JSON.stringify(file.filename)}`
         + `\nexport default ${COMP_IDENTIFIER}`,
     )
-    compiled.js = clientCode.trimStart()
-    compiled.ssr = ssrCode.trimStart()
+    file.compiled.js = clientCode.trimStart()
+    file.compiled.ssr = ssrCode.trimStart()
   }
 
-  compiled.css = await doCompileStyle(descriptor, id)
-
+  file.compiled.css = await doCompileStyle(descriptor, id)
+  file.change = false
   return []
 }
 

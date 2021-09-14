@@ -1,22 +1,22 @@
-import { setupMonaco, SupportLanguage, editor, getRunnableJS, setupTheme } from "@ui-elements/monaco"
-import { debounce } from "@ui-elements/utils"
-import { resolvePackageTypes } from "@ui-elements/unpkg"
+import { setupMonaco, SupportLanguage, editor, setupTheme, getRunnableJS } from "@ui-elements/monaco"
+import { createDefer, debounce } from "@ui-elements/utils"
 
 export type MonacoEditorChangeEvent = Event & {
   value: {
     content: string
-    // runnableJS: string
   }
 }
 
 export default class MonacoEditor extends HTMLElement {
-  private monacoInstance = setupMonaco()
-  private editor: editor.IStandaloneCodeEditor | undefined
+  public monacoAccessor = setupMonaco()
+  private editor = createDefer<editor.IStandaloneCodeEditor>()
 
   constructor() {
     super()
     const container = document.createElement("div")
     container.className = "editor"
+    container.style.width = "inherit"
+    container.style.height = "inherit"
     this.appendChild(container)
   }
 
@@ -25,10 +25,9 @@ export default class MonacoEditor extends HTMLElement {
   }
 
   async connectedCallback() {
-    const { monacoInstance } = this
-    const { monaco } = await monacoInstance
+    const { monaco } = await this.monacoAccessor
 
-    this.editor = monaco.editor.create(this.container, {
+    const editor = monaco.editor.create(this.container, {
       tabSize: 2,
       insertSpaces: true,
       autoClosingQuotes: 'always',
@@ -40,26 +39,25 @@ export default class MonacoEditor extends HTMLElement {
         enabled: false,
       },
     })
-
     // send change event
-    this.editor.onDidChangeModel(() => {
-      const model = this.editor!.getModel()
+    editor.onDidChangeModel(() => {
+      const model = editor.getModel()
       if (!model) {
         return
       }
-
+      console.log("[monaco-editor] change model")
       model.onDidChangeContent(debounce(async () => {
+        // model.uri.path
         const event = document.createEvent("events") as MonacoEditorChangeEvent
         event.initEvent("code-change", false, false)
         event.value = {
-          content: this.editor!.getValue(),
-          // runnableJS: await getRunnableJS(monaco, model)
+          content: editor.getValue(),
         }
         this.dispatchEvent(event)
       }))
     })
-
-    await setupTheme(monaco, this.editor)
+    this.editor.resolve(editor)
+    await setupTheme(monaco, editor)
     monaco.editor.setTheme("vscode-dark")
   }
 
@@ -68,11 +66,10 @@ export default class MonacoEditor extends HTMLElement {
   async createModel (
     extension: keyof typeof SupportLanguage,
     filename: string,
-    code?: string) {
-    console.log("createModel")
-    const { monacoInstance } = this
-    const { monaco } = await monacoInstance
-
+    code?: string
+  ) {
+    console.log("[monaco-editor] createModel")
+    const { monaco } = await this.monacoAccessor
     return monaco.editor.createModel(
       code || "",
       SupportLanguage[extension],
@@ -80,29 +77,27 @@ export default class MonacoEditor extends HTMLElement {
     )
   }
 
-  async setModel (model: editor.ITextModel) {
-    console.log("setModel")
-    const { monacoInstance } = this
-    await monacoInstance
-    this.editor!.setModel(model)
+  setModel (model: editor.ITextModel) {
+    console.log("[monaco-editor] setModel")
+    this.editor.promise.then(editor => {
+      editor.setModel(model)
+    })
   }
 
-  async addDTS (options: Array<{name: string, version: string, entry: string}>) {
-    console.log("addDTS")
-    const { monacoInstance } = this
-    const { addPackage } = await monacoInstance
-    addPackage(
-      await Promise.all(options.map(async option => ({
-        name: option.name,
-        types: await resolvePackageTypes(option.name, option.version, option.entry)
-      })))
-    )
+  async findModel (filename: string) {
+    const { monaco } = await this.monacoAccessor
+    return monaco.editor.getModel(monaco.Uri.parse(`file://${filename}`))
   }
 
-  async deleteDTS (names: string[]) {
-    console.log("deleteDTS")
-    const { monacoInstance } = this
-    const { deletePackage } = await monacoInstance
-    deletePackage(names)
+  removeModel () {
+    this.editor.promise.then(editor => {
+     editor.getModel()?.dispose()
+    })
+  }
+
+  async getRunnableJS (model: editor.ITextModel) {
+    console.log("[monaco-editor] getRunnableJS")
+    const { monaco } = await this.monacoAccessor
+    return getRunnableJS(monaco, model)
   }
 }

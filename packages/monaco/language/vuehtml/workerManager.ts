@@ -58,7 +58,6 @@ export class WorkerManager {
 
         label: this._defaults.languageId,
       })
-      console.log(this._worker)
       this._client = <Promise<VueHTMLWorker>> this._worker.getProxy()
     }
     return this._client

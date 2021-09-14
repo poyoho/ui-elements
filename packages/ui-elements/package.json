@@ -6,6 +6,8 @@
     "@ui-elements/monaco-editor": "^0.0.0",
     "@ui-elements/demo-block": "^0.0.0",
     "@ui-elements/code-comment": "^0.0.0",
-    "@ui-elements/iframe-sandbox": "^0.0.0"
+    "@ui-elements/iframe-sandbox": "^0.0.0",
+    "@ui-elements/drag-wrap": "^0.0.0",
+    "@ui-elements/tab-container": "^0.0.0"
   }
 }
