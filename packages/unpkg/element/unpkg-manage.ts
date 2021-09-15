@@ -23,7 +23,8 @@ export default class UnpkgManage extends HTMLElement {
   connectedCallback() {
     const { entry } = this
     entry.addEventListener("click", showPanel)
-    resolveRecommendPackage("vue")
+    entry.click()
+    // resolveRecommendPackage("vue")
   }
 
   disconnectedCallback() {
