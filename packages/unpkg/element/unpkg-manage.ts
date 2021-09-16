@@ -54,7 +54,7 @@ function renderPackageMetadata (items: PackageMetadata[], container: HTMLElement
     `<a class="pkg-title" target="_blank" href="https://www.npmjs.com/package/${next.name}">${next.name}</a>`,
     `<div class="pkg-desc">${next.description}</div>`,
     `<div class="pkg-ctrl">`,
-    `<select></select>`,
+    `<ul></ul>`,
     `<button pkg="${next.name}">${installed ? 'uninstall' : 'install'}</button>`,
     `</div></div>`
   ]), [] as string[]).join("\n")
@@ -87,7 +87,7 @@ async function clickResultContent (e: MouseEvent) {
   const pkgName = target.getAttribute("pkg")!
   const versionList = await resolvePackageVersion(pkgName)
   const select = target.previousElementSibling! as HTMLSelectElement
-  select.innerHTML = versionList.map(version => `<option>${version}</option>`).join("")
+  select.innerHTML = versionList.map(version => `<li>${version}</li>`).join("")
   select.style.display = "inline-block"
 }
 

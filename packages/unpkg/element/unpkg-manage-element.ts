@@ -132,11 +132,14 @@ button:hover svg path {
 .pkg-ctrl button {
   color: #e1e1e1;
 }
-.pkg-ctrl select {
+.pkg-ctrl ul {
   background: #000;
   color: #e1e1e1;
   border: 1px solid #333;
   display: none;
+}
+.pkg-ctrl ul li{
+  list-style: none;
 }
 </style>
 `
