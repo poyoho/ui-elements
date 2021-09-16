@@ -9,53 +9,29 @@ export default html`
 <div id="panel" style="display: none;">
   <ul class="menu">
     <li noclick class="title">Setting</li>
-    <li class="active">Packages</li>
-    <li>Install</li>
+    <li class="active">Installed</li>
+    <li>Packages</li>
   </ul>
   <div class="result">
     <input type="text" class="filter item" placeholder="filter packages">
-    <div class="item">
-      <h3 class="pkg-title">vue</h3>
-      <div class="pkg-desc">vue hhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahh</div>
-      <button class="pkg-button">install</button>
-    </div>
-    <div class="item">
-      <h3 class="pkg-title">vue</h3>
-      <div class="pkg-desc">vue hhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahh</div>
-      <button class="pkg-button">install</button>
-    </div>
-    <div class="item">
-      <h3 class="pkg-title">vue</h3>
-      <div class="pkg-desc">vue hhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahh</div>
-      <button class="pkg-button">install</button>
-    </div>
-    <div class="item">
-      <h3 class="pkg-title">vue</h3>
-      <div class="pkg-desc">vue hhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahh</div>
-      <button class="pkg-button">install</button>
-    </div>
-    <div class="item">
-      <h3 class="pkg-title">vue</h3>
-      <div class="pkg-desc">vue hhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahh</div>
-      <button class="pkg-button">install</button>
-    </div>
-    <div class="item">
-      <h3 class="pkg-title">vue</h3>
-      <div class="pkg-desc">vue hhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahh</div>
-      <button class="pkg-button">install</button>
-    </div>
-    <div class="item">
-      <h3 class="pkg-title">vue</h3>
-      <div class="pkg-desc">vue hhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahh</div>
-      <button class="pkg-button">install</button>
-    </div>
-    <div class="item">
-      <h3 class="pkg-title">vue</h3>
-      <div class="pkg-desc">vue hhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahhhhahahhahahaahahh</div>
-      <button class="pkg-button">install</button>
-    </div>
+    <div class="content"></div>
   </div>
 <style>
+::-webkit-scrollbar {
+  width: 12px;
+}
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset006pxrgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: inset006pxrgba(0, 0, 0, 0.5);
+}
+::-webkit-scrollbar-thumb:window-inactive {
+  background: rgba(0, 0, 0, 0.5);
+}
 button {
   background: transparent;
   outline: 0;
@@ -95,6 +71,7 @@ button:hover svg path {
   list-style: none;
   border-right: 3px solid #111111;
   width: 25%;
+  user-select: none;
 }
 .menu li {
   color: #e1e1e1;
@@ -134,6 +111,7 @@ button:hover svg path {
 .pkg-title {
   font-size: 24px;
   margin: 0;
+  color: #e1e1e1;
 }
 .pkg-desc {
   font-size: 16px;
@@ -141,16 +119,24 @@ button:hover svg path {
   padding: 10px 0;
   word-break: break-all;
 }
-.pkg-button {
+.pkg-ctrl {
   position: absolute;
   font-size: 16px;
   text-align: right;
   padding: 10px 16px;
-  color: #e1e1e1;
   border-radius: 5px;
   background: #000;
   top: 12px;
   right: 15px;
+}
+.pkg-ctrl button {
+  color: #e1e1e1;
+}
+.pkg-ctrl select {
+  background: #000;
+  color: #e1e1e1;
+  border: 1px solid #333;
+  display: none;
 }
 </style>
 `

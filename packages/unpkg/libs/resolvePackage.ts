@@ -22,6 +22,7 @@ export interface PacakgeVersions {
 
 export const PACKAGE_CDN = (path: string) => `https://unpkg.com/${path}`
 export const SKYPACK_RECOMMEND = (keyword: string) => `https://api.skypack.dev/v1/search?q=${keyword}&count=12`
+export const SKYPACK_VERSION = (pkgName: string) => `https://api.skypack.dev/v1/package/${pkgName}`
 
 export async function resolvePackageMetadata(name: string, version: string): Promise<PackageMetadata | Error> {
   const response = await fetch(PACKAGE_CDN(`${name}${version ? `@${version}` : ''}/package.json`))
@@ -69,11 +70,24 @@ export async function resolvePackage(name: string, version: string) {
 }
 
 export async function resolveRecommendPackage (keyword: string) {
+  if (!keyword) {
+    return []
+  }
   const response = await fetch(SKYPACK_RECOMMEND(keyword))
   if (!response.ok) {
-    return new Error('Error Resolving Keyword')
+    return []
   }
-  const data = await response.json()
-  console.log(data)
-  return []
+  const data = (await response.json()).results
+  return data
+}
+
+
+export async function resolvePackageVersion (pkgName: string) {
+  const response = await fetch(SKYPACK_VERSION(pkgName))
+  if (!response.ok) {
+    return []
+  }
+  const data = (await response.json()).versions
+  const versionList = Object.keys(data)
+  return versionList.splice(versionList.length - 13).sort().reverse()
 }
