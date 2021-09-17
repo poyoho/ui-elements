@@ -94,13 +94,20 @@ async function clickInstallPackage (e: MouseEvent) {
     case "confirm":
     {
       const select = target.parentElement!.previousElementSibling! as SelectBox
+      const version = select.value
+      if (!version) {
+        select.classList.toggle("input-error", true)
+        setTimeout(() => {
+          select.classList.toggle("input-error", false)
+        }, 400)
+        break
+      }
       const btn = target.parentElement!
       const host = getShadowHost(target) as UnpkgManage
       select.style.display = "none"
       btn.parentElement!.style.background = "#3f3f3f"
       btn.innerHTML = "✔ installed"
       // host.installed.push({})
-      // version: select.value,
     }
     case "cancel":
     {

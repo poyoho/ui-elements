@@ -17,6 +17,14 @@ export default html`
     <div class="content"></div>
   </div>
 <style>
+@keyframes input-error {
+  to {
+    transform: scale(.92);
+  }
+}
+.input-error {
+  animation: input-error .1s linear 4 alternate;
+}
 ::-webkit-scrollbar {
   width: 12px;
 }
