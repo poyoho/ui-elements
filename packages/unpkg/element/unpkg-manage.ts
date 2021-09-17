@@ -45,8 +45,8 @@ function switchResult (host: UnpkgManage) {
 
 function renderPackageMetadata (items: PackageMetadata[], container: HTMLElement, installed: boolean) {
   const host = getShadowHost(container) as UnpkgManage
+  const installedPackages = new Set(host.installed.map(el => el.name))
   container.innerHTML = items.reduce((prev, next) => {
-    const installedPackages = new Set(host.installed.map(el => el.name))
     const version = next.version
     const packageStatus = installed
       ? 'uninstall'
