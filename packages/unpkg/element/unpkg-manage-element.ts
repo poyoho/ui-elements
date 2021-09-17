@@ -140,6 +140,9 @@ button:hover svg path {
 .pkg-ctrl button {
   color: #e1e1e1;
 }
+.installed {
+  background: #3f3f3f;
+}
 select-box {
   width: 100px;
   display: none;

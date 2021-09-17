@@ -2,12 +2,11 @@ import teamplateElement from "./unpkg-manage-element"
 import { getShadowHost, debounce } from "@ui-elements/utils"
 import { resolvePackageVersion, resolveRecommendPackage } from "../libs/resolvePackage"
 import type { SelectBox } from "@ui-elements/select-box"
+import { nextTick, version } from "vue/types/umd"
 
 interface PackageMetadata {
   name: string
   description: string
-  hasTypes: boolean
-  updateAt: string
   version: string
 }
 
@@ -45,15 +44,24 @@ function switchResult (host: UnpkgManage) {
 }
 
 function renderPackageMetadata (items: PackageMetadata[], container: HTMLElement, installed: boolean) {
-  container.innerHTML = items.reduce((prev, next) => prev.concat([
-    `<div class="item">`,
-    `<a class="pkg-title" target="_blank" href="https://www.npmjs.com/package/${next.name}">${next.name}</a>`,
-    `<div class="pkg-desc">${next.description}</div>`,
-    `<div class="pkg-ctrl">`,
-    `<select-box placeholder="select version"></select-box>`,
-    `<button pkg="${next.name}">${installed ? 'uninstall' : 'install'}</button>`,
-    `</div></div>`
-  ]), [] as string[]).join("\n")
+  const host = getShadowHost(container) as UnpkgManage
+  container.innerHTML = items.reduce((prev, next) => {
+    const installedPackages = new Set(host.installed.map(el => el.name))
+    const version = next.version
+    const packageStatus = installed
+      ? 'uninstall'
+      : installedPackages.has(next.name) ? '✔ installed' : 'install'
+    return prev.concat([
+      // don't alert it, [function clickInstallPackage] use it.
+      `<div class="item">`,
+      `<a class="pkg-title" target="_blank" href="https://www.npmjs.com/package/${next.name}${version ? "/v/" + version : ""}">${next.name}${version ? "@" + version : ""}</a>`,
+      `<div class="pkg-desc">${next.description}</div>`,
+      `<div class="pkg-ctrl ${packageStatus}">`,
+      `<select-box placeholder="select version"></select-box>`,
+      `<button name="${next.name}">${packageStatus}</button>`,
+      `</div></div>`
+    ])
+  }, [] as string[]).join("\n")
 }
 
 async function keywordFileter(e: Event) {
@@ -64,7 +72,6 @@ async function keywordFileter(e: Event) {
     {
       const keyword = host.keywordInput.value
       const packagesMetadata = await resolveRecommendPackage(keyword)
-      console.log(keyword, packagesMetadata)
       renderPackageMetadata(packagesMetadata, host.resultContent, false)
     }
     case "Installed":
@@ -83,7 +90,7 @@ async function clickInstallPackage (e: MouseEvent) {
   switch (target.innerHTML) {
     case "install":
     {
-      const pkgName = target.getAttribute("pkg")!
+      const pkgName = target.getAttribute("name")!
       const versionList = await resolvePackageVersion(pkgName)
       const select = target.previousElementSibling! as HTMLSelectElement
       select.innerHTML = versionList.map(version => `<option-box value="${version}">${version}</option-box>`).join("")
@@ -91,9 +98,14 @@ async function clickInstallPackage (e: MouseEvent) {
       target.innerHTML = "<button>confirm</button>  <button>cancel</button>"
       break
     }
+    case "uninstall":
+    {
+      break
+    }
     case "confirm":
     {
-      const select = target.parentElement!.previousElementSibling! as SelectBox
+      const wrap = target.parentElement!
+      const select = wrap.previousElementSibling! as SelectBox
       const version = select.value
       if (!version) {
         select.classList.toggle("input-error", true)
@@ -102,12 +114,20 @@ async function clickInstallPackage (e: MouseEvent) {
         }, 400)
         break
       }
-      const btn = target.parentElement!
       const host = getShadowHost(target) as UnpkgManage
       select.style.display = "none"
-      btn.parentElement!.style.background = "#3f3f3f"
-      btn.innerHTML = "✔ installed"
-      // host.installed.push({})
+      wrap.innerHTML = "✔ installed"
+      wrap.parentElement!.classList.toggle("installed", true)
+      const itemWrap = wrap.parentElement!.parentElement!
+      const name = itemWrap.querySelector(".pkg-title")!.innerHTML
+      const description = itemWrap.querySelector(".pkg-desc")!.innerHTML
+      host.installed.push({
+        name,
+        version,
+        description
+      })
+      host.dispatchEvent(new CustomEvent("change", { detail: host.installed }))
+      break
     }
     case "cancel":
     {
