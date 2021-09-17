@@ -21,12 +21,12 @@ export default html`
   width: 12px;
 }
 ::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset006pxrgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: rgba(0, 0, 0, 0.3);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb {
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.5);
   -webkit-box-shadow: inset006pxrgba(0, 0, 0, 0.5);
 }
 ::-webkit-scrollbar-thumb:window-inactive {
@@ -132,14 +132,9 @@ button:hover svg path {
 .pkg-ctrl button {
   color: #e1e1e1;
 }
-.pkg-ctrl ul {
-  background: #000;
-  color: #e1e1e1;
-  border: 1px solid #333;
+select-box {
+  width: 100px;
   display: none;
-}
-.pkg-ctrl ul li{
-  list-style: none;
 }
 </style>
 `

@@ -20,3 +20,5 @@ export function install() {
     window.customElements.define("option-box", OptionBox)
   }
 }
+
+export type {SelectBox, OptionBox}

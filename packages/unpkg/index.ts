@@ -1,5 +1,6 @@
 export * from "./libs"
 import UnpkgManage from "./element/unpkg-manage"
+import * as SelectBox from "@ui-elements/select-box"
 
 declare global {
   interface Window {
@@ -12,6 +13,7 @@ declare global {
 
 export function install() {
   if (!window.customElements.get("unpkg-manage")) {
+    SelectBox.install()
     window.UnpkgManage = UnpkgManage
     window.customElements.define("unpkg-manage", UnpkgManage)
   }

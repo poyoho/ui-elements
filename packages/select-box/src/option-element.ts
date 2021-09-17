@@ -13,7 +13,7 @@ export default html`
   box-sizing: border-box;
   font-size: 13px;
   color: #e1e1e1;
-  background: #1e1e1e;
+  background: #000;
   padding: 0 10px;
   overflow: hidden;
   text-overflow:ellipsis;

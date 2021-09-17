@@ -1,12 +1,14 @@
 import teamplateElement from "./unpkg-manage-element"
 import { getShadowHost, debounce } from "@ui-elements/utils"
 import { resolvePackageVersion, resolveRecommendPackage } from "../libs/resolvePackage"
+import type { SelectBox } from "@ui-elements/select-box"
 
 interface PackageMetadata {
   name: string
   description: string
   hasTypes: boolean
   updateAt: string
+  version: string
 }
 
 function showPanel (e: MouseEvent) {
@@ -33,12 +35,6 @@ function switchResult (host: UnpkgManage) {
   const { resultContent, activeMenu } = host
   Array.from(resultContent.children).forEach(chlid => chlid.remove())
   switch (activeMenu) {
-    case "Packages":
-    {
-      const keyword = host.keywordInput.value
-      console.log(keyword)
-      break
-    }
     case "Installed":
     {
       const items = host.installed
@@ -54,7 +50,7 @@ function renderPackageMetadata (items: PackageMetadata[], container: HTMLElement
     `<a class="pkg-title" target="_blank" href="https://www.npmjs.com/package/${next.name}">${next.name}</a>`,
     `<div class="pkg-desc">${next.description}</div>`,
     `<div class="pkg-ctrl">`,
-    `<ul></ul>`,
+    `<select-box placeholder="select version"></select-box>`,
     `<button pkg="${next.name}">${installed ? 'uninstall' : 'install'}</button>`,
     `</div></div>`
   ]), [] as string[]).join("\n")
@@ -79,16 +75,41 @@ async function keywordFileter(e: Event) {
 
 }
 
-async function clickResultContent (e: MouseEvent) {
+async function clickInstallPackage (e: MouseEvent) {
   const target = e.target as HTMLButtonElement
   if (target.tagName !== "BUTTON") {
     return
   }
-  const pkgName = target.getAttribute("pkg")!
-  const versionList = await resolvePackageVersion(pkgName)
-  const select = target.previousElementSibling! as HTMLSelectElement
-  select.innerHTML = versionList.map(version => `<li>${version}</li>`).join("")
-  select.style.display = "inline-block"
+  switch (target.innerHTML) {
+    case "install":
+    {
+      const pkgName = target.getAttribute("pkg")!
+      const versionList = await resolvePackageVersion(pkgName)
+      const select = target.previousElementSibling! as HTMLSelectElement
+      select.innerHTML = versionList.map(version => `<option-box value="${version}">${version}</option-box>`).join("")
+      select.style.display = "inline-block"
+      target.innerHTML = "<button>confirm</button>  <button>cancel</button>"
+      break
+    }
+    case "confirm":
+    {
+      const select = target.parentElement!.previousElementSibling! as SelectBox
+      const btn = target.parentElement!
+      const host = getShadowHost(target) as UnpkgManage
+      select.style.display = "none"
+      btn.parentElement!.style.background = "#3f3f3f"
+      btn.innerHTML = "✔ installed"
+      // host.installed.push({})
+      // version: select.value,
+    }
+    case "cancel":
+    {
+      const select = target.parentElement!.previousElementSibling! as SelectBox
+      target.parentElement!.innerHTML = "install"
+      select.style.display = "none"
+      break
+    }
+  }
 }
 
 export default class UnpkgManage extends HTMLElement {
@@ -111,7 +132,7 @@ export default class UnpkgManage extends HTMLElement {
     entry.addEventListener("click", showPanel)
     menu.addEventListener("click", switchMenu)
     keywordInput.addEventListener("input", this.inputEventHandle)
-    resultContent.addEventListener("click", clickResultContent)
+    resultContent.addEventListener("click", clickInstallPackage)
     switchResult(this)
     entry.click()
   }

@@ -20,10 +20,12 @@ function selectDrop (e: MouseEvent) {
   const event = new CustomEvent("change", { detail: checkValue })
   host.dispatchEvent(event)
   host.input.value = checkValue
+  host.value = checkValue
   drop.classList.toggle("show")
 }
 
 export default class Select extends HTMLElement {
+  public value = ""
   constructor() {
     super()
     const template = document.createElement("template")
@@ -44,6 +46,7 @@ export default class Select extends HTMLElement {
 
   connectedCallback() {
     const { input, drop } = this
+    input.placeholder = this.getAttribute("placeholder") || ""
     input.addEventListener("click", toggleDrag)
     drop.addEventListener("click", selectDrop)
   }
