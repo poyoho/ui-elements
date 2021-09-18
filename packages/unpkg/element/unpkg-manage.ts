@@ -13,12 +13,12 @@ function showPanel (e: MouseEvent) {
   const target = e.target! as HTMLElement
   const host = getShadowHost(target) as UnpkgManage
   const { panel } = host
-  panel.classList.toggle("show", true)
+  panel.classList.toggle("show")
 }
 
 function switchMenu (e: MouseEvent) {
   const target = e.target as HTMLLIElement
-  if (target.tagName !== "LI" || target.hasAttribute("noclick")) {
+  if (target.tagName !== "LI" || !target.hasAttribute("key")) {
     return
   }
   const host = getShadowHost(target) as UnpkgManage
@@ -56,7 +56,7 @@ function renderPackageMetadata (items: PackageMetadata[], container: HTMLElement
       `<a class="pkg-title" target="_blank" href="https://www.npmjs.com/package/${next.name}${version ? "/v/" + version : ""}">${next.name}${version ? "@" + version : ""}</a>`,
       `<div class="pkg-desc">${next.description}</div>`,
       `<div class="pkg-ctrl ${packageStatus}">`,
-      `<select-box placeholder="select version"></select-box>`,
+      `<select-box placeholder="pick package"></select-box>`,
       `<button key="${packageStatus}" name="${next.name}">${packageStatus}</button>`,
       `</div></div>`
     ])
@@ -167,13 +167,12 @@ export default class UnpkgManage extends HTMLElement {
   }
 
   connectedCallback() {
-    const { entry, menu, keywordInput, resultContent } = this
+    const { entry, menu, keywordInput, resultContent, iconClose } = this
     entry.addEventListener("click", showPanel)
     menu.addEventListener("click", switchMenu)
     keywordInput.addEventListener("input", this.inputEventHandle)
     resultContent.addEventListener("click", clickInstallPackage)
-    switchResult(this)
-    entry.click()
+    iconClose.addEventListener("click", showPanel)
   }
 
   disconnectedCallback() {
@@ -197,5 +196,9 @@ export default class UnpkgManage extends HTMLElement {
 
   get keywordInput (): HTMLInputElement {
     return this.shadowRoot!.querySelector(".result .filter")!
+  }
+
+  get iconClose (): HTMLElement {
+    return this.shadowRoot!.querySelector(".icon-close")!
   }
 }

@@ -1,19 +1,33 @@
+import ENTRY from "./icon/entry.svg?raw"
+import CLOSE from "./icon/close.svg?raw"
+import INSTALLED from "./icon/installed.svg?raw"
+import PACKAGE from "./icon/package.svg?raw"
+
 function html(...args: any) {
-  return args
+  return (args[0] as Array<string>).map((str, idx) => str + (args[1 + idx] || "")).join("")
 }
 
 export default html`
 <button id="entry">
-  <svg t="1631631233593" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2480" width="24" height="24"><path d="M846.416977 421.154969c-7.857968-29.366841-19.485797-57.192583-34.354436-82.913385l65.271586-98.513688-0.107447-0.107447-92.849688-92.848665-0.107447-0.107447-98.513688 65.271586c-25.718755-14.869662-53.544497-26.495444-82.912361-34.355459L579.340199 61.780065l-0.152473 0L447.877075 61.780065l-0.151449 0-23.502273 115.801423c-29.366841 7.858992-57.192583 19.485797-82.914408 34.355459l-98.513688-65.271586-0.107447 0.107447-92.849688 92.849688-0.107447 0.107447 65.272609 98.513688c-14.869662 25.720801-26.495444 53.546543-34.355459 82.913385L64.848449 444.657242l0 0.152473 0 131.309628 0 0.151449 115.801423 23.50125c7.860015 29.365818 19.485797 57.192583 34.355459 82.913385l-65.271586 98.514711 0.107447 0.106424 92.849688 92.848665 0.107447 0.107447 98.513688-65.271586c25.720801 14.869662 53.546543 26.495444 82.914408 34.355459l23.502273 115.801423 0.152473 0 131.309628 0 0.151449 0 23.502273-115.801423c29.366841-7.860015 57.192583-19.485797 82.912361-34.355459l98.513688 65.271586 0.107447-0.107447 92.850711-92.848665 0.107447-0.106424-65.272609-98.514711c14.870686-25.720801 26.497491-53.546543 34.354436-82.913385l115.802446-23.50125 0-0.152473L962.220447 444.808692l0-0.151449L846.416977 421.154969zM669.350213 510.465041c0 86.054935-69.761853 155.815765-155.817812 155.815765-86.054935 0-155.818835-69.76083-155.818835-155.815765 0-86.055958 69.762877-155.816788 155.818835-155.816788C599.589382 354.648252 669.350213 424.409083 669.350213 510.465041z" p-id="2481"></path></svg>
+  ${ENTRY}
 </button>
 <div id="panel" style="display: none;">
   <ul class="menu">
-    <li noclick class="title">Setting</li>
-    <li key="Installed" class="active">Installed</li>
-    <li key="Packages">Packages</li>
+    <li class="title">
+      Setting
+      ${CLOSE}
+    </li>
+    <li key="Installed" class="active">
+      ${INSTALLED}
+      Installed
+    </li>
+    <li key="Packages">
+      ${PACKAGE}
+      Packages
+    </li>
   </ul>
   <div class="result">
-    <input type="text" class="filter item" placeholder="filter packages">
+    <input type="text" class="filter item" placeholder="pick package">
     <div class="content"></div>
   </div>
 <style>
@@ -64,6 +78,7 @@ button:hover svg path {
   border-radius: 10px;
   height: 700px;
   overflow: hidden;
+  z-index: 2147483647;
 }
 @media screen and (max-width: 1000px) {
   #panel {
@@ -84,10 +99,14 @@ button:hover svg path {
 .menu li {
   color: #e1e1e1;
   padding: 20px;
+  cursor: default;
+}
+.icon-close {
+  float: right;
   cursor: pointer;
 }
-.menu li[noclick] {
-  cursor: default;
+.menu li[key] {
+  cursor: pointer;
 }
 .menu li.active {
   background: #555;
@@ -144,7 +163,7 @@ button:hover svg path {
   background: #3f3f3f;
 }
 select-box {
-  width: 100px;
+  width: 90px;
   display: none;
 }
 </style>
