@@ -1,7 +1,7 @@
-export * from "./libs"
-export * from "./element/unpkg-manage-element"
 import UnpkgManage from "./element/unpkg-manage"
 import * as SelectBox from "@ui-elements/select-box"
+export * from "./libs"
+export { UnpkgManage }
 
 declare global {
   interface Window {

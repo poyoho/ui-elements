@@ -10,6 +10,9 @@ export function createMonacoEditorManager (host: CodePlayground) {
   const { editorWrap } = host
   const editors: Record<string, MonacoEditorItem> = {}
   const manager = {
+    get: (type: SupportEditorType): MonacoEditorItem => {
+      return editors[type]
+    },
     active: (type: SupportEditorType): MonacoEditorItem => {
       let state = editors[type]
       // create it
