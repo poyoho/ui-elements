@@ -2,7 +2,6 @@ import teamplateElement from "./unpkg-manage-element"
 import { getShadowHost, debounce } from "@ui-elements/utils"
 import { resolvePackageVersion, resolveRecommendPackage } from "../libs/resolvePackage"
 import type { SelectBox } from "@ui-elements/select-box"
-import { nextTick, version } from "vue/types/umd"
 
 interface PackageMetadata {
   name: string
@@ -26,18 +25,18 @@ function switchMenu (e: MouseEvent) {
   const ulTarget = e.currentTarget as HTMLUListElement
   ulTarget.querySelector(".active")!.classList.toggle("active", false)
   target.classList.toggle("active", true)
-  host.activeMenu = target.innerHTML
+  host.activeMenu = target.getAttribute("key")!
   switchResult(host)
 }
 
 function switchResult (host: UnpkgManage) {
-  const { resultContent, activeMenu } = host
+  const { keywordInput, resultContent, activeMenu } = host
   Array.from(resultContent.children).forEach(chlid => chlid.remove())
+  keywordInput.value = ""
   switch (activeMenu) {
     case "Installed":
     {
-      const items = host.installed
-      renderPackageMetadata(items, resultContent, host.activeMenu === "Installed")
+      renderPackageMetadata(host.installed, resultContent, host.activeMenu === "Installed")
       break
     }
   }
@@ -58,7 +57,7 @@ function renderPackageMetadata (items: PackageMetadata[], container: HTMLElement
       `<div class="pkg-desc">${next.description}</div>`,
       `<div class="pkg-ctrl ${packageStatus}">`,
       `<select-box placeholder="select version"></select-box>`,
-      `<button name="${next.name}">${packageStatus}</button>`,
+      `<button key="${packageStatus}" name="${next.name}">${packageStatus}</button>`,
       `</div></div>`
     ])
   }, [] as string[]).join("\n")
@@ -67,16 +66,21 @@ function renderPackageMetadata (items: PackageMetadata[], container: HTMLElement
 async function keywordFileter(e: Event) {
   const target = e.target as HTMLInputElement
   const host = getShadowHost(target) as UnpkgManage
+  const keyword = host.keywordInput.value
+
   switch(host.activeMenu) {
     case "Packages":
     {
-      const keyword = host.keywordInput.value
       const packagesMetadata = await resolveRecommendPackage(keyword)
       renderPackageMetadata(packagesMetadata, host.resultContent, false)
+      break
     }
     case "Installed":
     {
-
+      const match = new RegExp(`[${keyword}]{${keyword.length}}`)
+      const packagesMetadata = host.installed.filter(pack => match.test(pack.name))
+      renderPackageMetadata(packagesMetadata, host.resultContent, true)
+      break
     }
   }
 
@@ -95,11 +99,19 @@ async function clickInstallPackage (e: MouseEvent) {
       const select = target.previousElementSibling! as HTMLSelectElement
       select.innerHTML = versionList.map(version => `<option-box value="${version}">${version}</option-box>`).join("")
       select.style.display = "inline-block"
-      target.innerHTML = "<button>confirm</button>  <button>cancel</button>"
+      target.innerHTML = '<button key="confirm">confirm</button>  <button key="cancel">cancel</button>'
       break
     }
     case "uninstall":
     {
+      const host = getShadowHost(target) as UnpkgManage
+      const pkgName = target.getAttribute("name")!
+      const idx = host.installed.findIndex(el => el.name === pkgName)
+      if (idx !== -1) {
+        host.installed.splice(idx, 1)
+        renderPackageMetadata(host.installed, host.resultContent, true)
+        host.dispatchEvent(new CustomEvent("change", { detail: host.installed }))
+      }
       break
     }
     case "confirm":

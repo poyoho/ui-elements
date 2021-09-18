@@ -9,8 +9,8 @@ export default html`
 <div id="panel" style="display: none;">
   <ul class="menu">
     <li noclick class="title">Setting</li>
-    <li class="active">Installed</li>
-    <li>Packages</li>
+    <li key="Installed" class="active">Installed</li>
+    <li key="Packages">Packages</li>
   </ul>
   <div class="result">
     <input type="text" class="filter item" placeholder="filter packages">
