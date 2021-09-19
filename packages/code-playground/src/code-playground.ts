@@ -31,7 +31,7 @@ export default class CodePlayground extends HTMLElement {
     addButton.addEventListener("click", clickshowInput)
     addInput.addEventListener("keydown", this.createFileEvent)
     addInput.addEventListener("blur", fileInputBlur)
-    unpkgManage.addEventListener("change", this.updatePackages)
+    unpkgManage.addEventListener("unpkg-change", this.updatePackages)
     fs.subscribe("update", async (file) => {
       if (file.filename.endsWith(".vue")) {
         const scripts = await projectManage.getProjectRunableJS(fs)

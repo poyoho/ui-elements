@@ -24,11 +24,11 @@ export const PACKAGE_CDN = (path: string) => `https://unpkg.com/${path}`
 export const SKYPACK_RECOMMEND = (keyword: string) => `https://api.skypack.dev/v1/search?q=${keyword}&count=12`
 export const SKYPACK_VERSION = (pkgName: string) => `https://api.skypack.dev/v1/package/${pkgName}`
 
-export async function resolvePackageMetadata(name: string, version: string): Promise<PackageMetadata | Error> {
+export async function resolvePackageMetadata(name: string, version: string): Promise<PackageMetadata> {
   const response = await fetch(PACKAGE_CDN(`${name}${version ? `@${version}` : ''}/package.json`))
 
   if (!response.ok)
-    return new Error('Error Resolving Package Data')
+    throw new Error('Error Resolving Package Data')
 
   return await response.json()
 }

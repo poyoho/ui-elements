@@ -15,7 +15,6 @@ function createFileTab (filename: string, keepalive?: boolean) {
   return filetab
 }
 
-// TODO add DTS
 export async function createFile (host: CodePlayground,  filename: string, keepalive?: boolean) {
   const { editorManage, tabWrap, fs, editorWrap } = host
 
@@ -47,7 +46,8 @@ export async function createFile (host: CodePlayground,  filename: string, keepa
   const filetab = createFileTab(filename, keepalive)
   tabWrap.insertBefore(filetab, tabWrap.lastElementChild!.previousElementSibling)
   filetab.addEventListener("click", clickActiveFile)
-  // it must be an asynchronous event to prevent monaco model conflicts caused by creating two files at the same time
+  // it must be an asynchronous event to prevent monaco model conflicts
+  // caused by creating two files at the same time
   await clickActiveFile(filetab)
   if (!keepalive) {
     const closeBtn = filetab.querySelector("svg")!

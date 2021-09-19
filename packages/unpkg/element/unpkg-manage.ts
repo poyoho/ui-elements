@@ -3,10 +3,20 @@ import { getShadowHost, debounce } from "@ui-elements/utils"
 import { resolvePackageVersion, resolveRecommendPackage } from "../libs/resolvePackage"
 import type { SelectBox } from "@ui-elements/select-box"
 
-interface PackageMetadata {
+export interface UnpkgChangeEventDetail {
+  list: PackageMetadata[]
+  item: PackageMetadata
+  action: "add" | "delete"
+}
+
+export interface PackageMetadata {
   name: string
   description: string
   version: string
+}
+
+function createUnpkgManageChangeEvent (detail: UnpkgChangeEventDetail) {
+  return new CustomEvent<UnpkgChangeEventDetail>("unpkg-change", { detail })
 }
 
 function showPanel (e: MouseEvent) {
@@ -108,9 +118,14 @@ async function clickInstallPackage (e: MouseEvent) {
       const pkgName = target.getAttribute("name")!
       const idx = host.installed.findIndex(el => el.name === pkgName)
       if (idx !== -1) {
+        const item = host.installed[idx]
         host.installed.splice(idx, 1)
         renderPackageMetadata(host.installed, host.resultContent, true)
-        host.dispatchEvent(new CustomEvent("change", { detail: host.installed }))
+        host.dispatchEvent(createUnpkgManageChangeEvent({
+          item,
+          list: host.installed,
+          action: "delete"
+        }))
       }
       break
     }
@@ -133,12 +148,17 @@ async function clickInstallPackage (e: MouseEvent) {
       const itemWrap = wrap.parentElement!.parentElement!
       const name = itemWrap.querySelector(".pkg-title")!.innerHTML
       const description = itemWrap.querySelector(".pkg-desc")!.innerHTML
-      host.installed.push({
+      const item = {
         name,
         version,
         description
-      })
-      host.dispatchEvent(new CustomEvent("change", { detail: host.installed }))
+      }
+      host.installed.push(item)
+      host.dispatchEvent(createUnpkgManageChangeEvent({
+        list: host.installed,
+        item,
+        action: "add"
+      }))
       break
     }
     case "cancel":

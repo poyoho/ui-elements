@@ -21,32 +21,39 @@ export function setupTypescriptLanguageService (monaco: monaco) {
     ...localConfig,
   })
 
-  const packages = new Map<string, {
-    content: string;
-    filePath?: string;
-  }>()
+  const packages = new Set<string>()
 
   return {
-    addDTS (options: Array<{name: string, types: string}>) {
-      console.log(options)
-      options.forEach(opt => {
-        if (packages.has(opt.name)) {
-          return
+    hasDTS (name: string) {
+      return packages.has(name)
+    },
+
+    addDTS (options: Array<{name: string, content: string}>) {
+      const dts = options.reduce((prev, next) => {
+        if (packages.has(next.name)) {
+          return prev
         }
         const lib =  {
-          content: `declare module '${opt.name}' { ${opt.types} } `
+          filePath: next.name,
+          content: `declare module '${next.name}' { ${next.content} } `
         }
-        packages.set(opt.name, lib)
-      })
-      monaco.languages.typescript.typescriptDefaults.setExtraLibs(Array.from(packages.values()))
-      monaco.languages.typescript.javascriptDefaults.setExtraLibs(Array.from(packages.values()))
+        packages.add(next.name)
+        prev.push(lib)
+        return prev
+      }, [] as {content: string}[])
+      monaco.languages.typescript.typescriptDefaults.setExtraLibs(dts)
+      monaco.languages.typescript.javascriptDefaults.setExtraLibs(dts)
     },
+
     deleteDTS (names: string[]) {
+      const packages = monaco.languages.typescript.typescriptDefaults.getExtraLibs()
       names.forEach(name => {
-        packages.delete(name)
+        delete packages[name]
       })
-      monaco.languages.typescript.typescriptDefaults.setExtraLibs(Array.from(packages.values()))
-      monaco.languages.typescript.javascriptDefaults.setExtraLibs(Array.from(packages.values()))
+      console.log(packages);
+
+      // monaco.languages.typescript.typescriptDefaults.setExtraLibs(packages)
+      // monaco.languages.typescript.javascriptDefaults.setExtraLibs(packages)
     }
   }
 }
