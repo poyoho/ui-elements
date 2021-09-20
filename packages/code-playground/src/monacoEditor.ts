@@ -2,7 +2,6 @@ import CodePlayground from "./code-playground"
 import MonacoEditor from "@ui-elements/monaco-editor/src/monaco-editor"
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
 import { MonacoEditorItem, SupportEditorType } from "./types"
-import { vuePackages } from "@ui-elements/unpkg"
 
 type EditorManage = ReturnType<typeof createMonacoEditorManager>
 
@@ -99,10 +98,6 @@ function createOrGetFile (fs: FileSystem<CompiledFile>, filename: string, isNotE
   return file
 }
 
-async function setupTypescriptLanaguageService (editor: MonacoEditor) {
-  ;(await editor.monacoAccessor).typescript.addDTS(vuePackages)
-}
-
 export async function activeMonacoEditor (
   editorManage: EditorManage,
   fs: FileSystem<CompiledFile>,
@@ -138,7 +133,6 @@ export async function activeMonacoEditor (
         cache.ts = await tsEditor.editor.getRunnableJS(tsModel)
         updateVueFile()
       })
-      setupTypescriptLanaguageService(tsEditor.editor)
     }
   } else if (filename.endsWith(".ts")) {
     const [tsEditor] = createOrGetEditor(editorManage, ["ts"])
@@ -150,7 +144,6 @@ export async function activeMonacoEditor (
       tsModel.onDidChangeContent(async () => {
         file.updateContent(await tsEditor.editor.getRunnableJS(tsModel))
       })
-      setupTypescriptLanaguageService(tsEditor.editor)
     }
   } else {
     throw "don't support create ${filename}, only support create *.vue/*.ts."

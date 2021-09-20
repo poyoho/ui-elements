@@ -20,36 +20,59 @@ export interface PacakgeVersions {
   versions: string[]
 }
 
-export const PACKAGE_CDN = (path: string) => `https://unpkg.com/${path}`
 export const SKYPACK_RECOMMEND = (keyword: string) => `https://api.skypack.dev/v1/search?q=${keyword}&count=12`
-export const SKYPACK_VERSION = (pkgName: string) => `https://api.skypack.dev/v1/package/${pkgName}`
+export const SKYPACK_PACKAGEDATA = (pkgName: string) => `https://api.skypack.dev/v1/package/${pkgName}`
+export const SKYPACK_METADATA = (path: string) => `https://cdn.skypack.dev/${path}?meta`
+export const SKYPACK_CDN = (path: string) => `https://cdn.skypack.dev${path}`
+export const UNPKG_CDN = (path: string) => `https://unpkg.com/${path}`
 
 export async function resolvePackageMetadata(name: string, version: string): Promise<PackageMetadata> {
-  const response = await fetch(PACKAGE_CDN(`${name}${version ? `@${version}` : ''}/package.json`))
-
+  const response = await fetch(SKYPACK_METADATA(`${name}${version ? "@"+version : ""}`))
   if (!response.ok)
     throw new Error('Error Resolving Package Data')
 
   return await response.json()
 }
 
-export async function resolvePackageTypes(name: string, entry: string, version?: string): Promise<string> {
-  const response = await fetch(PACKAGE_CDN(`${name}${version ? "@"+version : ""}/${entry}`))
-
-  if (!response.ok)
-    return ''
-
-  return await response.text()
+export async function resolvePackageTypes(name: string, version?: string): Promise<string> {
+  const response = await fetch(SKYPACK_CDN(`/${name}${version ? "@"+version : ""}?dts`))
+  if (!response.ok) return ''
+  const dtsURL = SKYPACK_CDN(response.headers.get("x-typescript-types")!)
+  const respDTS = await fetch(dtsURL)
+  if (!response.ok) return ''
+  return await respDTS.text()
 }
 
-export async function resolvePackage(name: string, version: string) {
+export async function resolveRecommendPackage (keyword: string) {
+  if (!keyword) {
+    return []
+  }
+  const response = await fetch(SKYPACK_RECOMMEND(keyword))
+  if (!response.ok) {
+    return []
+  }
+  const data = (await response.json()).results
+  return data
+}
+
+
+export async function resolvePackageVersion (pkgName: string) {
+  const response = await fetch(SKYPACK_PACKAGEDATA(pkgName))
+  if (!response.ok) {
+    return []
+  }
+  const data = (await response.json()).versions
+  const versionList = Object.keys(data)
+  return versionList.splice(versionList.length - 13).sort().reverse()
+}
+
+async function resolvePackage(name: string, version: string) {
   const packages: Package[] = []
   const metadata = await resolvePackageMetadata(name, version)
 
   if (!(metadata instanceof Error)) {
     const typesEntry = metadata.types
     const dependencies = Object.entries(metadata.dependencies || []).map(([name, version]) => ({ name, version }))
-    // 递归加载所有依赖
     const resolvedDeps = await Promise.allSettled(dependencies.map(({ name, version }) => resolvePackage(name, version)))
 
     packages.push(
@@ -67,27 +90,4 @@ export async function resolvePackage(name: string, version: string) {
   }
 
   return packages.filter((p, i) => packages.findIndex(x => x.name === p.name) === i)
-}
-
-export async function resolveRecommendPackage (keyword: string) {
-  if (!keyword) {
-    return []
-  }
-  const response = await fetch(SKYPACK_RECOMMEND(keyword))
-  if (!response.ok) {
-    return []
-  }
-  const data = (await response.json()).results
-  return data
-}
-
-
-export async function resolvePackageVersion (pkgName: string) {
-  const response = await fetch(SKYPACK_VERSION(pkgName))
-  if (!response.ok) {
-    return []
-  }
-  const data = (await response.json()).versions
-  const versionList = Object.keys(data)
-  return versionList.splice(versionList.length - 13).sort().reverse()
 }

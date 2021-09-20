@@ -1,6 +1,7 @@
 import { activeMonacoEditor, removeMonacoEditorModel } from "./monacoEditor"
 import CodePlayground from "./code-playground"
 import { FileSystem, CompiledFile } from "@ui-elements/vfs"
+import { resolvePackageTypes, SKYPACK_CDN } from "@ui-elements/unpkg"
 
 function isCreateAble (filename: string, fs: FileSystem<CompiledFile>) {
   return [".vue", ".ts"].some(extend => filename.endsWith(extend))
@@ -53,6 +54,18 @@ export async function createFile (host: CodePlayground,  filename: string, keepa
     const closeBtn = filetab.querySelector("svg")!
     closeBtn.addEventListener("click", removeFile, false)
   }
+  const vuedts = await resolvePackageTypes("vue", "3.2.6")
+  const ts = editorManage.get("ts")
+
+  // test
+  console.log(vuedts)
+  ;(await ts.editor.monacoAccessor).typescript.addDTS([{
+    name: "vue",
+    content: vuedts
+  }])
+  host.sandbox.setupDependency({
+    "vue": SKYPACK_CDN("/vue@3.2.6")
+  })
 }
 
 export function clickshowInput (e: MouseEvent) {

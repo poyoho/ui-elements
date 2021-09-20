@@ -8,6 +8,7 @@ import { UnpkgManage } from "@ui-elements/unpkg"
 import { setupIframesandbox } from "./sandbox"
 import { createFile, clickshowInput, fileInputBlur, inputCreateFile } from "./filetab"
 import { updatePackages } from "./packageManage"
+import { resolvePackageTypes } from "@ui-elements/unpkg"
 
 export default class CodePlayground extends HTMLElement {
   public fs = new FileSystem<CompiledFile>()
@@ -24,10 +25,9 @@ export default class CodePlayground extends HTMLElement {
     this.appendChild(wrap)
     this.editorManage = createMonacoEditorManager(this)
 
-    const { project, addButton, addInput, fs, unpkgManage } = this
+    const { project, addButton, addInput, fs, unpkgManage, editorManage } = this
     const projectManage = await project
     const sandbox = setupIframesandbox(this)
-    sandbox.setupDependency(projectManage.getRuntimeImportMap())
     addButton.addEventListener("click", clickshowInput)
     addInput.addEventListener("keydown", this.createFileEvent)
     addInput.addEventListener("blur", fileInputBlur)

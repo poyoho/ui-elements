@@ -1,16 +1,8 @@
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
-import { PACKAGE_CDN } from "@ui-elements/unpkg"
 import boostrap from "./bootstrap/main.js?raw"
 import appvue from "./bootstrap/app.vue?raw"
 import { compileFile as compileSFCFile } from "./compile/sfc"
 import { parseFileModules } from "@ui-elements/compiler"
-import { resolvePackageTypes } from "@ui-elements/unpkg"
-
-export function getRuntimeImportMap () {
-  return {
-    "vue": PACKAGE_CDN("@vue/runtime-dom@3.2.4/dist/runtime-dom.esm-browser.js")
-  }
-}
 
 function getAppEntry (filesystem: FileSystem<CompiledFile>) {
   const file = filesystem.readFile("app.vue")
