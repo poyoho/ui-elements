@@ -16,4 +16,18 @@ export const babelParse = _babelParse.parse
 import * as _babelTypes from '@babel/types'
 export const isReferenced = _babelTypes.isReferenced
 
+export type { ParserPlugin } from "@babel/parser"
 export { walk } from 'estree-walker'
+
+export interface CompiledFile {
+  filename: string
+  compiled: {
+    js: string
+    css: string
+  }
+}
+
+export interface FileSystem {
+  isExist: (filename: string) => boolean
+  readFile: (filename: string) => CompiledFile | undefined
+}

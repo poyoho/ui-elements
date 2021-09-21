@@ -1,4 +1,4 @@
-import { Identifier, Node, Function, ObjectProperty, BlockStatement, Program, isReferenced, walk } from "./env"
+import { Identifier, Node, Function, ObjectProperty, BlockStatement, Program, isReferenced, walk, ParserPlugin } from "./env"
 
 export function walkIdentifiers(
   root: Node,
@@ -234,8 +234,8 @@ export const isStaticPropertyKey = (node: Node, parent: Node) =>
  * for ES2020. This will need to be updated as the spec moves forward.
  * Full list at https://babeljs.io/docs/en/next/babel-parser#plugins
  */
-export const babelParserDefaultPlugins = [
+export const babelParserDefaultPlugins: ParserPlugin[] = [
   'bigInt',
   'optionalChaining',
   'nullishCoalescingOperator'
-] as const
+]

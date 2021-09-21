@@ -1,3 +1,4 @@
+import { parseSkypackDTSModule } from "@ui-elements/compiler"
 export interface Package {
   name: string
   version: string
@@ -40,7 +41,12 @@ export async function resolvePackageTypes(name: string, version?: string): Promi
   const dtsURL = SKYPACK_CDN(response.headers.get("x-typescript-types")!)
   const respDTS = await fetch(dtsURL)
   if (!response.ok) return ''
-  return await respDTS.text()
+  const dtsScript = await respDTS.text()
+  const allDTS = parseSkypackDTSModule("vue", dtsScript, (packName) => {
+    resolvePackageTypes(packName)
+    return Promise.resolve("")
+  })
+  return allDTS
 }
 
 export async function resolveRecommendPackage (keyword: string) {

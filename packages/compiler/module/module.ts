@@ -1,22 +1,12 @@
 import {
   modulesKey, exportKey, dynamicImportKey, moduleKey, globalCSS,
   babelParse, babelParserDefaultPlugins, walkIdentifiers, MagicString,
-  ExportSpecifier, Identifier, Node, ObjectProperty, walk
+  ExportSpecifier, Identifier, Node, ObjectProperty, walk, ParserPlugin,
+  CompiledFile, FileSystem
 } from "./env"
-export interface CompiledFile {
-  filename: string
-  compiled: {
-    js: string
-    css: string
-  }
-}
 
-export interface FileSystem {
-  isExist: (filename: string) => boolean
-  readFile: (filename: string) => CompiledFile | undefined
-}
 
-const isStaticProperty = (node: Node): node is ObjectProperty => {
+export const isStaticProperty = (node: Node): node is ObjectProperty => {
   return node.type === 'ObjectProperty' && !node.computed
 }
 
@@ -33,13 +23,14 @@ export function processJavaScriptModule (
   filename: string,
   js: string,
   filesystem: FileSystem,
+  plugins: ParserPlugin[] = babelParserDefaultPlugins
 ) {
   const s = new MagicString(js)
 
   const ast = babelParse(js, {
     sourceFilename: filename,
     sourceType: 'module',
-    plugins: [...babelParserDefaultPlugins],
+    plugins: plugins,
   }).program.body
 
   const idToImportMap = new Map<string, string>()
@@ -254,7 +245,7 @@ export function processFile(
   return processed
 }
 
-function extractNames(param: Node): string[] {
+export function extractNames(param: Node): string[] {
   return extractIdentifiers(param).map(id => id.name)
 }
 
@@ -305,7 +296,7 @@ function extractIdentifiers(
   return nodes
 }
 
-function isInDestructureAssignment(parent: Node, parentStack: Node[]): boolean {
+export function isInDestructureAssignment(parent: Node, parentStack: Node[]): boolean {
   if (
     parent
     && (parent.type === 'ObjectProperty' || parent.type === 'ArrayPattern')
