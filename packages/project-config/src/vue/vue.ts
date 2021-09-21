@@ -1,8 +1,7 @@
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
 import boostrap from "./bootstrap/main.js?raw"
 import appvue from "./bootstrap/app.vue?raw"
-import { compileFile as compileSFCFile } from "./compile/sfc"
-import { parseFileModules } from "@ui-elements/compiler"
+import { parseFileModules, compileVueSFCFile } from "@ui-elements/compiler"
 
 function getAppEntry (filesystem: FileSystem<CompiledFile>) {
   const file = filesystem.readFile("app.vue")
@@ -16,7 +15,7 @@ function getAppEntry (filesystem: FileSystem<CompiledFile>) {
 }
 
 export async function compileFile (file: CompiledFile) {
-  const err = await compileSFCFile(file)
+  const err = await compileVueSFCFile(file)
   if (err.length > 0) {
     throw err
   }
