@@ -54,18 +54,13 @@ export async function createFile (host: CodePlayground,  filename: string, keepa
     const closeBtn = filetab.querySelector("svg")!
     closeBtn.addEventListener("click", removeFile, false)
   }
-  const vuedts = await resolvePackageTypes("vue", "3.2.6")
-  const ts = editorManage.get("ts")
 
   // test
+  const ts = editorManage.get("ts")
+  const vuedts = await resolvePackageTypes("vue", "3.2.6")
   console.log(vuedts)
-  ;(await ts.editor.monacoAccessor).typescript.addDTS([{
-    name: "vue",
-    content: vuedts
-  }])
-  host.sandbox.setupDependency({
-    "vue": SKYPACK_CDN("/vue@3.2.6")
-  })
+  ;(await ts.editor.monacoAccessor).typescript.addDTS(vuedts)
+  host.sandbox.setupDependency({ "vue": SKYPACK_CDN("vue", "3.2.6") })
 }
 
 export function clickshowInput (e: MouseEvent) {

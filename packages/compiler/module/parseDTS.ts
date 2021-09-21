@@ -37,7 +37,7 @@ export async function parseSkypackDTSModule (
     if (node.type === 'ImportDeclaration') {
       const importId = defineImport(node.source.value)
       s.remove(node.source.start!, node.source.end!)
-      s.appendLeft(node.source.start!, importId)
+      s.appendLeft(node.source.start!, `'${importId}'`)
     }
   }
 
@@ -54,12 +54,15 @@ export async function parseSkypackDTSModule (
     ) {
       const importId = defineImport(node.source.value)
       s.remove(node.source.start!, node.source.end!)
-      s.appendRight(node.source.start!, importId)
+      s.appendRight(node.source.start!, `'${importId}'`)
     }
   }
 
   let result = [
-    `declare module '${filename}' { ${s.toString()} }`
+    {
+      filePath: filename,
+      content: `declare module '${filename}' { ${s.toString()} }`
+    }
   ]
 
   addDependencies.forEach(pkg => packageDependencies.add(pkg))

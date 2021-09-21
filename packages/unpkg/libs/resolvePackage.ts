@@ -22,25 +22,18 @@ export interface PacakgeVersions {
   versions: string[]
 }
 
+const formatName = (name: string) => name[0] === "/" ? name : `/${name}`
+const formatVersion = (version?: string) => version ? "@"+version : ""
+
 export const SKYPACK_RECOMMEND = (keyword: string) => `https://api.skypack.dev/v1/search?q=${keyword}&count=12`
 export const SKYPACK_PACKAGEDATA = (pkgName: string) => `https://api.skypack.dev/v1/package/${pkgName}`
-export const SKYPACK_METADATA = (path: string) => `https://cdn.skypack.dev/${path}?meta`
-export const SKYPACK_CDN = (path: string) => `https://cdn.skypack.dev${path}`
-export const UNPKG_CDN = (path: string) => `https://unpkg.com/${path}`
+export const SKYPACK_CDN = (name: string, version?: string, params?: string) => `https://cdn.skypack.dev${formatName(name)}${formatVersion(version)}` + (params || "")
+export const UNPKG_CDN = (name: string, version?: string, params?: string) => `https://unpkg.com/${formatName(name)}${formatVersion(version)}` + (params || "")
 
-export async function resolvePackageMetadata(name: string, version: string): Promise<PackageMetadata> {
-  const response = await fetch(SKYPACK_METADATA(`${name}${version ? "@"+version : ""}`))
-  if (!response.ok)
-    throw new Error('Error Resolving Package Data')
-
-  return await response.json()
-}
-
-export async function resolvePackageTypes(name: string, version?: string): Promise<string[]> {
-  const response = await fetch(SKYPACK_CDN(`/${name}${version ? "@"+version : ""}?dts`))
+export async function resolvePackageTypes(name: string, version?: string): Promise<{filePath: string, content: string}[]> {
+  const response = await fetch(SKYPACK_CDN(name, version, "?dts"))
   if (!response.ok) return []
-  const dtsURL = SKYPACK_CDN(response.headers.get("x-typescript-types")!)
-  const respDTS = await fetch(dtsURL)
+  const respDTS = await fetch(SKYPACK_CDN(response.headers.get("x-typescript-types")!))
   if (!response.ok) return []
   const dtsScript = await respDTS.text()
   const allDTS = await parseSkypackDTSModule("vue", dtsScript, async (packageURI: string) => {
@@ -49,7 +42,7 @@ export async function resolvePackageTypes(name: string, version?: string): Promi
     const dts = await resp.text()
     return Promise.resolve(dts)
   })
-  return allDTS
+  return allDTS.reverse()
 }
 
 export async function resolveRecommendPackage (keyword: string) {
@@ -72,6 +65,13 @@ export async function resolvePackageVersion (pkgName: string) {
   const data = (await response.json()).versions
   const versionList = Object.keys(data)
   return versionList.splice(versionList.length - 13).sort().reverse()
+}
+
+export async function resolvePackageMetadata(name: string, version: string): Promise<PackageMetadata> {
+  const response = await fetch(SKYPACK_CDN(name, version, "?metadata"))
+  if (!response.ok)
+    throw new Error('Error Resolving Package Data')
+  return await response.json()
 }
 
 async function resolvePackage(name: string, version: string) {

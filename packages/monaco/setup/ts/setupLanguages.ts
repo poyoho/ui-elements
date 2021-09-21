@@ -28,21 +28,10 @@ export function setupTypescriptLanguageService (monaco: monaco) {
       return packages.has(name)
     },
 
-    addDTS (options: Array<{name: string, content: string}>) {
-      const dts = options.reduce((prev, next) => {
-        if (packages.has(next.name)) {
-          return prev
-        }
-        const lib =  {
-          filePath: next.name,
-          content: `declare module '${next.name}' { ${next.content} } `
-        }
-        packages.add(next.name)
-        prev.push(lib)
-        return prev
-      }, [] as {content: string}[])
-      monaco.languages.typescript.typescriptDefaults.setExtraLibs(dts)
-      monaco.languages.typescript.javascriptDefaults.setExtraLibs(dts)
+    addDTS (options: Array<{filePath: string, content: string}>) {
+      options.forEach((option) => packages.add(option.filePath))
+      monaco.languages.typescript.typescriptDefaults.setExtraLibs(options)
+      monaco.languages.typescript.javascriptDefaults.setExtraLibs(options)
     },
 
     deleteDTS (names: string[]) {
