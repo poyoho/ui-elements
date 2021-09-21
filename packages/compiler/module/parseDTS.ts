@@ -3,12 +3,14 @@ import {
   babelParserDefaultPlugins
 } from "./env"
 
-export function parseSkypackDTSModule (
+export async function parseSkypackDTSModule (
   filename: string,
   script: string,
   fetchDTS: (packUri: string) => Promise<string>,
+  packageDependencies: Set<string> = new Set<string>()
 ) {
   const s = new MagicString(script)
+  const addDependencies = new Set<string>()
 
   const ast = babelParse(script, {
     sourceFilename: filename,
@@ -19,11 +21,11 @@ export function parseSkypackDTSModule (
     ],
   }).program.body
 
-  const dependenciesFiles = new Set<string>()
-
   function defineImport (source: string) {
     const filename = source.match(/\/-\/(.*)@/)![1]
-    dependenciesFiles.add(source)
+    if (!packageDependencies.has(source)) {
+      addDependencies.add(source)
+    }
     return filename
   }
 
@@ -56,13 +58,19 @@ export function parseSkypackDTSModule (
     }
   }
 
-  if (dependenciesFiles.size) {
-    dependenciesFiles.forEach(async file => {
-      const dtsScript = await fetchDTS(file)
-      const module = parseSkypackDTSModule(file, dtsScript, fetchDTS)
-      s.append(module)
-    })
-  }
+  let result = [
+    `declare module '${filename}' { ${s.toString()} }`
+  ]
 
-  return s.toString()
+  addDependencies.forEach(pkg => packageDependencies.add(pkg))
+  await Promise.all(
+    Array.from(addDependencies.values()).map(async moduleURI => {
+      const dtsScript = await fetchDTS(moduleURI)
+      const filename = moduleURI.match(/\/-\/(.*)@/)![1]
+      const module = await parseSkypackDTSModule(filename, dtsScript, fetchDTS, packageDependencies)
+      result = result.concat(module)
+    })
+  )
+
+  return result
 }
