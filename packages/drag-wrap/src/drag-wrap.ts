@@ -113,6 +113,7 @@ function formatDirection (item: string): direction {
 
 let id = 0
 
+// TODO fixed item
 export default class DrapWrap extends HTMLElement {
   #direction: "row" | "column" = "row"
   #id = ++id

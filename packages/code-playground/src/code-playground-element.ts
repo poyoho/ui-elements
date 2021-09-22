@@ -3,8 +3,10 @@ function html(...args: any) {
 }
 
 export default html`
-<unpkg-manage></unpkg-manage>
 <drag-wrap direction="row">
+  <div slot="item">
+    <unpkg-manage></unpkg-manage>
+  </div>
   <div slot="item">
     <div id="tab">
 
