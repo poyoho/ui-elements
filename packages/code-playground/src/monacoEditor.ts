@@ -88,10 +88,10 @@ async function createOrGetModel (editor: MonacoEditor, type: SupportEditorType, 
   return model
 }
 
-function createOrGetFile (fs: FileSystem<CompiledFile>, filename: string, isNotExistFile: boolean) {
+function createOrGetFile (fs: FileSystem<CompiledFile>, filename: string, content: string, isNotExistFile: boolean) {
   let file: CompiledFile
   if (isNotExistFile) {
-    file = fs.writeFile(new CompiledFile({ name: filename }))
+    file = fs.writeFile(new CompiledFile({ name: filename, content }))
   } else {
     file = fs.readFile(filename)!
   }
@@ -101,29 +101,31 @@ function createOrGetFile (fs: FileSystem<CompiledFile>, filename: string, isNotE
 export async function activeMonacoEditor (
   editorManage: EditorManage,
   fs: FileSystem<CompiledFile>,
-  filename: string
+  filename: string,
+  code: string
 ) {
   const isNotExistFile = !fs.isExist(filename)
 
-  const file = createOrGetFile(fs, filename, isNotExistFile)
 
   if (filename.endsWith(".vue")) {
     const [vuehtmlEditor, tsEditor] = createOrGetEditor(editorManage, ["vuehtml", "ts"])
 
-    const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", "<template></template>", isNotExistFile)
+    const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", "<template>app.vue</template>", isNotExistFile)
     const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename+".ts", "export default {}", isNotExistFile)
     vuehtmlEditor.editor.setModel(vuehtmlModel)
     tsEditor.editor.setModel(tsModel)
 
     if (isNotExistFile) {
       const cache = { html: vuehtmlModel.getValue(), ts: tsModel.getValue() }
+      const getContent = () => [
+        cache.html,
+        "<script>",
+        cache.ts,
+        "</script>"
+      ].join("\n")
+      const file = createOrGetFile(fs, filename, getContent(), isNotExistFile)
       const updateVueFile = async () => {
-        file.updateContent([
-          cache.html,
-          "<script>",
-          cache.ts,
-          "</script>"
-        ].join("\n"))
+        file.updateContent(getContent())
       }
       vuehtmlModel.onDidChangeContent(() => {
         cache.html = vuehtmlModel.getValue()
@@ -137,16 +139,17 @@ export async function activeMonacoEditor (
   } else if (filename.endsWith(".ts")) {
     const [tsEditor] = createOrGetEditor(editorManage, ["ts"])
 
-    const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename, "", isNotExistFile)
+    const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename, code, isNotExistFile)
     tsEditor.editor.setModel(tsModel)
 
     if (isNotExistFile) {
+      const file = createOrGetFile(fs, filename, tsModel.getValue(), isNotExistFile)
       tsModel.onDidChangeContent(async () => {
         file.updateContent(await tsEditor.editor.getRunnableJS(tsModel))
       })
     }
   } else {
-    throw "don't support create ${filename}, only support create *.vue/*.ts."
+    throw `don't support create ${filename}, only support create *.vue/*.ts.`
   }
 }
 

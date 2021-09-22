@@ -1,5 +1,6 @@
 
 import { createApp as _createApp } from "vue"
+
 const App = __modules__["app.vue"].default
 const config = __modules__["config.ts"].default
 

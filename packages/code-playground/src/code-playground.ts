@@ -2,17 +2,16 @@ import type IframeSandbox from "@ui-elements/iframe-sandbox/src/iframe-sandbox"
 import type DragWrap from "@ui-elements/drag-wrap/src/drag-wrap"
 import teamplateElement from "./code-playground-element"
 import { FileSystem, CompiledFile } from "@ui-elements/vfs"
-import { createProjectManager } from "@ui-elements/compiler"
 import { createMonacoEditorManager } from "./monacoEditor"
-import { UnpkgManage } from "@ui-elements/unpkg"
+import { SKYPACK_CDN, UnpkgManage } from "@ui-elements/unpkg"
+import { createProjectManager } from "@ui-elements/project-config"
 import { setupIframesandbox } from "./sandbox"
-import { createFile, clickshowInput, fileInputBlur, inputCreateFile } from "./filetab"
+import { createFileEditor, clickshowInput, fileInputBlur, inputCreateFile } from "./filetab"
 import { updatePackages } from "./packageManage"
-import { resolvePackageTypes } from "@ui-elements/unpkg"
 
 export default class CodePlayground extends HTMLElement {
   public fs = new FileSystem<CompiledFile>()
-  public project = createProjectManager("vue")
+  public project = createProjectManager("vue", this.fs)
   public editorManage!: ReturnType<typeof createMonacoEditorManager>
   private createFileEvent = inputCreateFile(this)
   private updatePackages = updatePackages(this)
@@ -33,15 +32,18 @@ export default class CodePlayground extends HTMLElement {
     addInput.addEventListener("blur", fileInputBlur)
     unpkgManage.addEventListener("unpkg-change", this.updatePackages)
     fs.subscribe("update", async (file) => {
-      if (file.filename.endsWith(".vue")) {
-        const scripts = await projectManage.getProjectRunableJS(fs)
+      if (file.filename.endsWith(".vue") || file.filename.endsWith(".ts")) {
+        const scripts = await projectManage.getProjectRunableJS()
         sandbox.eval(scripts)
-      } else if (file.filename.endsWith(".ts")) {
-
       }
     })
 
-    await createFile(this, "app.vue", true)
+    await createFileEditor(this, projectManage.entryFile, "", true)
+    await createFileEditor(this, projectManage.configFile, projectManage.defaultConfigCode, true)
+    const tsEditor = editorManage.get("ts")
+    const dependencies = await projectManage.resolveProjectDependencies()
+    sandbox.setupDependency(dependencies.importMap)
+    ;(await tsEditor.editor.monacoAccessor).typescript.addDTS(dependencies.dts)
   }
 
   disconnectedCallback () {

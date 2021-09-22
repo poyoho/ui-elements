@@ -73,7 +73,7 @@ export default class MonacoEditor extends HTMLElement {
     return monaco.editor.createModel(
       code || "",
       SupportLanguage[extension],
-      monaco.Uri.parse(`file://${filename}`)
+      monaco.Uri.file(`file://${filename}`)
     )
   }
 
@@ -86,7 +86,7 @@ export default class MonacoEditor extends HTMLElement {
 
   async findModel (filename: string) {
     const { monaco } = await this.monacoAccessor
-    return monaco.editor.getModel(monaco.Uri.parse(`file://${filename}`))
+    return monaco.editor.getModel(monaco.Uri.file(`file://${filename}`))
   }
 
   removeModel () {

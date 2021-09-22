@@ -16,7 +16,7 @@ function createFileTab (filename: string, keepalive?: boolean) {
   return filetab
 }
 
-export async function createFile (host: CodePlayground,  filename: string, keepalive?: boolean) {
+export async function createFileEditor (host: CodePlayground,  filename: string, code: string, keepalive?: boolean) {
   const { editorManage, tabWrap, fs, editorWrap } = host
 
   async function clickActiveFile (e: MouseEvent | HTMLElement) {
@@ -30,7 +30,7 @@ export async function createFile (host: CodePlayground,  filename: string, keepa
     } else {
       e.setAttribute("active", "")
     }
-    await activeMonacoEditor(editorManage, fs, filename)
+    await activeMonacoEditor(editorManage, fs, filename, code)
     editorWrap.updateItems()
   }
 
@@ -54,13 +54,6 @@ export async function createFile (host: CodePlayground,  filename: string, keepa
     const closeBtn = filetab.querySelector("svg")!
     closeBtn.addEventListener("click", removeFile, false)
   }
-
-  // test
-  const ts = editorManage.get("ts")
-  const vuedts = await resolvePackageTypes("vue", "3.2.6")
-  console.log(vuedts)
-  ;(await ts.editor.monacoAccessor).typescript.addDTS(vuedts)
-  host.sandbox.setupDependency({ "vue": SKYPACK_CDN("vue", "3.2.6") })
 }
 
 export function clickshowInput (e: MouseEvent) {
@@ -76,7 +69,7 @@ export function inputCreateFile (host: CodePlayground) {
       const target = (e.target as HTMLInputElement)
       const filename = target.value
       if (isCreateAble(filename, host.fs)) {
-        await createFile(host, filename)
+        await createFileEditor(host, filename, "")
         target.value = ""
         target.classList.toggle("filename-input-show", false)
       } else {

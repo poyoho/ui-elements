@@ -13,7 +13,7 @@ export class BaseFile {
   public type = "base"
   public filename: string
   public content = ""
-  public change = false
+  public change = true
 
   protected _onUpdate: ((filename: string) => void) | undefined
 

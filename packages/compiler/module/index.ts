@@ -1,4 +1,5 @@
-import { CompiledFile, FileSystem, processFile } from "./module"
+import { processFile } from "./module"
+import { CompiledFile, FileSystem } from "./env"
 
 export function parseFileModules (file: CompiledFile, filesystem: FileSystem) {
   return processFile(file, filesystem)

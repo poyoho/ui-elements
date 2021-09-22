@@ -171,6 +171,7 @@ async function clickInstallPackage (e: MouseEvent) {
   }
 }
 
+// TODO add packages
 export default class UnpkgManage extends HTMLElement {
   public activeMenu = "Installed"
   public installed: PackageMetadata[] = []
