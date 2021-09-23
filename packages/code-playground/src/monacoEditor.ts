@@ -12,32 +12,37 @@ export function createMonacoEditorManager (host: CodePlayground) {
     get: (type: SupportEditorType): MonacoEditorItem => {
       return editors[type]
     },
-    active: (type: SupportEditorType): MonacoEditorItem => {
-      let state = editors[type]
-      // create it
-      if (!state) {
-        const editor = new MonacoEditor()
-        editor.style.width = "100%"
-        editor.style.height = "100%"
+    active: (types: SupportEditorType[]): MonacoEditorItem[] => {
+      manager.hideAll()
+      const result = types.map(type => {
+        let state = editors[type]
+        // create it
+        if (!state) {
+          const editor = new MonacoEditor()
+          editor.style.width = "100%"
+          editor.style.height = "100%"
 
-        const wrap = host.ownerDocument.createElement("div")
-        wrap.style.width = "100%"
-        wrap.style.height = "100%"
-        wrap.setAttribute("slot", "item")
-        wrap.setAttribute("type", type)
-        wrap.appendChild(editor)
+          const wrap = host.ownerDocument.createElement("div")
+          wrap.style.width = "100%"
+          wrap.style.height = "100%"
+          wrap.setAttribute("slot", "item")
+          wrap.setAttribute("type", type)
+          wrap.appendChild(editor)
 
-        state = { wrap, editor, status: false }
-        editors[type] = state
-        editorWrap.appendChild(state.wrap)
-      }
-      // show it
-      if (!state.status) {
-        state.status = true
-        state.wrap.style.display = "block"
-        state.wrap.removeAttribute("hidden")
-      }
-      return state
+          state = { wrap, editor, status: false }
+          editors[type] = state
+          editorWrap.appendChild(state.wrap)
+        }
+        // show it
+        if (!state.status) {
+          state.status = true
+          state.wrap.style.display = "block"
+          state.wrap.removeAttribute("hidden")
+        }
+        return state
+      })
+      editorWrap.updateItems()
+      return result
     },
 
     getActive: () => {
@@ -72,12 +77,6 @@ export function createMonacoEditorManager (host: CodePlayground) {
   return manager
 }
 
-function createOrGetEditor (editorManage: EditorManage, types: SupportEditorType[]) {
-  editorManage.hideAll()
-  const editors = types.map(type => editorManage.active(type))
-  return editors
-}
-
 async function createOrGetModel (editor: MonacoEditor, type: SupportEditorType, filename: string, code: string, isNotExistFile: boolean) {
   let model
   if (isNotExistFile) {
@@ -108,7 +107,7 @@ export async function activeMonacoEditor (
 
 
   if (filename.endsWith(".vue")) {
-    const [vuehtmlEditor, tsEditor] = createOrGetEditor(editorManage, ["vuehtml", "ts"])
+    const [vuehtmlEditor, tsEditor] = editorManage.active(["vuehtml", "ts"])
 
     const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", "<template>app.vue</template>", isNotExistFile)
     const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename+".ts", "export default {}", isNotExistFile)
@@ -137,16 +136,22 @@ export async function activeMonacoEditor (
       })
     }
   } else if (filename.endsWith(".ts")) {
-    const [tsEditor] = createOrGetEditor(editorManage, ["ts"])
+    const [tsEditor] = editorManage.active(["ts"])
 
     const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename, code, isNotExistFile)
     tsEditor.editor.setModel(tsModel)
 
     if (isNotExistFile) {
       const file = createOrGetFile(fs, filename, tsModel.getValue(), isNotExistFile)
+      const compileTS = async () => {
+        file.compiled.js = await tsEditor.editor.getRunnableJS(tsModel)
+        file.change = false
+      }
       tsModel.onDidChangeContent(async () => {
-        file.updateContent(await tsEditor.editor.getRunnableJS(tsModel))
+        compileTS()
+        file.updateContent(tsModel.getValue())
       })
+      await compileTS()
     }
   } else {
     throw `don't support create ${filename}, only support create *.vue/*.ts.`

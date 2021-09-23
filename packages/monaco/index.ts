@@ -1,4 +1,4 @@
-import { createSinglePromise } from "@ui-elements/utils"
+import { createSinglePromise, tryPromise } from "@ui-elements/utils"
 
 import type { editor } from "monaco-editor"
 export type { editor }
@@ -7,7 +7,8 @@ export * from "./textmate"
 import { setupTypescriptLanguageService } from "./setup"
 
 export async function getEmitResult (monaco: monaco, model: editor.ITextModel) {
-  const worker = await monaco.languages.typescript.getTypeScriptWorker()
+  // sometimes typescript worker is not loaded
+  const worker = await tryPromise(() => monaco.languages.typescript.getTypeScriptWorker(), 3, 100)
   const client = await worker(model.uri)
   return await client.getEmitOutput(model.uri.toString())
 }

@@ -5,7 +5,9 @@ import { parseFileModules } from "@ui-elements/compile-module"
 import { compileVueSFCFile } from "@ui-elements/compile-vue"
 import { resolvePackageTypes, SKYPACK_CDN } from "@ui-elements/unpkg"
 
-export function createVueProject(filesystem: FileSystem<CompiledFile>) {
+export async function createVueProject(filesystem: FileSystem<CompiledFile>) {
+  const dts = await resolvePackageTypes("vue", "3.2.6")
+
   const result = {
     entryFile: "app.vue",
     configFile: "config.ts",
@@ -16,20 +18,13 @@ export function createVueProject(filesystem: FileSystem<CompiledFile>) {
       `}`,
       `export default config`
     ].join("\n"),
-
-    async resolveProjectDependencies () {
-      const dts = await resolvePackageTypes("vue", "3.2.6")
-      dts.push({
-        filePath: "config",
-        content: configDTS
-      })
-      return {
-        dts,
-        importMap: {
-          vue: SKYPACK_CDN("vue", "3.2.6")
-        }
-      }
+    importMap: {
+      vue: SKYPACK_CDN("vue", "3.2.6")
     },
+    dts: dts.concat([{
+      filePath: "config",
+      content: configDTS
+    }]),
 
     async compileFile (file: CompiledFile) {
       const err = await compileVueSFCFile(file)
@@ -43,10 +38,7 @@ export function createVueProject(filesystem: FileSystem<CompiledFile>) {
       const appEntry = filesystem.readFile(result.entryFile)!
       const appConfig = filesystem.readFile(result.configFile)!
 
-      await Promise.all([
-        result.compileFile(appEntry),
-        result.compileFile(appConfig)
-      ])
+      await result.compileFile(appEntry)
 
       const modules = parseFileModules(appEntry, filesystem)
       const configModules = parseFileModules(appConfig, filesystem)
@@ -57,6 +49,7 @@ export function createVueProject(filesystem: FileSystem<CompiledFile>) {
         ...modules.reverse(),
         boostrap,
       ]
+
       return scripts
     }
   }

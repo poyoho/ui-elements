@@ -28,7 +28,6 @@ const formatVersion = (version?: string) => version ? "@"+version : ""
 export const SKYPACK_RECOMMEND = (keyword: string) => `https://api.skypack.dev/v1/search?q=${keyword}&count=12`
 export const SKYPACK_PACKAGEDATA = (pkgName: string) => `https://api.skypack.dev/v1/package/${pkgName}`
 export const SKYPACK_CDN = (name: string, version?: string, params?: string) => `https://cdn.skypack.dev${formatName(name)}${formatVersion(version)}` + (params || "")
-export const UNPKG_CDN = (name: string, version?: string, params?: string) => `https://unpkg.com/${formatName(name)}${formatVersion(version)}` + (params || "")
 
 export async function resolvePackageTypes(name: string, version?: string): Promise<{filePath: string, content: string}[]> {
   const response = await fetch(SKYPACK_CDN(name, version, "?dts"))

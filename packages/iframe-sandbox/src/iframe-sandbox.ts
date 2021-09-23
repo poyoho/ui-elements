@@ -52,8 +52,8 @@ export default class CodeSandbox extends HTMLElement {
 
     sandbox.addEventListener('load', () => {
       sandboxProxy.handle_links()
-      console.log("[iframe-sandbox] sandbox load")
       this.proxy.resolve(sandboxProxy)
+      console.log("[iframe-sandbox] sandbox load")
     })
 
     const shadowRoot = this.attachShadow({ mode: "open" })
@@ -62,7 +62,6 @@ export default class CodeSandbox extends HTMLElement {
     template.style.height = "inherit"
     template.appendChild(sandbox)
     shadowRoot.appendChild(template)
-    this.setupDependency({})
   }
 
   disconnectedCallback() {}

@@ -60,7 +60,6 @@ function mouseDown (e: MouseEvent) {
     direction === "row" ? (elm.style.width = size) : (elm.style.height = size)
   const updatePostion = (e: MouseEvent) => {
     const wrapSize = clientSize(wrap)
-    console.log("[wrapsize]", wrap.clientWidth)
     const postion = calcPostion(clientOffset(e), items, clientSize)
     const maxSize = clientSize(postion.start) + clientSize(postion.end)
     const startSize = clientSize(postion.start)
@@ -170,7 +169,8 @@ export default class DrapWrap extends HTMLElement {
       direction === "row" ? (item.style.width = itemSize) : (item.style.height = itemSize)
       item.addEventListener("mousedown", stopPropagation)
     })
-
-    wrap.addEventListener("mousedown", mouseDown)
+    if (items.length > 0) {
+      wrap.addEventListener("mousedown", mouseDown)
+    }
   }
 }

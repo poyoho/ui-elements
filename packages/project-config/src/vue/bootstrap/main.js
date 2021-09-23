@@ -13,6 +13,7 @@ document.getElementById('__sfc-styles').innerHTML = window.__css__
 const app = window.__app__ = _createApp(App)
 app.config.errorHandler = e => console.error(e)
 
+await config.enhanceApp(app)
+
 app.mount('#app')
 
-config.enhanceApp(app)

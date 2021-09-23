@@ -3,7 +3,7 @@ import type DragWrap from "@ui-elements/drag-wrap/src/drag-wrap"
 import teamplateElement from "./code-playground-element"
 import { FileSystem, CompiledFile } from "@ui-elements/vfs"
 import { createMonacoEditorManager } from "./monacoEditor"
-import { SKYPACK_CDN, UnpkgManage } from "@ui-elements/unpkg"
+import { UnpkgManage } from "@ui-elements/unpkg"
 import { createProjectManager } from "@ui-elements/project-config"
 import { setupIframesandbox } from "./sandbox"
 import { createFileEditor, clickshowInput, fileInputBlur, inputCreateFile } from "./filetab"
@@ -32,19 +32,13 @@ export default class CodePlayground extends HTMLElement {
     addInput.addEventListener("keydown", this.createFileEvent)
     addInput.addEventListener("blur", fileInputBlur)
     unpkgManage.addEventListener("unpkg-change", this.updatePackages)
-    fs.subscribe("update", async (file) => {
-      if (file.filename.endsWith(".vue") || file.filename.endsWith(".ts")) {
-        const scripts = await projectManage.getProjectRunableJS()
-        sandbox.eval(scripts)
-      }
-    })
+    fs.subscribe("update", this.evalProject.bind(this))
 
+    sandbox.setupDependency(projectManage.importMap)
     await createFileEditor(this, projectManage.entryFile, "", true)
     await createFileEditor(this, projectManage.configFile, projectManage.defaultConfigCode, true)
-    const tsEditor = editorManage.get("ts")
-    const dependencies = await projectManage.resolveProjectDependencies()
-    sandbox.setupDependency(dependencies.importMap)
-    ;(await tsEditor.editor.monacoAccessor).typescript.addDTS(dependencies.dts)
+    ;(await editorManage.get("ts").editor.monacoAccessor).typescript.addDTS(projectManage.dts)
+    await this.evalProject()
   }
 
   disconnectedCallback () {
@@ -73,5 +67,12 @@ export default class CodePlayground extends HTMLElement {
 
   get unpkgManage (): UnpkgManage {
     return this.ownerDocument.querySelector("unpkg-manage")!
+  }
+
+  private async evalProject () {
+    const { project, sandbox } = this
+    const projectManage = await project
+    const scripts = await projectManage.getProjectRunableJS()
+    sandbox.eval(scripts)
   }
 }

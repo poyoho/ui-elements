@@ -1,7 +1,6 @@
 import { activeMonacoEditor, removeMonacoEditorModel } from "./monacoEditor"
 import CodePlayground from "./code-playground"
 import { FileSystem, CompiledFile } from "@ui-elements/vfs"
-import { resolvePackageTypes, SKYPACK_CDN } from "@ui-elements/unpkg"
 
 function isCreateAble (filename: string, fs: FileSystem<CompiledFile>) {
   return [".vue", ".ts"].some(extend => filename.endsWith(extend))
@@ -31,7 +30,6 @@ export async function createFileEditor (host: CodePlayground,  filename: string,
       e.setAttribute("active", "")
     }
     await activeMonacoEditor(editorManage, fs, filename, code)
-    editorWrap.updateItems()
   }
 
   function removeFile(e: MouseEvent) {
