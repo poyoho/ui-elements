@@ -13,21 +13,35 @@ export default class MonacoEditor extends HTMLElement {
 
   constructor() {
     super()
-    const container = document.createElement("div")
-    container.className = "editor"
-    container.style.width = "inherit"
-    container.style.height = "inherit"
+    // const shadowRoot = this.attachShadow({ mode: "open" })
+    const container = this.ownerDocument.createElement("div")
+    container.innerHTML = `<div id="editor-container" style="width:inherit;height:inherit;"></div>`
+    // const node = container.content.cloneNode(true)
+    // shadowRoot.appendChild(node)
     this.appendChild(container)
   }
 
   get container (): HTMLDivElement {
-    return this.querySelector("div.editor")!
+    return this!.querySelector("#editor-container")!
   }
 
   async connectedCallback() {
     const { monaco } = await this.monacoAccessor
+    const { container } = this
+    console.log(document.getElementsByTagName("link"));
 
-    const editor = monaco.editor.create(this.container, {
+		// move all CSS inside the shadow root, pick only link tags relevant to the editor
+    // TODO make monaco editor import with requirejs
+		const documentLinks = Array.prototype.slice.call(document.getElementsByTagName('link'), 0).filter((documentLink) => {
+			if (/vs\/(base|editor|platform)/.test(documentLink.getAttribute('href'))) {
+				return true;
+			}
+			console.log(`Not moving: `, documentLink);
+			return true;
+		});
+		documentLinks.forEach(documentLink => this.shadowRoot!.appendChild(documentLink));
+
+    const editor = monaco.editor.create(container, {
       tabSize: 2,
       insertSpaces: true,
       autoClosingQuotes: 'always',
@@ -38,6 +52,7 @@ export default class MonacoEditor extends HTMLElement {
       minimap: {
         enabled: false,
       },
+      useShadowDOM: true
     })
     // send change event
     editor.onDidChangeModel(() => {
