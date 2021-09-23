@@ -1,10 +1,7 @@
 {
-  "name": "@ui-elements/compiler",
+  "name": "@ui-elements/compile-module",
   "version": "0.0.0",
   "main": "index.ts",
-  "devDependencies": {
-    "@vue/compiler-sfc": "^3.2.4"
-  },
   "dependencies": {
     "@babel/parser": "^7.15.0",
     "@babel/types": "^7.15.0",

@@ -1,11 +1,12 @@
-import type { SFCDescriptor, BindingMetadata } from '@vue/compiler-sfc'
-import { importVuePackage, COMP_IDENTIFIER, SFCFile } from "./env"
+import { COMP_IDENTIFIER, SFCFile } from "./env"
+import {
+  SFCDescriptor, BindingMetadata,
+  parse, compileStyle, compileTemplate, rewriteDefault, compileScript
+} from "@vue/compiler-sfc"
 
 export async function compileVueSFCFile(
   file: SFCFile
 ): Promise<Error[]> {
-  const { compiler } = await importVuePackage()
-
   if (!file.content.trim() || !file.change) {
     return []
   }
@@ -17,7 +18,7 @@ export async function compileVueSFCFile(
   }
 
   const id = await hashId(file.filename)
-  const { errors, descriptor } = compiler.parse(file.content, {
+  const { errors, descriptor } = parse(file.content, {
     filename: file.filename,
     sourceMap: true,
   })
@@ -47,7 +48,7 @@ export async function compileVueSFCFile(
     ssrCode += code
   }
 
-  const clientScriptResult = await doCompileScript(descriptor, id, false)
+  const clientScriptResult = doCompileScript(descriptor, id, false)
   if (!clientScriptResult) {
     file.change = false
     return []
@@ -74,7 +75,7 @@ export async function compileVueSFCFile(
   // template
   // only need dedicated compilation if not using <script setup>
   if (descriptor.template && !descriptor.scriptSetup) {
-    const clientTemplateResult = await doCompileTemplate(
+    const clientTemplateResult = doCompileTemplate(
       descriptor,
       id,
       bindings,
@@ -87,7 +88,7 @@ export async function compileVueSFCFile(
 
     clientCode += clientTemplateResult
 
-    const ssrTemplateResult = await doCompileTemplate(descriptor, id, bindings, true)
+    const ssrTemplateResult = doCompileTemplate(descriptor, id, bindings, true)
     if (!ssrTemplateResult) {
       file.change = false
       return []
@@ -111,21 +112,20 @@ export async function compileVueSFCFile(
     file.compiled.ssr = ssrCode.trimStart()
   }
 
-  file.compiled.css = await doCompileStyle(descriptor, id)
+  file.compiled.css = doCompileStyle(descriptor, id)
   file.change = false
   return []
 }
 
-async function doCompileScript(
+function doCompileScript(
   descriptor: SFCDescriptor,
   id: string,
   ssr: boolean,
-): Promise<[string, BindingMetadata | undefined] | undefined> {
+): [string, BindingMetadata | undefined] | undefined {
 
   if (descriptor.script || descriptor.scriptSetup) {
     try {
-      const { compiler } = await importVuePackage()
-      const compiledScript = compiler.compileScript(descriptor, {
+      const compiledScript = compileScript(descriptor, {
         id,
         refSugar: true,
         inlineTemplate: true,
@@ -144,7 +144,7 @@ async function doCompileScript(
       }
       code
         += `\n${
-          compiler.rewriteDefault(compiledScript.content, COMP_IDENTIFIER)}`
+          rewriteDefault(compiledScript.content, COMP_IDENTIFIER)}`
       return [code, compiledScript.bindings]
     }
     catch (e) {
@@ -155,14 +155,13 @@ async function doCompileScript(
   }
 }
 
-async function doCompileTemplate(
+function doCompileTemplate(
   descriptor: SFCDescriptor,
   id: string,
   bindingMetadata: BindingMetadata | undefined,
   ssr: boolean,
 ) {
-  const { compiler } = await importVuePackage()
-  const templateResult = compiler.compileTemplate({
+  const templateResult = compileTemplate({
     source: descriptor.template!.content,
     filename: descriptor.filename,
     id,
@@ -189,10 +188,9 @@ async function doCompileTemplate(
   )
 }
 
-async function doCompileStyle(descriptor: SFCDescriptor, id: string) {
-  const { compiler } = await importVuePackage()
+function doCompileStyle(descriptor: SFCDescriptor, id: string) {
   return descriptor.styles.map(style => {
-    const styleResult = compiler.compileStyle({
+    const styleResult = compileStyle({
       id: id,
       filename: descriptor.filename,
       source: style.content,

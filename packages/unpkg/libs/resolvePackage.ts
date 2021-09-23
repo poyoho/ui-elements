@@ -1,4 +1,4 @@
-import { parseSkypackDTSModule } from "@ui-elements/compiler"
+import { parseSkypackDTSModule } from "@ui-elements/compile-module"
 
 export interface Package {
   name: string

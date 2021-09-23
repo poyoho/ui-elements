@@ -1,6 +1,6 @@
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
 import boostrap from "./bootstrap/main.js?raw"
-import { parseFileModules } from "@ui-elements/compiler"
+import { parseFileModules } from "@ui-elements/compile-module"
 
 function getAppEntry (filesystem: FileSystem<CompiledFile>) {
   const file = filesystem.readFile("boostrap.js")

@@ -1,7 +1,8 @@
 import boostrap from "./bootstrap/main.js?raw"
 import configDTS from "./bootstrap/config.d.ts?raw"
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
-import { parseFileModules, compileVueSFCFile } from "@ui-elements/compiler"
+import { parseFileModules } from "@ui-elements/compile-module"
+import { compileVueSFCFile } from "@ui-elements/compile-vue"
 import { resolvePackageTypes, SKYPACK_CDN } from "@ui-elements/unpkg"
 
 export function createVueProject(filesystem: FileSystem<CompiledFile>) {
