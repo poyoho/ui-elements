@@ -60,6 +60,7 @@ function mouseDown (e: MouseEvent) {
     direction === "row" ? (elm.style.width = size) : (elm.style.height = size)
   const updatePostion = (e: MouseEvent) => {
     const wrapSize = clientSize(wrap)
+    console.log("[wrapsize]", wrap.clientWidth)
     const postion = calcPostion(clientOffset(e), items, clientSize)
     const maxSize = clientSize(postion.start) + clientSize(postion.end)
     const startSize = clientSize(postion.start)
@@ -113,7 +114,6 @@ function formatDirection (item: string): direction {
 
 let id = 0
 
-// TODO fixed item
 export default class DrapWrap extends HTMLElement {
   #direction: "row" | "column" = "row"
   #id = ++id
@@ -121,8 +121,8 @@ export default class DrapWrap extends HTMLElement {
     super()
     const shadowRoot = this.attachShadow({ mode: "open" })
     const wrap = this.ownerDocument.createElement("div")
-    wrap.style.width = "100%"
-    wrap.style.height = "100%"
+    wrap.style.width = "inherit"
+    wrap.style.height = "inherit"
     wrap.innerHTML = teamplateElement
     shadowRoot.appendChild(wrap)
     this.setAttribute("data-index", `${this.#id}`)

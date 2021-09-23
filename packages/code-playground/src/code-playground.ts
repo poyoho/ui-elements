@@ -21,6 +21,7 @@ export default class CodePlayground extends HTMLElement {
     wrap.innerHTML = teamplateElement
     wrap.style.width = "inherit"
     wrap.style.height = "inherit"
+    wrap.style.display = "flex"
     this.appendChild(wrap)
     this.editorManage = createMonacoEditorManager(this)
 

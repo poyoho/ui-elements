@@ -3,10 +3,10 @@ function html(...args: any) {
 }
 
 export default html`
-<drag-wrap direction="row">
-  <div slot="item">
-    <unpkg-manage></unpkg-manage>
-  </div>
+<div class="control-bar">
+  <unpkg-manage></unpkg-manage>
+</div>
+<drag-wrap direction="row" id="editor">
   <div slot="item">
     <div id="tab">
 
@@ -19,11 +19,34 @@ export default html`
     </drag-wrap>
   </div>
 
-  <div slot="item" class="sandbox">
+  <div slot="item">
     <iframe-sandbox id="sandbox"/>
   </div>
 </drag-wrap>
 <style>
+  .control-bar {
+    width: 36px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+  }
+  #editor {
+    flex: 1;
+    height: 100%;
+    margin: auto 0;
+  }
+  #sandbox {
+    width: 100%;
+    height: 100%;
+  }
+  #editor [slot="item"] {
+    height: 100%;
+  }
+  #editor-wrap {
+    width: 100%;
+    height: calc(100% - 25px);
+  }
   @keyframes input-error {
     to {
       transform: scale(.92);
@@ -46,10 +69,6 @@ export default html`
     outline: 0;
     border: 1px solid #333;
     transition: width .1s;
-  }
-  .sandbox {
-    height: 100%;
-    background: #333;
   }
   #tab button {
     font-size: 13px;
