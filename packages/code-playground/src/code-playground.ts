@@ -4,14 +4,14 @@ import teamplateElement from "./code-playground-element"
 import { FileSystem, CompiledFile } from "@ui-elements/vfs"
 import { createMonacoEditorManager } from "./monacoEditor"
 import { UnpkgManage } from "@ui-elements/unpkg"
-import { createProjectManager } from "@ui-elements/project-config"
-import { setupIframesandbox } from "./sandbox"
+import { createProjectManager, ProjectManager } from "@ui-elements/project-config"
+import { setupIframesandboxEvent } from "./sandbox"
 import { createFileEditor, clickshowInput, fileInputBlur, inputCreateFile } from "./filetab"
 import { updatePackages } from "./packageManage"
 
 export default class CodePlayground extends HTMLElement {
   public fs = new FileSystem<CompiledFile>()
-  public project = createProjectManager("vue", this.fs)
+  public project!: Promise<ProjectManager>
   public editorManage!: ReturnType<typeof createMonacoEditorManager>
   private createFileEvent = inputCreateFile(this)
   private updatePackages = updatePackages(this)
@@ -23,22 +23,17 @@ export default class CodePlayground extends HTMLElement {
     wrap.style.height = "inherit"
     wrap.style.display = "flex"
     this.appendChild(wrap)
+
     this.editorManage = createMonacoEditorManager(this)
 
-    const { project, addButton, addInput, fs, unpkgManage, editorManage } = this
-    const projectManage = await project
-    const sandbox = setupIframesandbox(this)
+    const { addButton, addInput, fs, unpkgManage } = this
+    setupIframesandboxEvent(this)
     addButton.addEventListener("click", clickshowInput)
     addInput.addEventListener("keydown", this.createFileEvent)
     addInput.addEventListener("blur", fileInputBlur)
     unpkgManage.addEventListener("unpkg-change", this.updatePackages)
     fs.subscribe("update", this.evalProject.bind(this))
-
-    sandbox.setupDependency(projectManage.importMap)
-    await createFileEditor(this, projectManage.entryFile, "", true)
-    await createFileEditor(this, projectManage.configFile, projectManage.defaultConfigCode, true)
-    ;(await editorManage.get("ts").editor.monacoAccessor).typescript.addDTS(projectManage.dts)
-    await this.evalProject()
+    this.setupProjectManage()
   }
 
   disconnectedCallback () {
@@ -67,6 +62,18 @@ export default class CodePlayground extends HTMLElement {
 
   get unpkgManage (): UnpkgManage {
     return this.ownerDocument.querySelector("unpkg-manage")!
+  }
+
+  public async setupProjectManage () {
+    this.project = createProjectManager("vue", this.fs)
+    const { sandbox, editorManage } = this
+    const projectManage = await this.project
+
+    sandbox.setupDependency(projectManage.importMap)
+    await createFileEditor(this, projectManage.entryFile, "", true)
+    await createFileEditor(this, projectManage.configFile, projectManage.defaultConfigCode, true)
+    ;(await editorManage.get("ts").editor.monacoAccessor).typescript.addDTS(projectManage.dts)
+    await this.evalProject()
   }
 
   private async evalProject () {

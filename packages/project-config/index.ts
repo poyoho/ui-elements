@@ -1,5 +1,5 @@
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
-export interface Compiler {
+export interface ProjectManager {
   entryFile: string
   configFile: string
   defaultConfigCode: string
@@ -11,7 +11,7 @@ export interface Compiler {
 
 type CompilerType = "vue"
 
-export async function createProjectManager (type: CompilerType, filesystem: FileSystem<CompiledFile>): Promise<Compiler> {
+export async function createProjectManager (type: CompilerType, filesystem: FileSystem<CompiledFile>): Promise<ProjectManager> {
   switch (type) {
     case "vue": {
       return (await import("./src/vue/vue")).createVueProject(filesystem)

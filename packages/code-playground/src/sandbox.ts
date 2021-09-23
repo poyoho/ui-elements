@@ -1,7 +1,7 @@
 import type { SandboxEvent } from "@ui-elements/iframe-sandbox/src/iframe-sandbox"
 import CodePlayground from "./code-playground"
 
-export function setupIframesandbox (host: CodePlayground) {
+export function setupIframesandboxEvent (host: CodePlayground) {
   const { sandbox } = host
 
   sandbox.addEventListener("on_fetch_progress", (e) => {
@@ -32,6 +32,4 @@ export function setupIframesandbox (host: CodePlayground) {
     const event = e as SandboxEvent
     console.log("[vueplayground] on_console_group_end", event.data)
   })
-
-  return sandbox
 }
