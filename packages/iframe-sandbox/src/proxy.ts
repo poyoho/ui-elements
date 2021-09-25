@@ -83,7 +83,6 @@ export class SandboxProxy {
 
   handle_repl_message(event: any) {
     if (event.source !== this.iframe.contentWindow) return
-
     const { action, args } = event.data
 
     switch (action) {
