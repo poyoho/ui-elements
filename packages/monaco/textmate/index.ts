@@ -3,10 +3,8 @@ import { wireTmGrammars } from 'monaco-editor-textmate'
 import { createSinglePromise } from "@ui-elements/utils"
 import { loadWASM } from 'onigasm'
 
+type monaco = typeof monaco
 const onigasm = new URL("./token/onigasm.wasm", import.meta.url)
-
-import type { editor } from 'monaco-editor'
-export type monaco = typeof import("monaco-editor")
 
 const loadOnigasm = createSinglePromise(() => loadWASM(onigasm.href))
 
@@ -52,7 +50,7 @@ function convertTheme(theme: any): any {
 }
 
 // any editor need setup
-export async function setupTheme (monaco: monaco, editor: editor.ICodeEditor) {
+export async function setupTheme (monaco: monaco, editor: monaco.editor.ICodeEditor) {
   await loadOnigasm() // See https://www.npmjs.com/package/onigasm#light-it-up
   const registry = new Registry({
     getGrammarDefinition: async (scopeName) => {
@@ -86,5 +84,5 @@ export async function setupTheme (monaco: monaco, editor: editor.ICodeEditor) {
 
   monaco.editor.defineTheme("vscode-dark", convertTheme((await import("./theme/dark_vs.json")).default))
   // monaco.editor.defineTheme("light", convertTheme((await import("./theme/light_plus.json")).default))
-  await wireTmGrammars(monaco, registry, grammars, editor)
+  await wireTmGrammars((monaco as any), registry, grammars, (editor as any))
 }

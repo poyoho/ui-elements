@@ -1,6 +1,7 @@
 import type { LanguageServiceDefaultsImpl } from './monaco.contribution'
 import type { VueHTMLWorker } from './vuehtmlWorker'
-import { Uri, IDisposable, editor } from "monaco-editor"
+type Uri = monaco.Uri
+type IDisposable = monaco.IDisposable
 
 const STOP_WHEN_IDLE_FOR = 2 * 60 * 1000 // 2min
 
@@ -10,7 +11,7 @@ export class WorkerManager {
   private _lastUsedTime: number
   private _configChangeListener: IDisposable
 
-  private _worker: editor.MonacoWebWorker<VueHTMLWorker> | null
+  private _worker: monaco.editor.MonacoWebWorker<VueHTMLWorker> | null
   private _client: Promise<VueHTMLWorker> | undefined
 
   constructor(defaults: LanguageServiceDefaultsImpl) {
@@ -48,7 +49,7 @@ export class WorkerManager {
     this._lastUsedTime = Date.now()
 
     if (!this._client) {
-      this._worker = editor.createWebWorker<VueHTMLWorker>({
+      this._worker = monaco.editor.createWebWorker<VueHTMLWorker>({
         moduleId: '', // never use it
         // passed in to the create() method
         createData: {

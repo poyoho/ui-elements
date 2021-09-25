@@ -1,4 +1,4 @@
-import { setupMonaco, SupportLanguage, editor, setupTheme, getRunnableJS } from "@ui-elements/monaco"
+import { setupMonaco, SupportLanguage, setupTheme, getRunnableJS } from "@ui-elements/monaco"
 import { createDefer, debounce } from "@ui-elements/utils"
 
 export type MonacoEditorChangeEvent = Event & {
@@ -9,37 +9,29 @@ export type MonacoEditorChangeEvent = Event & {
 
 export default class MonacoEditor extends HTMLElement {
   public monacoAccessor = setupMonaco()
-  private editor = createDefer<editor.IStandaloneCodeEditor>()
+  private editor = createDefer<monaco.editor.IStandaloneCodeEditor>()
 
   constructor() {
     super()
-    // const shadowRoot = this.attachShadow({ mode: "open" })
+    const shadowRoot = this.attachShadow({ mode: "open" })
     const container = this.ownerDocument.createElement("div")
+    container.style.width = "inherit"
+    container.style.height = "inherit"
     container.innerHTML = `<div id="editor-container" style="width:inherit;height:inherit;"></div>`
-    // const node = container.content.cloneNode(true)
-    // shadowRoot.appendChild(node)
-    this.appendChild(container)
+    shadowRoot.appendChild(container)
   }
 
   get container (): HTMLDivElement {
-    return this!.querySelector("#editor-container")!
+    return this.shadowRoot!.querySelector("#editor-container")!
   }
 
   async connectedCallback() {
-    const { monaco } = await this.monacoAccessor
+
+    const { monaco, style } = await this.monacoAccessor
     const { container } = this
-    console.log(document.getElementsByTagName("link"));
 
 		// move all CSS inside the shadow root, pick only link tags relevant to the editor
-    // TODO make monaco editor import with requirejs
-		const documentLinks = Array.prototype.slice.call(document.getElementsByTagName('link'), 0).filter((documentLink) => {
-			if (/vs\/(base|editor|platform)/.test(documentLink.getAttribute('href'))) {
-				return true;
-			}
-			console.log(`Not moving: `, documentLink);
-			return true;
-		});
-		documentLinks.forEach(documentLink => this.shadowRoot!.appendChild(documentLink));
+    this.shadowRoot!.appendChild(style.cloneNode(true))
 
     const editor = monaco.editor.create(container, {
       tabSize: 2,
@@ -52,8 +44,9 @@ export default class MonacoEditor extends HTMLElement {
       minimap: {
         enabled: false,
       },
-      useShadowDOM: true
+      useShadowDOM: false,
     })
+
     // send change event
     editor.onDidChangeModel(() => {
       const model = editor.getModel()
@@ -92,7 +85,7 @@ export default class MonacoEditor extends HTMLElement {
     )
   }
 
-  setModel (model: editor.ITextModel) {
+  setModel (model: monaco.editor.ITextModel) {
     console.log("[monaco-editor] setModel")
     this.editor.promise.then(editor => {
       editor.setModel(model)
@@ -110,7 +103,7 @@ export default class MonacoEditor extends HTMLElement {
     })
   }
 
-  async getRunnableJS (model: editor.ITextModel) {
+  async getRunnableJS (model: monaco.editor.ITextModel) {
     console.log("[monaco-editor] getRunnableJS")
     const { monaco } = await this.monacoAccessor
     return getRunnableJS(monaco, model)

@@ -1,4 +1,4 @@
-type monaco = typeof import("monaco-editor")
+type monaco = typeof monaco
 
 export function setupTypescriptLanguageService (monaco: monaco) {
   const localConfig = {

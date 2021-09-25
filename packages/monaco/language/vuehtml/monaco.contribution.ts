@@ -1,115 +1,24 @@
 import * as mode from './vuehtmlMode'
-import * as monaco from "monaco-editor"
 
-export interface HTMLFormatConfiguration {
-  readonly tabSize: number
-  readonly insertSpaces: boolean
-  readonly wrapLineLength: number
-  readonly unformatted: string
-  readonly contentUnformatted: string
-  readonly indentInnerHtml: boolean
-  readonly preserveNewLines: boolean
-  readonly maxPreserveNewLines: number
-  readonly indentHandlebars: boolean
-  readonly endWithNewline: boolean
-  readonly extraLiners: string
-  readonly wrapAttributes: 'auto' | 'force' | 'force-aligned' | 'force-expand-multiline'
-}
-
-export interface CompletionConfiguration {
-  [provider: string]: boolean
-}
-
-export interface Options {
-/**
- * If set, comments are tolerated. If set to false, syntax errors will be emitted for comments.
- */
-  readonly format?: HTMLFormatConfiguration
-  /**
- * A list of known schemas and/or associations of schemas to file names.
- */
-  readonly suggest?: CompletionConfiguration
-}
-
-export interface ModeConfiguration {
-/**
- * Defines whether the built-in completionItemProvider is enabled.
- */
-  readonly completionItems?: boolean
-
-  /**
- * Defines whether the built-in hoverProvider is enabled.
- */
-  readonly hovers?: boolean
-
-  /**
- * Defines whether the built-in documentSymbolProvider is enabled.
- */
-  readonly documentSymbols?: boolean
-
-  /**
- * Defines whether the built-in definitions provider is enabled.
- */
-  readonly links?: boolean
-
-  /**
- * Defines whether the built-in references provider is enabled.
- */
-  readonly documentHighlights?: boolean
-
-  /**
- * Defines whether the built-in rename provider is enabled.
- */
-  readonly rename?: boolean
-
-  /**
- * Defines whether the built-in color provider is enabled.
- */
-  readonly colors?: boolean
-
-  /**
- * Defines whether the built-in foldingRange provider is enabled.
- */
-  readonly foldingRanges?: boolean
-
-  /**
- * Defines whether the built-in diagnostic provider is enabled.
- */
-  readonly diagnostics?: boolean
-
-  /**
- * Defines whether the built-in selection range provider is enabled.
- */
-  readonly selectionRanges?: boolean
-
-  /**
- * Defines whether the built-in documentFormattingEdit provider is enabled.
- */
-  readonly documentFormattingEdits?: boolean
-
-  /**
- * Defines whether the built-in documentRangeFormattingEdit provider is enabled.
- */
-  readonly documentRangeFormattingEdits?: boolean
-}
+import vuehtml = monaco.languages.vuehtml
 
 export interface LanguageServiceDefaults {
   readonly languageId: string
-  readonly modeConfiguration: ModeConfiguration
+  readonly modeConfiguration: monaco.languages.vuehtml.ModeConfiguration
   readonly onDidChange: monaco.IEvent<LanguageServiceDefaults>
-  readonly options: Options
-  setOptions(options: Options): void
+  readonly options: monaco.languages.vuehtml.Options
+  setOptions(options: vuehtml.Options): void
 }
 
 // --- HTML configuration and defaults ---------
 
 export class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
   private _onDidChange = new monaco.Emitter<LanguageServiceDefaults>()
-  private _options: Options | undefined
-  private _modeConfiguration: ModeConfiguration | undefined
+  private _options: vuehtml.Options | undefined
+  private _modeConfiguration: vuehtml.ModeConfiguration | undefined
   private _languageId: string
 
-  constructor(languageId: string, options: Options, modeConfiguration: ModeConfiguration) {
+  constructor(languageId: string, options: vuehtml.Options, modeConfiguration: vuehtml.ModeConfiguration) {
     this._languageId = languageId
     this.setOptions(options)
     this.setModeConfiguration(modeConfiguration)
@@ -131,18 +40,18 @@ export class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
     return this._modeConfiguration!
   }
 
-  setOptions(options: Options): void {
+  setOptions(options: vuehtml.Options): void {
     this._options = options || Object.create(null)
     this._onDidChange.fire(this)
   }
 
-  setModeConfiguration(modeConfiguration: ModeConfiguration): void {
+  setModeConfiguration(modeConfiguration: vuehtml.ModeConfiguration): void {
     this._modeConfiguration = modeConfiguration || Object.create(null)
     this._onDidChange.fire(this)
   }
 }
 
-const formatDefaults: Required<HTMLFormatConfiguration> = {
+const formatDefaults: Required<vuehtml.HTMLFormatConfiguration> = {
   tabSize: 2,
   insertSpaces: false,
   wrapLineLength: 120,
@@ -157,12 +66,12 @@ const formatDefaults: Required<HTMLFormatConfiguration> = {
   wrapAttributes: 'auto',
 }
 
-const htmlOptionsDefault: Required<Options> = {
+const htmlOptionsDefault: Required<vuehtml.Options> = {
   format: formatDefaults,
   suggest: { html5: true },
 }
 
-function getConfigurationDefault(languageId: string): Required<ModeConfiguration> {
+function getConfigurationDefault(languageId: string): Required<vuehtml.ModeConfiguration> {
   return {
     completionItems: true,
     hovers: true,
@@ -193,7 +102,8 @@ function createAPI() {
 		vuehtmlDefaults
 	}
 }
-;(<any>monaco.languages).vuehtml = createAPI()
+
+monaco.languages.vuehtml = createAPI()
 
 // --- Registration to monaco editor ---
 

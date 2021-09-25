@@ -1,20 +1,18 @@
 import * as ls from 'vscode-html-languageservice'
-import type { worker } from "monaco-editor"
-import type { Options } from './monaco.contribution'
 import { vueHTMLPlugin } from './vue'
-
+import vuehtml = monaco.languages.vuehtml
 export interface ICreateData {
   languageId: string
-  languageSettings: Options
+  languageSettings: vuehtml.Options
 }
 
 export class VueHTMLWorker {
-  private _ctx: worker.IWorkerContext
+  private _ctx: monaco.worker.IWorkerContext
   private _languageService: ls.LanguageService
-  private _languageSettings: Options
+  private _languageSettings: vuehtml.Options
   private _languageId: string
 
-  constructor(ctx: worker.IWorkerContext, createData: ICreateData) {
+  constructor(ctx: monaco.worker.IWorkerContext, createData: ICreateData) {
     console.log("[vuehtml worker] create vuehtml worker")
     this._ctx = ctx
     this._languageSettings = createData.languageSettings
@@ -137,7 +135,7 @@ export class VueHTMLWorker {
   }
 }
 
-export function create (ctx: worker.IWorkerContext, createData: ICreateData): VueHTMLWorker {
+export function create (ctx: monaco.worker.IWorkerContext, createData: ICreateData): VueHTMLWorker {
   console.log("create vuehtml worker")
   return new VueHTMLWorker(ctx, createData)
 }
