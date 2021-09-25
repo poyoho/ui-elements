@@ -1,6 +1,6 @@
 import teamplateElement from "./code-playground-element"
 import type { IframeSandbox } from "@ui-elements/iframe-sandbox"
-import type { DrapWrap } from "@ui-elements/drag-wrap"
+import type { DragWrap } from "@ui-elements/drag-wrap"
 import { FileSystem, CompiledFile } from "@ui-elements/vfs"
 import { UnpkgManage } from "@ui-elements/unpkg"
 import { createMonacoEditorManager } from "./monacoEditor"
@@ -43,7 +43,7 @@ export default class CodePlayground extends HTMLElement {
   get sandbox (): IframeSandbox {
     return this.shadowRoot!.querySelector("#sandbox")!
   }
-  get editorWrap (): DrapWrap {
+  get editorWrap (): DragWrap {
     return this.shadowRoot!.querySelector("#editor-wrap")!
   }
   get tabWrap (): HTMLDivElement {

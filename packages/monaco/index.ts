@@ -1,4 +1,4 @@
-import { createSinglePromise, tryPromise } from "@ui-elements/utils"
+import { createSinglePromise } from "@ui-elements/utils"
 
 export * from "./textmate"
 import { setupTypescriptLanguageService } from "./setup"
@@ -24,7 +24,7 @@ export const loadWorkers = createSinglePromise(async () => {
     { default: HTMLWorker },
   ] = await Promise.all([
     import("./language/vuehtml/monaco.contribution" as any),
-    import('./language/vuehtml/vuehtml.worker.js?worker' as any),
+    import('./language/vuehtml/vuehtml.worker.ts?worker' as any),
     import('monaco-editor/esm/vs/editor/editor.worker?worker' as any),
     import('monaco-editor/esm/vs/language/json/json.worker?worker' as any),
     import('monaco-editor/esm/vs/language/typescript/ts.worker?worker' as any),

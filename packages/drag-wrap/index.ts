@@ -1,19 +1,19 @@
-import DrapWrap from "./src/drag-wrap"
+import DragWrap from "./src/drag-wrap"
 export * from "./src/drag-wrap"
-export { DrapWrap }
+export { DragWrap }
 
 declare global {
   interface Window {
-    DrapWrap: typeof DrapWrap
+    DragWrap: typeof DragWrap
   }
   interface HTMLElementTagNameMap {
-    "drag-wrap": DrapWrap
+    "drag-wrap": DragWrap
   }
 }
 
 export function install() {
   if (!window.customElements.get("drag-wrap")) {
-    window.DrapWrap = DrapWrap
-    window.customElements.define("drag-wrap", DrapWrap)
+    window.DragWrap = DragWrap
+    window.customElements.define("drag-wrap", DragWrap)
   }
 }

@@ -41,7 +41,9 @@ module.exports = async function runBuild () {
           },
           exclude: [
             "node_modules",
-            "playground"
+            "playground",
+            "scripts",
+            "*.js"
           ]
         }
       }),

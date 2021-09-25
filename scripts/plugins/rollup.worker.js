@@ -3,6 +3,7 @@ const path = require("path")
 const { parse: parseUrl, URLSearchParams } = require("url")
 const { createHash } = require('crypto');
 const { nodeResolve } = require('@rollup/plugin-node-resolve')
+const esbuild = require("rollup-plugin-esbuild")
 const commonjs = require('@rollup/plugin-commonjs')
 
 function getAssetHash(content) {
@@ -44,7 +45,14 @@ module.exports = function rollupWebWorker () {
         plugins: [
           nodeResolve({
             jsnext: true,
+            main: true,
             browser: true,
+          }),
+          esbuild({
+            exclude: [
+              "node_modules",
+              "__tests__",
+            ]
           }),
           commonjs({
             include: [/node_modules/],
