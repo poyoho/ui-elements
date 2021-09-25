@@ -8,7 +8,7 @@
     "build": "node scripts/build.js",
     "release": "node scripts/release.js",
     "predeploy": "cd playground && yarn && yarn build",
-    "deploy": "gh-pages -d playground/dist"
+    "deploy": "gh-pages -d ./playground/dist"
   },
   "author": "poyoho",
   "license": "MIT",
