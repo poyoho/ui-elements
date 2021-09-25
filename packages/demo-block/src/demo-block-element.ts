@@ -4,11 +4,9 @@ function html(...args: any) {
 
 export default html`
 <div class="demo-block">
-  <!-- 代码执行ui -->
   <div class="exec">
     <slot name="exec"></slot>
   </div>
-  <!-- 源码区 -->
   <div class="expaned-block source">
     <div class="description">
       <slot name="description"></slot>
@@ -20,14 +18,13 @@ export default html`
       <slot name="highlight"></slot>
     </div>
   </div>
-  <!-- 控制区 -->
   <div class="control">
-    <i class="contract"></i>
+    <i class="contract-icon"></i>
     <span>展开</span>
   </div>
 </div>
 <style>
-.demo-block{
+.demo-block {
   border: 1px solid #ebebeb;
   background: #fafafa;
   margin: 20px 0;
@@ -82,17 +79,10 @@ export default html`
 .control:hover {
   color: #409eff
 }
-.control:hover .expand {
-  border-bottom-color: #409eff;
-}
-.control:hover .contract {
-  border-top-color: #409eff;
-}
 .control span {
   line-height: 30px;
   display: inline-block;
 }
-
 .copy {
   cursor: pointer;
   background: transparent;
@@ -102,8 +92,7 @@ export default html`
 .copy:hover {
   color: #eeeeee;
 }
-
-.expand,.contract {
+.contract-icon {
   position: relative;
   width: 0;
   height: 0;
@@ -113,14 +102,21 @@ export default html`
   border-bottom-color: transparent;
   border-left-color: transparent;
   border-right-color: transparent;
-}
-.expand {
-  top: -12px;
-  border-bottom-color: #e5e7eb;
-}
-.contract {
   top: 12px;
   border-top-color: #e5e7eb;
 }
+.control:hover .contract-icon {
+  border-top-color: #409eff;
+}
+.control:hover .contract-icon.expand {
+  border-top-color: transparent !important;
+  border-bottom-color: #409eff !important;
+}
+.expand {
+  top: -12px !important;
+  border-top-color: transparent !important;
+  border-bottom-color: #e5e7eb !important;
+}
+
 </style>
 `

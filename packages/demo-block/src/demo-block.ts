@@ -5,29 +5,25 @@ interface State {
   expaned: boolean
   height: number
   componentContext: string
-
-  expandContractIconNode: HTMLElement
-  expandContractTextNode: HTMLSpanElement
-  expandContractWrapNode: HTMLDivElement
 }
 
 const states = new WeakMap<DemoBlockElement, State>()
 
 function expandContract(e: Event) {
   const target = e.target! as HTMLElement
-  const demoBlock = getShadowHost(target) as DemoBlockElement
-  const state = states.get(demoBlock)!
+  const host = getShadowHost(target) as DemoBlockElement
+  const { source, tipText, expandContractIcon } = host
+  const state = states.get(host)!
   state.expaned = !state.expaned
   if (state.expaned) {
-    state.expandContractWrapNode.style.height = `${state.height}px`
-    state.expandContractTextNode.textContent = "隐藏"
-    state.expandContractIconNode.className = "expand"
+    source.style.height = `${state.height}px`
+    tipText.textContent = "隐藏"
   } else {
-    state.expandContractWrapNode.style.height = "0"
-    state.expandContractTextNode.textContent = "展开"
-    state.expandContractIconNode.className = "contract"
+    source.style.height = "0"
+    tipText.textContent = "展开"
   }
-  states.set(demoBlock, state)
+  expandContractIcon.classList.toggle("expand")
+  states.set(host, state)
 }
 
 function copyToClipBoard(e: Event) {
@@ -54,32 +50,22 @@ export default class DemoBlockElement extends HTMLElement {
     super()
     const shadowRoot = this.attachShadow({ mode: "open" })
     const wrap = this.ownerDocument.createElement("div")
+    wrap.style.width = "inherit"
+    wrap.style.height = "inherit"
     wrap.innerHTML = teamplateElement
     shadowRoot.appendChild(wrap)
   }
 
   connectedCallback() {
-    const source = this.source
-    const tipText = this.tipText
-    const ctrl = this.ctrl
-    const component = this.componentSource
-    const copyIcon = this.copyIcon
-    const expandContractIcon = this.expandContractIcon
+    const { source, ctrl, component, copyIcon } = this
     const state: State = {
       expaned: false,
       height: source.clientHeight,
       componentContext: component?.textContent || "",
-
-      expandContractIconNode: expandContractIcon,
-      expandContractTextNode: tipText,
-      expandContractWrapNode: source
     }
     states.set(this, state)
 
     source.style.height = "0"
-    // if(component?.className.includes("vue")) {
-    //   appendVueSFCPlaygroundCtrl(ctrl, state.componentContext)
-    // }
     if (!component) {
       copyIcon.parentElement?.remove()
       copyIcon.remove()
@@ -119,14 +105,14 @@ export default class DemoBlockElement extends HTMLElement {
   }
 
   get expandContractIcon(): HTMLElement {
-    return this.shadowRoot!.querySelector<HTMLSpanElement>(".control .contract")!
+    return this.shadowRoot!.querySelector<HTMLSpanElement>(".control .contract-icon")!
   }
 
   get copyIcon(): HTMLElement {
     return this.shadowRoot!.querySelector<HTMLElement>(".highlight .copy")!
   }
 
-  get componentSource(): HTMLDivElement | null {
+  get component(): HTMLDivElement | null {
     // !!! this component add in packages/compile
     return this.querySelector("[slot='highlight'] .cloneable")
   }
