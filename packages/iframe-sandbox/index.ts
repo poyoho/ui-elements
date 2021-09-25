@@ -1,5 +1,6 @@
 import IframeSandbox from "./src/iframe-sandbox"
-
+export * from "./src/iframe-sandbox"
+export { IframeSandbox }
 declare global {
   interface Window {
     IframeSandbox: typeof IframeSandbox

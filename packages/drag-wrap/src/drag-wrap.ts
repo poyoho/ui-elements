@@ -120,8 +120,8 @@ export default class DrapWrap extends HTMLElement {
     super()
     const shadowRoot = this.attachShadow({ mode: "open" })
     const wrap = this.ownerDocument.createElement("div")
-    wrap.style.width = "100%"
-    wrap.style.height = "100%"
+    wrap.style.width = "inherit"
+    wrap.style.height = "inherit"
     wrap.innerHTML = teamplateElement
     shadowRoot.appendChild(wrap)
     this.setAttribute("data-index", `${this.#id}`)
@@ -132,8 +132,9 @@ export default class DrapWrap extends HTMLElement {
   }
 
   get items (): Array<HTMLElement> {
-    return Array.from(this.ownerDocument.querySelectorAll(`[data-index='${this.#id}']>[slot='item']`))
+    const items = Array.from(this.querySelectorAll(`[data-index='${this.#id}']>[slot='item']`))
       .filter(item => !item.hasAttribute("hidden")) as Array<HTMLElement>
+    return items
   }
 
   get wrap (): HTMLElement {
@@ -169,7 +170,8 @@ export default class DrapWrap extends HTMLElement {
       direction === "row" ? (item.style.width = itemSize) : (item.style.height = itemSize)
       item.addEventListener("mousedown", stopPropagation)
     })
-
-    wrap.addEventListener("mousedown", mouseDown)
+    if (items.length > 0) {
+      wrap.addEventListener("mousedown", mouseDown)
+    }
   }
 }

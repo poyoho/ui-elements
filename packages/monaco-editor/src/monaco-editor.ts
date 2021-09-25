@@ -1,5 +1,5 @@
-import { setupMonaco, SupportLanguage, editor, setupTheme, getRunnableJS } from "@ui-elements/monaco"
-import { createDefer, debounce } from "@ui-elements/utils"
+import { setupMonaco, SupportLanguage, setupTheme } from "@ui-elements/monaco"
+import { createDefer, debounce, tryPromise } from "@ui-elements/utils"
 
 export type MonacoEditorChangeEvent = Event & {
   value: {
@@ -9,25 +9,31 @@ export type MonacoEditorChangeEvent = Event & {
 
 export default class MonacoEditor extends HTMLElement {
   public monacoAccessor = setupMonaco()
-  private editor = createDefer<editor.IStandaloneCodeEditor>()
+  private editor = createDefer<monaco.editor.IStandaloneCodeEditor>()
 
   constructor() {
     super()
-    const container = document.createElement("div")
-    container.className = "editor"
+    const shadowRoot = this.attachShadow({ mode: "open" })
+    const container = this.ownerDocument.createElement("div")
     container.style.width = "inherit"
     container.style.height = "inherit"
-    this.appendChild(container)
+    container.innerHTML = `<div id="editor-container" style="width:inherit;height:inherit;"></div>`
+    shadowRoot.appendChild(container)
   }
 
   get container (): HTMLDivElement {
-    return this.querySelector("div.editor")!
+    return this.shadowRoot!.querySelector("#editor-container")!
   }
 
   async connectedCallback() {
-    const { monaco } = await this.monacoAccessor
 
-    const editor = monaco.editor.create(this.container, {
+    const { monaco, style } = await this.monacoAccessor
+    const { container } = this
+
+		// move all CSS inside the shadow root, pick only link tags relevant to the editor
+    this.shadowRoot!.appendChild(style.cloneNode(true))
+
+    const editor = monaco.editor.create(container, {
       tabSize: 2,
       insertSpaces: true,
       autoClosingQuotes: 'always',
@@ -38,7 +44,9 @@ export default class MonacoEditor extends HTMLElement {
       minimap: {
         enabled: false,
       },
+      useShadowDOM: false,
     })
+
     // send change event
     editor.onDidChangeModel(() => {
       const model = editor.getModel()
@@ -73,11 +81,11 @@ export default class MonacoEditor extends HTMLElement {
     return monaco.editor.createModel(
       code || "",
       SupportLanguage[extension],
-      monaco.Uri.parse(`file://${filename}`)
+      monaco.Uri.file(`file://${filename}`)
     )
   }
 
-  setModel (model: editor.ITextModel) {
+  setModel (model: monaco.editor.ITextModel) {
     console.log("[monaco-editor] setModel")
     this.editor.promise.then(editor => {
       editor.setModel(model)
@@ -86,7 +94,7 @@ export default class MonacoEditor extends HTMLElement {
 
   async findModel (filename: string) {
     const { monaco } = await this.monacoAccessor
-    return monaco.editor.getModel(monaco.Uri.parse(`file://${filename}`))
+    return monaco.editor.getModel(monaco.Uri.file(`file://${filename}`))
   }
 
   removeModel () {
@@ -94,10 +102,15 @@ export default class MonacoEditor extends HTMLElement {
      editor.getModel()?.dispose()
     })
   }
+}
 
-  async getRunnableJS (model: editor.ITextModel) {
-    console.log("[monaco-editor] getRunnableJS")
-    const { monaco } = await this.monacoAccessor
-    return getRunnableJS(monaco, model)
-  }
+export async function getRunnableJS (filename: string) {
+  const { monaco } = await setupMonaco()
+  const uri = monaco.Uri.file(`file://${filename}`)
+  // sometimes typescript worker is not loaded
+  const worker = await tryPromise(() => monaco.languages.typescript.getTypeScriptWorker(), 3, 100)
+  const client = await worker(uri)
+  const result = await client.getEmitOutput(uri.toString())
+  const firstJS = result.outputFiles.find((o: any) => o.name.endsWith(".js"))
+  return (firstJS && firstJS.text) || ""
 }

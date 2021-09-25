@@ -1,0 +1,10 @@
+{
+  "name": "@ui-elements/compile-module",
+  "version": "0.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@babel/parser": "^7.15.0",
+    "@babel/types": "^7.15.0",
+    "estree-walker": "^2.0.2"
+  }
+}

@@ -1,43 +1,37 @@
-import type IframeSandbox from "@ui-elements/iframe-sandbox/src/iframe-sandbox"
-import type DragWrap from "@ui-elements/drag-wrap/src/drag-wrap"
 import teamplateElement from "./code-playground-element"
+import type { IframeSandbox } from "@ui-elements/iframe-sandbox"
+import type { DrapWrap } from "@ui-elements/drag-wrap"
 import { FileSystem, CompiledFile } from "@ui-elements/vfs"
-import { createProjectManager } from "@ui-elements/compiler"
+import { UnpkgManage } from "@ui-elements/unpkg"
 import { createMonacoEditorManager } from "./monacoEditor"
-import { setupIframesandbox } from "./sandbox"
-import { createFile, clickshowInput, fileInputBlur, inputCreateFile } from "./filetab"
+import { createProjectManager, compileFile } from "./project-config"
+import { setupIframesandboxEvent } from "./sandbox"
+import { createFileEditor, clickshowInput, fileInputBlur, inputFilename } from "./filetab"
+import { updatePackages } from "./packageManage"
 
 export default class CodePlayground extends HTMLElement {
   public fs = new FileSystem<CompiledFile>()
-  public project = createProjectManager("vue")
-  public editorManage!: ReturnType<typeof createMonacoEditorManager>
-  private createFileEvent = inputCreateFile(this)
+  public editorManage = createMonacoEditorManager(this)
 
-  async connectedCallback () {
+  constructor () {
+    super()
+    const shadowRoot = this.attachShadow({ mode: "open" })
     const wrap = this.ownerDocument.createElement("div")
     wrap.innerHTML = teamplateElement
     wrap.style.width = "inherit"
     wrap.style.height = "inherit"
-    this.appendChild(wrap)
-    this.editorManage = createMonacoEditorManager(this)
+    wrap.style.display = "flex"
+    shadowRoot.appendChild(wrap)
+  }
 
-    const { project, addButton, addInput, fs } = this
-    const projectManage = await project
-    const sandbox = setupIframesandbox(this)
-    sandbox.setupDependency(projectManage.getRuntimeImportMap())
+  async connectedCallback () {
+    const { addButton, addInput, unpkgManage } = this
+    setupIframesandboxEvent(this)
     addButton.addEventListener("click", clickshowInput)
-    addInput.addEventListener("keydown", this.createFileEvent)
+    addInput.addEventListener("keydown", inputFilename)
     addInput.addEventListener("blur", fileInputBlur)
-    fs.subscribe("update", async (file) => {
-      if (file.filename.endsWith(".vue")) {
-        const scripts = await projectManage.getProjectRunableJS(fs)
-        sandbox.eval(scripts)
-      } else if (file.filename.endsWith(".ts")) {
-
-      }
-    })
-
-    await createFile(this, "app.vue", true)
+    unpkgManage.addEventListener("unpkg-change", updatePackages)
+    this.setupProjectManage()
   }
 
   disconnectedCallback () {
@@ -47,20 +41,49 @@ export default class CodePlayground extends HTMLElement {
   }
 
   get sandbox (): IframeSandbox {
-    return this.ownerDocument.querySelector("#sandbox")!
+    return this.shadowRoot!.querySelector("#sandbox")!
   }
-  get editorWrap (): DragWrap {
-    return this.ownerDocument.querySelector("#editor-wrap")!
+  get editorWrap (): DrapWrap {
+    return this.shadowRoot!.querySelector("#editor-wrap")!
   }
   get tabWrap (): HTMLDivElement {
-    return this.ownerDocument.querySelector("#tab")!
+    return this.shadowRoot!.querySelector("#tab")!
   }
 
   get addButton (): HTMLButtonElement {
-    return this.ownerDocument.querySelector("#tab .icon-add")!
+    return this.shadowRoot!.querySelector("#tab .icon-add")!
   }
 
   get addInput (): HTMLButtonElement {
-    return this.ownerDocument.querySelector("#filename-input")!
+    return this.shadowRoot!.querySelector("#filename-input")!
+  }
+
+  get unpkgManage (): UnpkgManage {
+    return this.shadowRoot!.querySelector("unpkg-manage")!
+  }
+
+  public async setupProjectManage () {
+    const { sandbox, editorManage, unpkgManage, fs } = this
+    const projectManage = await createProjectManager("vue", this.fs)
+    let isReady = false
+    async function updateProjectOutput (file: CompiledFile) {
+      const cacheStatus = isReady
+      await compileFile(file)
+      cacheStatus && sandbox.eval(projectManage.update(file))
+    }
+
+    fs.clear()
+    fs.subscribe("update", updateProjectOutput)
+    sandbox.setupDependency(projectManage.importMap)
+    unpkgManage.installPackage(projectManage.importMap)
+    await createFileEditor(this, projectManage.entryFile, {
+      vuehtml: "<template>vue template</template>",
+      ts: "export default {}"
+    }, true)
+    isReady = true
+    await createFileEditor(this, projectManage.configFile, {
+      ts: projectManage.defaultConfigCode
+    }, true)
+    ;(await editorManage.get("ts").editor.monacoAccessor).typescript.addDTS(projectManage.dts)
   }
 }

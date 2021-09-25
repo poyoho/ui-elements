@@ -1,41 +1,49 @@
 import CodePlayground from "./code-playground"
-import MonacoEditor from "@ui-elements/monaco-editor/src/monaco-editor"
+import { MonacoEditor } from "@ui-elements/monaco-editor"
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
 import { MonacoEditorItem, SupportEditorType } from "./types"
-import { vuePackages } from "@ui-elements/unpkg"
+import { debounce } from "@ui-elements/utils"
 
 type EditorManage = ReturnType<typeof createMonacoEditorManager>
 
 export function createMonacoEditorManager (host: CodePlayground) {
-  const { editorWrap } = host
   const editors: Record<string, MonacoEditorItem> = {}
   const manager = {
-    active: (type: SupportEditorType): MonacoEditorItem => {
-      let state = editors[type]
-      // create it
-      if (!state) {
-        const editor = new MonacoEditor()
-        editor.style.width = "100%"
-        editor.style.height = "100%"
+    get: (type: SupportEditorType): MonacoEditorItem => {
+      return editors[type]
+    },
+    active: (types: SupportEditorType[]): MonacoEditorItem[] => {
+      const { editorWrap } = host
+      manager.hideAll()
+      const result = types.map(type => {
+        let state = editors[type]
+        // create it
+        if (!state) {
+          const editor = new MonacoEditor()
+          editor.style.width = "100%"
+          editor.style.height = "100%"
 
-        const wrap = host.ownerDocument.createElement("div")
-        wrap.style.width = "100%"
-        wrap.style.height = "100%"
-        wrap.setAttribute("slot", "item")
-        wrap.setAttribute("type", type)
-        wrap.appendChild(editor)
+          const wrap = host.ownerDocument.createElement("div")
+          wrap.style.width = "100%"
+          wrap.style.height = "100%"
+          wrap.setAttribute("slot", "item")
+          wrap.setAttribute("type", type)
+          wrap.appendChild(editor)
 
-        state = { wrap, editor, status: false }
-        editors[type] = state
-        editorWrap.appendChild(state.wrap)
-      }
-      // show it
-      if (!state.status) {
-        state.status = true
-        state.wrap.style.display = "block"
-        state.wrap.removeAttribute("hidden")
-      }
-      return state
+          state = { wrap, editor, status: false }
+          editors[type] = state
+          editorWrap.appendChild(state.wrap)
+        }
+        // show it
+        if (!state.status) {
+          state.status = true
+          state.wrap.style.display = "block"
+          state.wrap.removeAttribute("hidden")
+        }
+        return state
+      })
+      editorWrap.updateItems()
+      return result
     },
 
     getActive: () => {
@@ -59,6 +67,7 @@ export function createMonacoEditorManager (host: CodePlayground) {
     },
 
     hideAll: () => {
+      const { editorWrap } = host
       editorWrap.items.forEach(item => {
         const type = item.getAttribute("type")
         if (type) {
@@ -68,12 +77,6 @@ export function createMonacoEditorManager (host: CodePlayground) {
     },
   }
   return manager
-}
-
-function createOrGetEditor (editorManage: EditorManage, types: SupportEditorType[]) {
-  editorManage.hideAll()
-  const editors = types.map(type => editorManage.active(type))
-  return editors
 }
 
 async function createOrGetModel (editor: MonacoEditor, type: SupportEditorType, filename: string, code: string, isNotExistFile: boolean) {
@@ -86,71 +89,64 @@ async function createOrGetModel (editor: MonacoEditor, type: SupportEditorType, 
   return model
 }
 
-function createOrGetFile (fs: FileSystem<CompiledFile>, filename: string, isNotExistFile: boolean) {
+function createOrGetFile (fs: FileSystem<CompiledFile>, filename: string, content: string, isNotExistFile: boolean) {
   let file: CompiledFile
   if (isNotExistFile) {
-    file = fs.writeFile(new CompiledFile({ name: filename }))
+    file = fs.writeFile(new CompiledFile(filename), content)
   } else {
     file = fs.readFile(filename)!
   }
   return file
 }
 
-async function setupTypescriptLanaguageService (editor: MonacoEditor) {
-  ;(await editor.monacoAccessor).typescript.addDTS(vuePackages)
-}
-
 export async function activeMonacoEditor (
   editorManage: EditorManage,
   fs: FileSystem<CompiledFile>,
-  filename: string
+  filename: string,
+  code: Record<string, string>
 ) {
   const isNotExistFile = !fs.isExist(filename)
 
-  const file = createOrGetFile(fs, filename, isNotExistFile)
-
   if (filename.endsWith(".vue")) {
-    const [vuehtmlEditor, tsEditor] = createOrGetEditor(editorManage, ["vuehtml", "ts"])
+    const [vuehtmlEditor, tsEditor] = editorManage.active(["vuehtml", "ts"])
 
-    const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", "<template></template>", isNotExistFile)
-    const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename+".ts", "export default {}", isNotExistFile)
+    const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", code.vuehtml || "", isNotExistFile)
     vuehtmlEditor.editor.setModel(vuehtmlModel)
+    const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename+".ts", code.ts || "", isNotExistFile)
     tsEditor.editor.setModel(tsModel)
 
     if (isNotExistFile) {
       const cache = { html: vuehtmlModel.getValue(), ts: tsModel.getValue() }
-      const updateVueFile = async () => {
-        file.updateContent([
-          cache.html,
-          "<script>",
-          cache.ts,
-          "</script>"
-        ].join("\n"))
-      }
-      vuehtmlModel.onDidChangeContent(() => {
+      const getContent = () => [
+        cache.html,
+        "<script>",
+        cache.ts,
+        "</script>"
+      ].join("\n")
+      const file = createOrGetFile(fs, filename, getContent(), isNotExistFile)
+      vuehtmlModel.onDidChangeContent(debounce(() => {
         cache.html = vuehtmlModel.getValue()
-        updateVueFile()
-      })
-      tsModel.onDidChangeContent(async () => {
-        cache.ts = await tsEditor.editor.getRunnableJS(tsModel)
-        updateVueFile()
-      })
-      setupTypescriptLanaguageService(tsEditor.editor)
+        fs.writeFile(file, getContent())
+      }))
+      tsModel.onDidChangeContent(debounce(async () => {
+        cache.ts = tsModel.getValue()
+        fs.writeFile(file, getContent())
+      }))
     }
   } else if (filename.endsWith(".ts")) {
-    const [tsEditor] = createOrGetEditor(editorManage, ["ts"])
+    const [tsEditor] = editorManage.active(["ts"])
 
-    const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename, "", isNotExistFile)
+    const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename, code.ts || "", isNotExistFile)
     tsEditor.editor.setModel(tsModel)
 
     if (isNotExistFile) {
-      tsModel.onDidChangeContent(async () => {
-        file.updateContent(await tsEditor.editor.getRunnableJS(tsModel))
-      })
-      setupTypescriptLanaguageService(tsEditor.editor)
+      const file = createOrGetFile(fs, filename, code.ts || "", isNotExistFile)
+      tsModel.onDidChangeContent(debounce(async () => {
+        fs.writeFile(file, tsModel.getValue())
+      }))
     }
   } else {
-    throw "don't support create ${filename}, only support create *.vue/*.ts."
+    throw `don't support create ${filename}, only support create *.vue/*.ts.`
   }
 }
 

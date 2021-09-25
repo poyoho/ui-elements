@@ -2,7 +2,9 @@ import { WorkerManager } from './workerManager'
 import type { VueHTMLWorker } from './vuehtmlWorker'
 import type { LanguageServiceDefaultsImpl } from './monaco.contribution'
 import * as languageFeatures from './languageFeatures'
-import { Uri, IDisposable, languages } from "monaco-editor"
+import languages = monaco.languages
+type Uri = monaco.Uri
+type IDisposable = monaco.IDisposable
 
 // when editor create .vue Model will exec it to create vue mode
 // run in main worker

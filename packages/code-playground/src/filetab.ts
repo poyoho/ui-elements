@@ -1,6 +1,7 @@
 import { activeMonacoEditor, removeMonacoEditorModel } from "./monacoEditor"
 import CodePlayground from "./code-playground"
 import { FileSystem, CompiledFile } from "@ui-elements/vfs"
+import { getShadowHost } from "@ui-elements/utils"
 
 function isCreateAble (filename: string, fs: FileSystem<CompiledFile>) {
   return [".vue", ".ts"].some(extend => filename.endsWith(extend))
@@ -15,9 +16,8 @@ function createFileTab (filename: string, keepalive?: boolean) {
   return filetab
 }
 
-// TODO add DTS
-export async function createFile (host: CodePlayground,  filename: string, keepalive?: boolean) {
-  const { editorManage, tabWrap, fs, editorWrap } = host
+export async function createFileEditor (host: CodePlayground,  filename: string, code: Record<string, string>, keepalive?: boolean) {
+  const { editorManage, tabWrap, fs } = host
 
   async function clickActiveFile (e: MouseEvent | HTMLElement) {
     const items = tabWrap.children
@@ -30,8 +30,7 @@ export async function createFile (host: CodePlayground,  filename: string, keepa
     } else {
       e.setAttribute("active", "")
     }
-    await activeMonacoEditor(editorManage, fs, filename)
-    editorWrap.updateItems()
+    await activeMonacoEditor(editorManage, fs, filename, code)
   }
 
   function removeFile(e: MouseEvent) {
@@ -47,7 +46,8 @@ export async function createFile (host: CodePlayground,  filename: string, keepa
   const filetab = createFileTab(filename, keepalive)
   tabWrap.insertBefore(filetab, tabWrap.lastElementChild!.previousElementSibling)
   filetab.addEventListener("click", clickActiveFile)
-  // it must be an asynchronous event to prevent monaco model conflicts caused by creating two files at the same time
+  // it must be an asynchronous event to prevent monaco model conflicts
+  // caused by creating two files at the same time
   await clickActiveFile(filetab)
   if (!keepalive) {
     const closeBtn = filetab.querySelector("svg")!
@@ -62,21 +62,21 @@ export function clickshowInput (e: MouseEvent) {
   input.focus()
 }
 
-export function inputCreateFile (host: CodePlayground) {
-  return async function (e: KeyboardEvent) {
-    if (e.key === "Enter") {
-      const target = (e.target as HTMLInputElement)
-      const filename = target.value
-      if (isCreateAble(filename, host.fs)) {
-        await createFile(host, filename)
-        target.value = ""
-        target.classList.toggle("filename-input-show", false)
-      } else {
-        target.classList.toggle("filename-input-error", true)
-        setTimeout(() => {
-          target.classList.toggle("filename-input-error", false)
-        }, 400)
-      }
+export async function inputFilename (e: KeyboardEvent) {
+  const target = e.target! as HTMLElement
+  const host = getShadowHost(target) as CodePlayground
+  if (e.key === "Enter") {
+    const target = (e.target as HTMLInputElement)
+    const filename = target.value
+    if (isCreateAble(filename, host.fs)) {
+      await createFileEditor(host, filename, {})
+      target.value = ""
+      target.classList.toggle("filename-input-show", false)
+    } else {
+      target.classList.toggle("filename-input-error", true)
+      setTimeout(() => {
+        target.classList.toggle("filename-input-error", false)
+      }, 400)
     }
   }
 }

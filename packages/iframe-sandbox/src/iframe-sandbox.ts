@@ -1,4 +1,5 @@
 import { createDefer } from "@ui-elements/utils"
+import { SKYPACK_CDN } from "@ui-elements/unpkg"
 import { SandboxHandleData, SandboxProxy } from "./proxy"
 import srcdoc from "./srcdoc.html?raw"
 
@@ -13,15 +14,15 @@ export default class CodeSandbox extends HTMLElement {
   private proxy = createDefer<SandboxProxy>()
 
   get sandbox (): HTMLIFrameElement {
-    return this.querySelector("iframe")!
+    return this.shadowRoot!.querySelector("iframe")!
   }
 
   async connectedCallback() {
-    const sandbox = document.createElement("iframe")
-    sandbox.className = "sandbox"
+    const sandbox = this.ownerDocument.createElement("iframe")
     sandbox.style.width = "inherit"
     sandbox.style.height = "inherit"
     sandbox.style.border = "0"
+    sandbox.style.outline = "0"
     sandbox.setAttribute('sandbox', [
       'allow-forms',
       'allow-modals',
@@ -52,19 +53,28 @@ export default class CodeSandbox extends HTMLElement {
 
     sandbox.addEventListener('load', () => {
       sandboxProxy.handle_links()
-      console.log("[iframe-sandbox] sandbox load")
       this.proxy.resolve(sandboxProxy)
+      console.log("[iframe-sandbox] sandbox load")
     })
-    this.appendChild(sandbox)
-    this.setupDependency({})
+
+    const shadowRoot = this.attachShadow({ mode: "open" })
+    const template = this.ownerDocument.createElement("div")
+    template.style.width = "inherit"
+    template.style.height = "inherit"
+    template.appendChild(sandbox)
+    shadowRoot.appendChild(template)
   }
 
   disconnectedCallback() {}
 
+  // importMap format for { name: version }
   setupDependency (importMap: Record<string, string>) {
     const { sandbox } = this
-    // replace importMaps
-    Object.assign(this.importMaps.imports, importMap)
+    for (const name in importMap) {
+      if (!this.importMaps.imports[name]) {
+        this.importMaps.imports[name] = SKYPACK_CDN(name, importMap[name])
+      }
+    }
     sandbox.srcdoc = srcdoc.replace(IMPORT_MAP, JSON.stringify(this.importMaps))
   }
 

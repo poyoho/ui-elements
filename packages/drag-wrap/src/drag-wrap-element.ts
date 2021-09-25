@@ -8,7 +8,7 @@ export default html`
 </div>
 <style>
   .drag-wrap {
-    background: #345;
+    background: #000;
     display: flex;
     justify-content: space-between;
     gap: 10px;
