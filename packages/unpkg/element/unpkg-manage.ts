@@ -1,6 +1,6 @@
 import teamplateElement from "./unpkg-manage-element"
 import { getShadowHost, debounce } from "@ui-elements/utils"
-import { resolvePackageVersion, resolveRecommendPackage } from "../libs/resolvePackage"
+import { resolvePackageData, resolveRecommendPackage } from "../libs/resolvePackage"
 import type { SelectBox } from "@ui-elements/select-box"
 
 export interface UnpkgChangeEventDetail {
@@ -24,6 +24,7 @@ function showPanel (e: MouseEvent) {
   const host = getShadowHost(target) as UnpkgManage
   const { panel } = host
   panel.classList.toggle("show")
+  renderPackageMetadata(host.installed, host.resultContent, true)
 }
 
 function switchMenu (e: MouseEvent) {
@@ -105,9 +106,15 @@ async function clickInstallPackage (e: MouseEvent) {
     case "install":
     {
       const pkgName = target.getAttribute("name")!
-      const versionList = await resolvePackageVersion(pkgName)
+      const pkgData = await resolvePackageData(pkgName)
+      const versionList = Object.keys(pkgData.versions)
       const select = target.previousElementSibling! as HTMLSelectElement
-      select.innerHTML = versionList.map(version => `<option-box value="${version}">${version}</option-box>`).join("")
+      select.innerHTML = versionList
+        .splice(versionList.length - 13)
+        .sort()
+        .reverse()
+        .map(version => `<option-box value="${version}">${version}</option-box>`)
+        .join("")
       select.style.display = "inline-block"
       target.innerHTML = '<button key="confirm">confirm</button>  <button key="cancel">cancel</button>'
       break
@@ -171,7 +178,6 @@ async function clickInstallPackage (e: MouseEvent) {
   }
 }
 
-// TODO add packages
 export default class UnpkgManage extends HTMLElement {
   public activeMenu = "Installed"
   public installed: PackageMetadata[] = []
@@ -185,6 +191,19 @@ export default class UnpkgManage extends HTMLElement {
     wrap.style.height = "inherit"
     wrap.innerHTML = teamplateElement
     shadowRoot.appendChild(wrap)
+  }
+
+  // install package and request package data in skypack
+  public async installPackage (options: Record<string, string>) {
+    for (const name in options) {
+      const version = options[name]
+      const pkgData = await resolvePackageData(name)
+      this.installed.push({
+        version,
+        name: name,
+        description: pkgData.description
+      })
+    }
   }
 
   connectedCallback() {

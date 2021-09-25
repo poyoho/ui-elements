@@ -132,8 +132,9 @@ export default class DrapWrap extends HTMLElement {
   }
 
   get items (): Array<HTMLElement> {
-    return Array.from(this.ownerDocument.querySelectorAll(`[data-index='${this.#id}']>[slot='item']`))
+    const items = Array.from(this.querySelectorAll(`[data-index='${this.#id}']>[slot='item']`))
       .filter(item => !item.hasAttribute("hidden")) as Array<HTMLElement>
+    return items
   }
 
   get wrap (): HTMLElement {

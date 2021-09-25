@@ -16,7 +16,7 @@ function createFileTab (filename: string, keepalive?: boolean) {
 }
 
 export async function createFileEditor (host: CodePlayground,  filename: string, code: string, keepalive?: boolean) {
-  const { editorManage, tabWrap, fs, editorWrap } = host
+  const { editorManage, tabWrap, fs } = host
 
   async function clickActiveFile (e: MouseEvent | HTMLElement) {
     const items = tabWrap.children

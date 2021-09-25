@@ -3,7 +3,7 @@ import configDTS from "./bootstrap/config.d.ts?raw"
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
 import { parseFileModules } from "@ui-elements/compile-module"
 import { compileVueSFCFile } from "@ui-elements/compile-vue"
-import { resolvePackageTypes, SKYPACK_CDN } from "@ui-elements/unpkg"
+import { resolvePackageTypes } from "@ui-elements/unpkg"
 
 export async function createVueProject(filesystem: FileSystem<CompiledFile>) {
   const dts = await resolvePackageTypes("vue", "3.2.6")
@@ -19,7 +19,7 @@ export async function createVueProject(filesystem: FileSystem<CompiledFile>) {
       `export default config`
     ].join("\n"),
     importMap: {
-      vue: SKYPACK_CDN("vue", "3.2.6")
+      vue: "3.2.6"
     },
     dts: dts.concat([{
       filePath: "config",

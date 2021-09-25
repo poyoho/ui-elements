@@ -15,7 +15,9 @@ export default html`
     </div>
     <drag-wrap direction="column" id="editor-wrap">
       <div slot="item" id="spacehold" hidden></div>
-      <slot name="editor"></slot>
+      <slot name="editor">
+
+      </slot>
     </drag-wrap>
   </div>
 
@@ -46,6 +48,7 @@ export default html`
   #editor-wrap {
     width: 100%;
     height: calc(100% - 25px);
+    background: #1e1e1e;
   }
   @keyframes input-error {
     to {

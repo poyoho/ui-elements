@@ -17,6 +17,13 @@ export interface PackageMetadata {
   dependencies: Record<string, string>
 }
 
+export interface PackageData {
+  versions: Record<string, string>
+  name: string
+  keywords: string[]
+  description: string
+}
+
 export interface PacakgeVersions {
   tags: Record<string, string>
   versions: string[]
@@ -56,18 +63,17 @@ export async function resolveRecommendPackage (keyword: string) {
   return data
 }
 
-export async function resolvePackageVersion (pkgName: string) {
+export async function resolvePackageData (pkgName: string): Promise<PackageData> {
   const response = await fetch(SKYPACK_PACKAGEDATA(pkgName))
   if (!response.ok) {
-    return []
+    throw "load package data error"
   }
-  const data = (await response.json()).versions
-  const versionList = Object.keys(data)
-  return versionList.splice(versionList.length - 13).sort().reverse()
+  const data = (await response.json())
+  return data
 }
 
 export async function resolvePackageMetadata(name: string, version: string): Promise<PackageMetadata> {
-  const response = await fetch(SKYPACK_CDN(name, version, "?metadata"))
+  const response = await fetch(SKYPACK_CDN(name, version, "/package.json"))
   if (!response.ok)
     throw new Error('Error Resolving Package Data')
   return await response.json()

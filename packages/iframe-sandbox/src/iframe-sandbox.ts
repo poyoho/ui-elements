@@ -1,4 +1,5 @@
 import { createDefer } from "@ui-elements/utils"
+import { SKYPACK_CDN } from "@ui-elements/unpkg"
 import { SandboxHandleData, SandboxProxy } from "./proxy"
 import srcdoc from "./srcdoc.html?raw"
 
@@ -66,10 +67,14 @@ export default class CodeSandbox extends HTMLElement {
 
   disconnectedCallback() {}
 
+  // importMap format for { name: version }
   setupDependency (importMap: Record<string, string>) {
     const { sandbox } = this
-    // replace importMaps
-    Object.assign(this.importMaps.imports, importMap)
+    for (const name in importMap) {
+      if (!this.importMaps.imports[name]) {
+        this.importMaps.imports[name] = SKYPACK_CDN(name, importMap[name])
+      }
+    }
     sandbox.srcdoc = srcdoc.replace(IMPORT_MAP, JSON.stringify(this.importMaps))
   }
 

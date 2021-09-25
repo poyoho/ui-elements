@@ -17,12 +17,13 @@ export default class CodePlayground extends HTMLElement {
   private updatePackages = updatePackages(this)
 
   async connectedCallback () {
+    const shadowRoot = this.attachShadow({ mode: "open" })
     const wrap = this.ownerDocument.createElement("div")
     wrap.innerHTML = teamplateElement
     wrap.style.width = "inherit"
     wrap.style.height = "inherit"
     wrap.style.display = "flex"
-    this.appendChild(wrap)
+    shadowRoot.appendChild(wrap)
 
     this.editorManage = createMonacoEditorManager(this)
 
@@ -43,33 +44,34 @@ export default class CodePlayground extends HTMLElement {
   }
 
   get sandbox (): IframeSandbox {
-    return this.ownerDocument.querySelector("#sandbox")!
+    return this.shadowRoot!.querySelector("#sandbox")!
   }
   get editorWrap (): DragWrap {
-    return this.ownerDocument.querySelector("#editor-wrap")!
+    return this.shadowRoot!.querySelector("#editor-wrap")!
   }
   get tabWrap (): HTMLDivElement {
-    return this.ownerDocument.querySelector("#tab")!
+    return this.shadowRoot!.querySelector("#tab")!
   }
 
   get addButton (): HTMLButtonElement {
-    return this.ownerDocument.querySelector("#tab .icon-add")!
+    return this.shadowRoot!.querySelector("#tab .icon-add")!
   }
 
   get addInput (): HTMLButtonElement {
-    return this.ownerDocument.querySelector("#filename-input")!
+    return this.shadowRoot!.querySelector("#filename-input")!
   }
 
   get unpkgManage (): UnpkgManage {
-    return this.ownerDocument.querySelector("unpkg-manage")!
+    return this.shadowRoot!.querySelector("unpkg-manage")!
   }
 
   public async setupProjectManage () {
     this.project = createProjectManager("vue", this.fs)
-    const { sandbox, editorManage } = this
+    const { sandbox, editorManage, unpkgManage } = this
     const projectManage = await this.project
 
     sandbox.setupDependency(projectManage.importMap)
+    unpkgManage.installPackage(projectManage.importMap)
     await createFileEditor(this, projectManage.entryFile, "", true)
     await createFileEditor(this, projectManage.configFile, projectManage.defaultConfigCode, true)
     ;(await editorManage.get("ts").editor.monacoAccessor).typescript.addDTS(projectManage.dts)
