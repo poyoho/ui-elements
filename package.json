@@ -6,7 +6,9 @@
   "scripts": {
     "bootstrap": "yarn --frozen-lockfile && npx lerna bootstrap",
     "build": "node scripts/build.js",
-    "release": "node scripts/release.js"
+    "release": "node scripts/release.js",
+    "predeploy": "cd playground && yarn && yarn build",
+    "deploy": "gh-pages -d playground/dist"
   },
   "author": "poyoho",
   "license": "MIT",
@@ -35,8 +37,8 @@
     "packages",
     "lib"
   ],
-  "main": "lib/ui-elements/index.js",
-  "types": "lib/ui-elements/index.d.ts",
+  "main": "libs/ui-elements/index.js",
+  "types": "libs/ui-elements/index.d.ts",
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
@@ -59,6 +61,7 @@
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.30.0",
     "semver": "^7.3.5",
-    "typescript": "^4.1.2"
+    "typescript": "^4.1.2",
+    "gh-pages": "^3.1.0"
   }
 }

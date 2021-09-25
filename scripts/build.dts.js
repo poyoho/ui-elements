@@ -43,6 +43,7 @@ module.exports = async function runBuild () {
             "node_modules",
             "playground",
             "scripts",
+            "libs",
             "*.js"
           ]
         }

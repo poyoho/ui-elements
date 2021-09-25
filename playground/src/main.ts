@@ -1,3 +1,3 @@
-import { install } from "../../packages/ui-elements"
+import { install } from "@ui-elements/ui-elements"
 
 install()

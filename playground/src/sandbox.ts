@@ -1,4 +1,4 @@
-import IframeSandbox from "../../packages/iframe-sandbox/src/iframe-sandbox"
+import { IframeSandbox } from "@ui-elements/iframe-sandbox"
 
 const sandbox = document.querySelector("iframe-sandbox") as any as IframeSandbox
 

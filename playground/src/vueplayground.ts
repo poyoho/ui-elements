@@ -1,2 +1,2 @@
-import { install } from "../../packages/code-playground"
+import { install } from "@ui-elements/code-playground"
 install()

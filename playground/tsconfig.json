@@ -16,7 +16,10 @@
       "esnext", "DOM"
     ],
     "allowSyntheticDefaultImports": true,
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "paths": {
+      "@ui-elements": ["../packages/"]
+    }
   },
   "exclude": [
     "node_modules",
