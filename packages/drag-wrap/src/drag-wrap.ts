@@ -47,7 +47,7 @@ function itemsUserSelect (items: Array<HTMLElement>, enable: boolean) {
 
 function mouseDown (e: MouseEvent) {
   const target = e.currentTarget! as HTMLElement
-  const hostElement = getShadowHost(target) as DrapWrap
+  const hostElement = getShadowHost(target) as DragWrap
   const { items, wrap, direction } = hostElement
 
   const clientOffset = (e: MouseEvent) =>
@@ -113,7 +113,7 @@ function formatDirection (item: string): direction {
 
 let id = 0
 
-export default class DrapWrap extends HTMLElement {
+export default class DragWrap extends HTMLElement {
   #direction: "row" | "column" = "row"
   #id = ++id
   constructor() {

@@ -1,6 +1,7 @@
 import * as ls from 'vscode-html-languageservice'
 import { vueHTMLPlugin } from './vue'
 import vuehtml = monaco.languages.vuehtml
+
 export interface ICreateData {
   languageId: string
   languageSettings: vuehtml.Options
