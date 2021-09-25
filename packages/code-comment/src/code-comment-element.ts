@@ -1,5 +1,5 @@
-import IconFullScreen from "./full-screen.svg?raw"
-import IconSpliteScreen from "./splite-screen.svg?raw"
+import IconFullScreen from "./full-screen.svg?url"
+import IconSpliteScreen from "./splite-screen.svg?url"
 
 function html(...args: any) {
   return (args[0] as Array<string>).map((str, idx) => str + (args[1 + idx] || "")).join("")
