@@ -27,7 +27,7 @@ export default class CodePlayground extends HTMLElement {
 
     this.editorManage = createMonacoEditorManager(this)
 
-    const { addButton, addInput, fs, unpkgManage } = this
+    const { addButton, addInput, fs, unpkgManage, project } = this
     setupIframesandboxEvent(this)
     addButton.addEventListener("click", clickshowInput)
     addInput.addEventListener("keydown", this.createFileEvent)
@@ -78,9 +78,12 @@ export default class CodePlayground extends HTMLElement {
     await this.evalProject()
   }
 
-  private async evalProject () {
+  private async evalProject (file?: CompiledFile) {
     const { project, sandbox } = this
     const projectManage = await project
+    if (file) {
+      projectManage.compileFile(file)
+    }
     const scripts = await projectManage.getProjectRunableJS()
     sandbox.eval(scripts)
   }

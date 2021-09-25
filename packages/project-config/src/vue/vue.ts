@@ -27,11 +27,13 @@ export async function createVueProject(filesystem: FileSystem<CompiledFile>) {
     }]),
 
     async compileFile (file: CompiledFile) {
+      if (!file.filename.endsWith(".vue")) {
+        return
+      }
       const err = await compileVueSFCFile(file)
       if (err.length > 0) {
         throw err
       }
-      return file
     },
 
     async getProjectRunableJS () {
@@ -41,8 +43,10 @@ export async function createVueProject(filesystem: FileSystem<CompiledFile>) {
       await result.compileFile(appEntry)
 
       const modules = parseFileModules(appEntry, filesystem)
+      console.log(modules);
       const configModules = parseFileModules(appConfig, filesystem)
-
+      console.log(configModules);
+      console.log(filesystem);
       const scripts = [
         'window.__modules__ = {};window.__css__ = \'\'',
         ...configModules,

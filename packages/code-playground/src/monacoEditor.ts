@@ -109,7 +109,7 @@ export async function activeMonacoEditor (
   if (filename.endsWith(".vue")) {
     const [vuehtmlEditor, tsEditor] = editorManage.active(["vuehtml", "ts"])
 
-    const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", "<template>app.vue</template>", isNotExistFile)
+    const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", "<template>vue template</template>", isNotExistFile)
     const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename+".ts", "export default {}", isNotExistFile)
     vuehtmlEditor.editor.setModel(vuehtmlModel)
     tsEditor.editor.setModel(tsModel)
