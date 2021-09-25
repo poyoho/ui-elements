@@ -1,22 +1,20 @@
-import type IframeSandbox from "@ui-elements/iframe-sandbox/src/iframe-sandbox"
-import type DragWrap from "@ui-elements/drag-wrap/src/drag-wrap"
 import teamplateElement from "./code-playground-element"
+import type { IframeSandbox } from "@ui-elements/iframe-sandbox"
+import type { DrapWrap } from "@ui-elements/drag-wrap"
 import { FileSystem, CompiledFile } from "@ui-elements/vfs"
-import { createMonacoEditorManager } from "./monacoEditor"
 import { UnpkgManage } from "@ui-elements/unpkg"
-import { createProjectManager, ProjectManager } from "@ui-elements/project-config"
+import { createMonacoEditorManager } from "./monacoEditor"
+import { createProjectManager, compileFile } from "./project-config"
 import { setupIframesandboxEvent } from "./sandbox"
-import { createFileEditor, clickshowInput, fileInputBlur, inputCreateFile } from "./filetab"
+import { createFileEditor, clickshowInput, fileInputBlur, inputFilename } from "./filetab"
 import { updatePackages } from "./packageManage"
 
 export default class CodePlayground extends HTMLElement {
   public fs = new FileSystem<CompiledFile>()
-  public project!: Promise<ProjectManager>
-  public editorManage!: ReturnType<typeof createMonacoEditorManager>
-  private createFileEvent = inputCreateFile(this)
-  private updatePackages = updatePackages(this)
+  public editorManage = createMonacoEditorManager(this)
 
-  async connectedCallback () {
+  constructor () {
+    super()
     const shadowRoot = this.attachShadow({ mode: "open" })
     const wrap = this.ownerDocument.createElement("div")
     wrap.innerHTML = teamplateElement
@@ -24,16 +22,15 @@ export default class CodePlayground extends HTMLElement {
     wrap.style.height = "inherit"
     wrap.style.display = "flex"
     shadowRoot.appendChild(wrap)
+  }
 
-    this.editorManage = createMonacoEditorManager(this)
-
-    const { addButton, addInput, fs, unpkgManage, project } = this
+  async connectedCallback () {
+    const { addButton, addInput, unpkgManage } = this
     setupIframesandboxEvent(this)
     addButton.addEventListener("click", clickshowInput)
-    addInput.addEventListener("keydown", this.createFileEvent)
+    addInput.addEventListener("keydown", inputFilename)
     addInput.addEventListener("blur", fileInputBlur)
-    unpkgManage.addEventListener("unpkg-change", this.updatePackages)
-    fs.subscribe("update", this.evalProject.bind(this))
+    unpkgManage.addEventListener("unpkg-change", updatePackages)
     this.setupProjectManage()
   }
 
@@ -46,7 +43,7 @@ export default class CodePlayground extends HTMLElement {
   get sandbox (): IframeSandbox {
     return this.shadowRoot!.querySelector("#sandbox")!
   }
-  get editorWrap (): DragWrap {
+  get editorWrap (): DrapWrap {
     return this.shadowRoot!.querySelector("#editor-wrap")!
   }
   get tabWrap (): HTMLDivElement {
@@ -66,25 +63,27 @@ export default class CodePlayground extends HTMLElement {
   }
 
   public async setupProjectManage () {
-    this.project = createProjectManager("vue", this.fs)
-    const { sandbox, editorManage, unpkgManage } = this
-    const projectManage = await this.project
+    const { sandbox, editorManage, unpkgManage, fs } = this
+    const projectManage = await createProjectManager("vue", this.fs)
+    let isReady = false
+    async function updateProjectOutput (file: CompiledFile) {
+      const cacheStatus = isReady
+      await compileFile(file)
+      cacheStatus && sandbox.eval(projectManage.update(file))
+    }
 
+    fs.clear()
+    fs.subscribe("update", updateProjectOutput)
     sandbox.setupDependency(projectManage.importMap)
     unpkgManage.installPackage(projectManage.importMap)
-    await createFileEditor(this, projectManage.entryFile, "", true)
-    await createFileEditor(this, projectManage.configFile, projectManage.defaultConfigCode, true)
+    await createFileEditor(this, projectManage.entryFile, {
+      vuehtml: "<template>vue template</template>",
+      ts: "export default {}"
+    }, true)
+    isReady = true
+    await createFileEditor(this, projectManage.configFile, {
+      ts: projectManage.defaultConfigCode
+    }, true)
     ;(await editorManage.get("ts").editor.monacoAccessor).typescript.addDTS(projectManage.dts)
-    await this.evalProject()
-  }
-
-  private async evalProject (file?: CompiledFile) {
-    const { project, sandbox } = this
-    const projectManage = await project
-    if (file) {
-      projectManage.compileFile(file)
-    }
-    const scripts = await projectManage.getProjectRunableJS()
-    sandbox.eval(scripts)
   }
 }

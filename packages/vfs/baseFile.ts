@@ -1,6 +1,5 @@
 export interface FileOptions {
   name: string
-  content?: string
 }
 
 export interface FileCompile {
@@ -11,22 +10,9 @@ export interface FileCompile {
 
 export class BaseFile {
   public type = "base"
-  public filename: string
   public content = ""
-  public change = true
-
-  protected _onUpdate: ((filename: string) => void) | undefined
-
-  constructor(options: FileOptions) {
-    this.filename = options.name
-    this.content = options.content || ""
-  }
-
-  public updateContent(valule: string) {
-    this.content = valule
-    // set it to false after external processing
-    this.change = true
-  }
+  public change = true // set it to false after external processing
+  constructor(public filename: string) {}
 }
 
 export class CompiledFile extends BaseFile {
@@ -35,5 +21,4 @@ export class CompiledFile extends BaseFile {
     ssr: '',
     css: '',
   }
-
 }

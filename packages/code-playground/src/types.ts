@@ -1,4 +1,4 @@
-import MonacoEditor from "@ui-elements/monaco-editor/src/monaco-editor"
+import { MonacoEditor } from "@ui-elements/monaco-editor"
 
 export interface MonacoEditorItem {
   wrap: HTMLDivElement

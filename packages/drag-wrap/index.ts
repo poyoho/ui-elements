@@ -1,4 +1,6 @@
 import DrapWrap from "./src/drag-wrap"
+export * from "./src/drag-wrap"
+export { DrapWrap }
 
 declare global {
   interface Window {

@@ -7,13 +7,8 @@ import {
 export async function compileVueSFCFile(
   file: SFCFile
 ): Promise<Error[]> {
-  if (!file.content.trim() || !file.change) {
-    return []
-  }
-
   if (!file.filename.endsWith('.vue')) {
     file.compiled.js = file.compiled.ssr = file.content
-    file.change = false
     return []
   }
 
@@ -23,7 +18,6 @@ export async function compileVueSFCFile(
     sourceMap: true,
   })
   if (errors.length) {
-    file.change = false
     return errors
   }
 
@@ -33,7 +27,6 @@ export async function compileVueSFCFile(
     || descriptor.styles.some(s => s.lang)
     || (descriptor.template && descriptor.template.lang)
   ) {
-    file.change = false
     return [
       Error('lang="x" pre-processors are not supported in the in-browser playground.'),
     ]
@@ -50,7 +43,6 @@ export async function compileVueSFCFile(
 
   const clientScriptResult = doCompileScript(descriptor, id, false)
   if (!clientScriptResult) {
-    file.change = false
     return []
   }
 
@@ -62,7 +54,6 @@ export async function compileVueSFCFile(
   if (descriptor.scriptSetup) {
     const ssrScriptResult = doCompileScript(descriptor, id, true)
     if (!ssrScriptResult) {
-      file.change = false
       return []
     }
 
@@ -82,7 +73,6 @@ export async function compileVueSFCFile(
       false,
     )
     if (!clientTemplateResult) {
-      file.change = false
       return []
     }
 
@@ -90,7 +80,6 @@ export async function compileVueSFCFile(
 
     const ssrTemplateResult = doCompileTemplate(descriptor, id, bindings, true)
     if (!ssrTemplateResult) {
-      file.change = false
       return []
     }
 
@@ -113,7 +102,6 @@ export async function compileVueSFCFile(
   }
 
   file.compiled.css = doCompileStyle(descriptor, id)
-  file.change = false
   return []
 }
 

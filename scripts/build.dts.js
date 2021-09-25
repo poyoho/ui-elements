@@ -57,12 +57,12 @@ module.exports = async function runBuild () {
   })
   await bundle.write({
     format: "es",
-    dir: path.resolve(__dirname, "..", "lib"),
+    dir: path.resolve(__dirname, "..", "libs"),
     paths(id) {
       if (id.startsWith("@ui-elements")) {
         return id.replace('@ui-elements', '..')
       }
     },
   })
-  await rm(path.resolve(__dirname, "..", "lib/index.js"))
+  await rm(path.resolve(__dirname, "..", "libs/index.js"))
 }

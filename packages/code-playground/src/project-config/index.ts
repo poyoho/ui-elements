@@ -1,4 +1,6 @@
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
+export * from "./compiler"
+
 export interface ProjectManager {
   // project entry file name
   entryFile: string
@@ -10,8 +12,8 @@ export interface ProjectManager {
   importMap: Record<string, string>
   // project init dts
   dts: { filePath: string; content: string; }[]
-  compileFile: (file: CompiledFile) => Promise<CompiledFile>
-  getProjectRunableJS: () => Promise<string[]>
+  reload: () => string[]
+  update: (file: CompiledFile) => string[]
 }
 
 type CompilerType = "vue"
@@ -19,7 +21,7 @@ type CompilerType = "vue"
 export async function createProjectManager (type: CompilerType, filesystem: FileSystem<CompiledFile>): Promise<ProjectManager> {
   switch (type) {
     case "vue": {
-      return (await import("./src/vue/vue")).createVueProject(filesystem)
+      return (await import("./lib/vue/vue")).createVueProject(filesystem)
     }
   }
 }

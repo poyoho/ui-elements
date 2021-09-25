@@ -57,7 +57,7 @@ async function componentBuilder (pkgName) {
   })
   await bundle.write({
     format: "es",
-    dir: path.resolve(__dirname, "..", "lib", pkgName),
+    dir: path.resolve(__dirname, "..", "libs", pkgName),
     paths(id) {
       if (id.startsWith("@ui-elements")) {
         return id.replace('@ui-elements', '..')

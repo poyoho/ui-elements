@@ -1,6 +1,7 @@
 import { activeMonacoEditor, removeMonacoEditorModel } from "./monacoEditor"
 import CodePlayground from "./code-playground"
 import { FileSystem, CompiledFile } from "@ui-elements/vfs"
+import { getShadowHost } from "@ui-elements/utils"
 
 function isCreateAble (filename: string, fs: FileSystem<CompiledFile>) {
   return [".vue", ".ts"].some(extend => filename.endsWith(extend))
@@ -15,7 +16,7 @@ function createFileTab (filename: string, keepalive?: boolean) {
   return filetab
 }
 
-export async function createFileEditor (host: CodePlayground,  filename: string, code: string, keepalive?: boolean) {
+export async function createFileEditor (host: CodePlayground,  filename: string, code: Record<string, string>, keepalive?: boolean) {
   const { editorManage, tabWrap, fs } = host
 
   async function clickActiveFile (e: MouseEvent | HTMLElement) {
@@ -61,21 +62,21 @@ export function clickshowInput (e: MouseEvent) {
   input.focus()
 }
 
-export function inputCreateFile (host: CodePlayground) {
-  return async function (e: KeyboardEvent) {
-    if (e.key === "Enter") {
-      const target = (e.target as HTMLInputElement)
-      const filename = target.value
-      if (isCreateAble(filename, host.fs)) {
-        await createFileEditor(host, filename, "")
-        target.value = ""
-        target.classList.toggle("filename-input-show", false)
-      } else {
-        target.classList.toggle("filename-input-error", true)
-        setTimeout(() => {
-          target.classList.toggle("filename-input-error", false)
-        }, 400)
-      }
+export async function inputFilename (e: KeyboardEvent) {
+  const target = e.target! as HTMLElement
+  const host = getShadowHost(target) as CodePlayground
+  if (e.key === "Enter") {
+    const target = (e.target as HTMLInputElement)
+    const filename = target.value
+    if (isCreateAble(filename, host.fs)) {
+      await createFileEditor(host, filename, {})
+      target.value = ""
+      target.classList.toggle("filename-input-show", false)
+    } else {
+      target.classList.toggle("filename-input-error", true)
+      setTimeout(() => {
+        target.classList.toggle("filename-input-error", false)
+      }, 400)
     }
   }
 }

@@ -1,5 +1,5 @@
-import { setupMonaco, SupportLanguage, setupTheme, getRunnableJS } from "@ui-elements/monaco"
-import { createDefer, debounce } from "@ui-elements/utils"
+import { setupMonaco, SupportLanguage, setupTheme } from "@ui-elements/monaco"
+import { createDefer, debounce, tryPromise } from "@ui-elements/utils"
 
 export type MonacoEditorChangeEvent = Event & {
   value: {
@@ -102,10 +102,15 @@ export default class MonacoEditor extends HTMLElement {
      editor.getModel()?.dispose()
     })
   }
+}
 
-  async getRunnableJS (model: monaco.editor.ITextModel) {
-    console.log("[monaco-editor] getRunnableJS")
-    const { monaco } = await this.monacoAccessor
-    return getRunnableJS(monaco, model)
-  }
+export async function getRunnableJS (filename: string) {
+  const { monaco } = await setupMonaco()
+  const uri = monaco.Uri.file(`file://${filename}`)
+  // sometimes typescript worker is not loaded
+  const worker = await tryPromise(() => monaco.languages.typescript.getTypeScriptWorker(), 3, 100)
+  const client = await worker(uri)
+  const result = await client.getEmitOutput(uri.toString())
+  const firstJS = result.outputFiles.find((o: any) => o.name.endsWith(".js"))
+  return (firstJS && firstJS.text) || ""
 }

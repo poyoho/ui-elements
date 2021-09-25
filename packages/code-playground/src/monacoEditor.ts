@@ -1,18 +1,19 @@
 import CodePlayground from "./code-playground"
-import MonacoEditor from "@ui-elements/monaco-editor/src/monaco-editor"
+import { MonacoEditor } from "@ui-elements/monaco-editor"
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
 import { MonacoEditorItem, SupportEditorType } from "./types"
+import { debounce } from "@ui-elements/utils"
 
 type EditorManage = ReturnType<typeof createMonacoEditorManager>
 
 export function createMonacoEditorManager (host: CodePlayground) {
-  const { editorWrap } = host
   const editors: Record<string, MonacoEditorItem> = {}
   const manager = {
     get: (type: SupportEditorType): MonacoEditorItem => {
       return editors[type]
     },
     active: (types: SupportEditorType[]): MonacoEditorItem[] => {
+      const { editorWrap } = host
       manager.hideAll()
       const result = types.map(type => {
         let state = editors[type]
@@ -66,6 +67,7 @@ export function createMonacoEditorManager (host: CodePlayground) {
     },
 
     hideAll: () => {
+      const { editorWrap } = host
       editorWrap.items.forEach(item => {
         const type = item.getAttribute("type")
         if (type) {
@@ -90,7 +92,7 @@ async function createOrGetModel (editor: MonacoEditor, type: SupportEditorType, 
 function createOrGetFile (fs: FileSystem<CompiledFile>, filename: string, content: string, isNotExistFile: boolean) {
   let file: CompiledFile
   if (isNotExistFile) {
-    file = fs.writeFile(new CompiledFile({ name: filename, content }))
+    file = fs.writeFile(new CompiledFile(filename), content)
   } else {
     file = fs.readFile(filename)!
   }
@@ -101,17 +103,16 @@ export async function activeMonacoEditor (
   editorManage: EditorManage,
   fs: FileSystem<CompiledFile>,
   filename: string,
-  code: string
+  code: Record<string, string>
 ) {
   const isNotExistFile = !fs.isExist(filename)
-
 
   if (filename.endsWith(".vue")) {
     const [vuehtmlEditor, tsEditor] = editorManage.active(["vuehtml", "ts"])
 
-    const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", "<template>vue template</template>", isNotExistFile)
-    const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename+".ts", "export default {}", isNotExistFile)
+    const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", code.vuehtml || "", isNotExistFile)
     vuehtmlEditor.editor.setModel(vuehtmlModel)
+    const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename+".ts", code.ts || "", isNotExistFile)
     tsEditor.editor.setModel(tsModel)
 
     if (isNotExistFile) {
@@ -123,35 +124,26 @@ export async function activeMonacoEditor (
         "</script>"
       ].join("\n")
       const file = createOrGetFile(fs, filename, getContent(), isNotExistFile)
-      const updateVueFile = async () => {
-        file.updateContent(getContent())
-      }
-      vuehtmlModel.onDidChangeContent(() => {
+      vuehtmlModel.onDidChangeContent(debounce(() => {
         cache.html = vuehtmlModel.getValue()
-        updateVueFile()
-      })
-      tsModel.onDidChangeContent(async () => {
-        cache.ts = await tsEditor.editor.getRunnableJS(tsModel)
-        updateVueFile()
-      })
+        fs.writeFile(file, getContent())
+      }))
+      tsModel.onDidChangeContent(debounce(async () => {
+        cache.ts = tsModel.getValue()
+        fs.writeFile(file, getContent())
+      }))
     }
   } else if (filename.endsWith(".ts")) {
     const [tsEditor] = editorManage.active(["ts"])
 
-    const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename, code, isNotExistFile)
+    const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename, code.ts || "", isNotExistFile)
     tsEditor.editor.setModel(tsModel)
 
     if (isNotExistFile) {
-      const file = createOrGetFile(fs, filename, tsModel.getValue(), isNotExistFile)
-      const compileTS = async () => {
-        file.compiled.js = await tsEditor.editor.getRunnableJS(tsModel)
-        file.change = false
-      }
-      tsModel.onDidChangeContent(async () => {
-        compileTS()
-        file.updateContent(tsModel.getValue())
-      })
-      await compileTS()
+      const file = createOrGetFile(fs, filename, code.ts || "", isNotExistFile)
+      tsModel.onDidChangeContent(debounce(async () => {
+        fs.writeFile(file, tsModel.getValue())
+      }))
     }
   } else {
     throw `don't support create ${filename}, only support create *.vue/*.ts.`

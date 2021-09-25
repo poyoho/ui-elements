@@ -3,20 +3,6 @@ import { createSinglePromise, tryPromise } from "@ui-elements/utils"
 export * from "./textmate"
 import { setupTypescriptLanguageService } from "./setup"
 import { useMonacoEditorMain } from "./fillers/monaco"
-type monaco = typeof monaco
-
-export async function getEmitResult (monaco: monaco, model: monaco.editor.ITextModel) {
-  // sometimes typescript worker is not loaded
-  const worker = await tryPromise(() => monaco.languages.typescript.getTypeScriptWorker(), 3, 100)
-  const client = await worker(model.uri)
-  return await client.getEmitOutput(model.uri.toString())
-}
-
-export async function getRunnableJS (monaco: monaco, model: monaco.editor.ITextModel) {
-  const result = await getEmitResult(monaco, model)
-  const firstJS = result.outputFiles.find((o: any) => o.name.endsWith(".js"))
-  return (firstJS && firstJS.text) || ""
-}
 
 export const SupportLanguage = {
   "vuehtml": "vuehtml",

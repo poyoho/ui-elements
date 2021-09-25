@@ -217,32 +217,25 @@ export function processJavaScriptModule (
 export function processFile(
   file: CompiledFile,
   filesystem: FileSystem,
-  seen = new Set<CompiledFile>()
+  seen = new Map<CompiledFile, string>()
 ) {
   if (seen.has(file)) {
-    return []
+    return
   }
 
-  seen.add(file)
-
   const { js, css } = file.compiled
-
   const { code: jscode, importedFiles } = processJavaScriptModule(file.filename, js, filesystem)
   const { code: csscode } = procssCSSModule(file.filename, css, filesystem)
 
-  const processed = [jscode + csscode]
-  if (importedFiles.size) {
-    for (const imported of importedFiles) {
-      const processedFile = processFile(
-        filesystem.readFile(imported)!,
-        filesystem,
-        seen
-      )
-      processed.push(...processedFile)
-    }
+  const processed = jscode + csscode
+  for (const imported of importedFiles) {
+    processFile(
+      filesystem.readFile(imported)!,
+      filesystem,
+      seen
+    )
   }
-  // return a list of files to further process
-  return processed
+  seen.set(file, processed)
 }
 
 export function extractNames(param: Node): string[] {

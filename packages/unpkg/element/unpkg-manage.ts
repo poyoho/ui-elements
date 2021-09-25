@@ -74,9 +74,8 @@ function renderPackageMetadata (items: PackageMetadata[], container: HTMLElement
   }, [] as string[]).join("\n")
 }
 
-async function keywordFileter(e: Event) {
-  const target = e.target as HTMLInputElement
-  const host = getShadowHost(target) as UnpkgManage
+async function keywordFileter (this: HTMLInputElement) {
+  const host = getShadowHost(this) as UnpkgManage
   const keyword = host.keywordInput.value
 
   switch(host.activeMenu) {
@@ -94,7 +93,6 @@ async function keywordFileter(e: Event) {
       break
     }
   }
-
 }
 
 async function clickInstallPackage (e: MouseEvent) {
@@ -181,7 +179,7 @@ async function clickInstallPackage (e: MouseEvent) {
 export default class UnpkgManage extends HTMLElement {
   public activeMenu = "Installed"
   public installed: PackageMetadata[] = []
-  private inputEventHandle = debounce(keywordFileter)
+  private keywordFileter = debounce(keywordFileter)
 
   constructor() {
     super()
@@ -210,7 +208,7 @@ export default class UnpkgManage extends HTMLElement {
     const { entry, menu, keywordInput, resultContent, iconClose } = this
     entry.addEventListener("click", showPanel)
     menu.addEventListener("click", switchMenu)
-    keywordInput.addEventListener("input", this.inputEventHandle)
+    keywordInput.addEventListener("input", this.keywordFileter)
     resultContent.addEventListener("click", clickInstallPackage)
     iconClose.addEventListener("click", showPanel)
   }
