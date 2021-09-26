@@ -2,8 +2,8 @@ import fs from "fs"
 import path from "path"
 import { UserConfig } from "vite"
 
-const entry = fs.readdirSync(path.resolve("./public/")).reduce((prev, filename) => {
-  prev[filename.replace(".html", "")] = path.resolve("./public/", filename)
+const entry = fs.readdirSync(path.resolve("./demos/")).reduce((prev, filename) => {
+  prev[filename.replace(".html", "")] = path.resolve("./demos/", filename, filename+".html")
   return prev
 }, {})
 entry.index = path.resolve("./index.html")
