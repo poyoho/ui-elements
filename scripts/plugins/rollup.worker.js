@@ -82,7 +82,7 @@ module.exports = function rollupWebWorker () {
       const workerOptions = { type: 'module' }
       return [
         `export default function WorkerWrapper() {`,
-        `  return new Worker("${baseName}", ${JSON.stringify(workerOptions)})`,
+        `  return new Worker(new URL("${baseName}", import.meta.url), ${JSON.stringify(workerOptions)})`,
         `}`
       ].join("\n")
     }

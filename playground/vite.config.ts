@@ -11,7 +11,7 @@ entry.index = path.resolve("./index.html")
 const viteConfig: UserConfig = {
   resolve: {
     alias: {
-      "@ui-elements": path.resolve("../libs/"),
+      "@ui-elements": path.resolve("../packages/"),
       "@": path.resolve("./src"),
     }
   },

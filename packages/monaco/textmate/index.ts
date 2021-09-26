@@ -3,7 +3,6 @@ import { wireTmGrammars } from 'monaco-editor-textmate'
 import { createSinglePromise } from "@ui-elements/utils"
 import { loadWASM } from 'onigasm'
 import onigasm from "./token/onigasm.wasm?url"
-// const onigasm = new URL("./token/onigasm.wasm", import.meta.url).href
 
 type monaco = typeof monaco
 const loadOnigasm = createSinglePromise(() => loadWASM(onigasm))

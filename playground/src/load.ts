@@ -9,4 +9,3 @@
     document.body.appendChild(dom)
   })
 })()
-
