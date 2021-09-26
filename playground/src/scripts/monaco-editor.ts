@@ -1,6 +1,9 @@
 import type { MonacoEditorChangeEvent, MonacoEditor } from "@ui-elements/monaco-editor"
+import { install } from "@ui-elements/monaco-editor"
 
-(async function () {
+install()
+
+;(async function () {
   const elm = document.querySelector(".editor") as any as MonacoEditor
   const model = await elm.createModel("ts", "test.vue.ts", `console.log("hello world :)")`)
   await elm.setModel(model)
