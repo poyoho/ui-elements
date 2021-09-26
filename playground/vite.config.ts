@@ -6,8 +6,7 @@ const entry = fs.readdirSync(path.resolve("./public/")).reduce((prev, filename) 
   prev[filename.replace(".html", "")] = path.resolve("./public/", filename)
   return prev
 }, {})
-
-console.log(entry);
+entry.index = path.resolve("./index.html")
 
 const viteConfig: UserConfig = {
   resolve: {
