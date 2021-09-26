@@ -7,6 +7,7 @@ const { nodeResolve } = require('@rollup/plugin-node-resolve')
 const json = require("@rollup/plugin-json")
 const rollupWorker = require("./plugins/rollup.worker")
 const rollupRaw = require("./plugins/rollup.raw")
+const rollupUrl = require("./plugins/rollup.url")
 const rollupTransform = require("./plugins/rollup.transform")
 const tsconfigPath = path.join(__dirname, "../tsconfig.json")
 const packagePath = path.join(__dirname, "../packages/")
@@ -42,15 +43,16 @@ async function componentBuilder (pkgName) {
       }),
       rollupWorker(),
       rollupRaw(),
+      rollupUrl(),
       rollupTransform(),
       json(),
       importMetaAssets({
-        exclude: /\?worker|\?raw/
+        exclude: /\?worker|\?raw|\?url/
       }),
     ],
     external (id) {
       return /^@ui-elements/.test(id)
-        || deps.some(k => new RegExp('^' + k).test(id)) && !id.includes("monaco-editor/esm")
+        || deps.some(k => new RegExp('^' + k).test(id)) && !id.includes("monaco-editor/esm") && !id.includes("monaco-editor/min")
     },
   }).catch(err => {
     console.log(err)

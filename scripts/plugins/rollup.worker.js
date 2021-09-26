@@ -74,17 +74,17 @@ module.exports = function rollupWebWorker () {
       const contentHash = getAssetHash(content)
       const baseName = `./${basename}.${contentHash}.js`
       const fileName = path.posix.join(baseName)
-
-      this.emitFile({
+      const filePath = this.emitFile({
         fileName,
         type: 'asset',
         source: code
       })
-
       const workerOptions = { type: 'module' }
-      return `export default function WorkerWrapper() {
-        return new Worker(new URL('${baseName}', import.meta.url), ${JSON.stringify(workerOptions)})
-      }`
+      return [
+        `export default function WorkerWrapper() {`,
+        `  return new Worker("${baseName}", ${JSON.stringify(workerOptions)})`,
+        `}`
+      ].join("\n")
     }
   }
 }

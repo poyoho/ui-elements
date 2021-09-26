@@ -23,7 +23,7 @@ module.exports = function rollupWebWorker () {
     name: "raw-loader",
     async load (id) {
       const query = parseRequest(id)
-      if (query && query.search.raw !== null) {
+      if (query && query.search.raw !== undefined) {
         return `export default ${JSON.stringify(
           fs.readFileSync(query.path, { encoding: 'utf-8' })
         )}`
