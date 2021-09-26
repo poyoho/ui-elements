@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script>process = {env: {}}</script>
+  
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .wrap {
+      height: 100%;
+      width: 100%;
+      background: #333;
+    }
+  </style>
+  <script type="module" crossorigin src="/ui-elements/assets/select-box.66a5635d.js"></script>
+    <link rel="modulepreload" href="/ui-elements/assets/index.7aeb2d8f.js">
+    <link rel="modulepreload" href="/ui-elements/assets/shadow.87af85ed.js">
+  </head>
+<body>
+  <div class="wrap">
+    <select-box>
+      <option-box value="123">123</option-box>
+      <option-box value="456">456</option-box>
+      <option-box value="789">789</option-box>
+      <option-box value="987">987</option-box>
+    </select-box>
+  </div>
+</body>
+<script>
+  const elm = document.querySelector("select-box")
+  elm.addEventListener("change", (e) => {
+    console.log(e.detail)
+  })
+</script>
+</html>

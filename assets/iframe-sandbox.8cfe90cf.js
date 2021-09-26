@@ -1,0 +1,1 @@
+import{i as e}from"./index.521922e3.js";import"./promise.2d7cfcc9.js";import"./resolvePackage.fdc5f42d.js";import"./vendor.3da8fb95.js";e();const o=document.querySelector("iframe-sandbox");o.eval(["console.log('asdasd')"]),o.setupDependency({});

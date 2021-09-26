@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>drag-wrap</title>
+  <script>process = {env: {}}</script>
+  
+  <style>
+    html, body {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background: #333;
+      color: #e3e3e3;
+    }
+    h2 {
+      padding: 20px;
+      width: 80%;
+      margin: 0 auto;
+    }
+    .wrap {
+      width: 80%;
+      margin: 0 auto;
+      height: 600px;
+    }
+    drag-wrap {
+      width: 100%;
+      height: 100%;
+      background: #fff;
+    }
+    [slot="item"] {
+      background: #666;
+      text-align: center;
+    }
+  </style>
+  <script type="module" crossorigin src="/ui-elements/assets/drag-wrap.2da01948.js"></script>
+    <link rel="modulepreload" href="/ui-elements/assets/index.26171d6e.js">
+    <link rel="modulepreload" href="/ui-elements/assets/shadow.87af85ed.js">
+  </head>
+<body>
+  <a href="/">back</a>
+  <h2>drag-wrap row</h2>
+  <div class="wrap">
+    <drag-wrap direction="row">
+      <div slot="item">1</div>
+      <div slot="item">2</div>
+      <div slot="item">3</div>
+      <div slot="item">4</div>
+      <div slot="item">5</div>
+    </drag-wrap>
+  </div>
+  <h2>drag-wrap column</h2>
+  <div class="wrap">
+    <drag-wrap direction="column">
+      <div slot="item">1</div>
+      <div slot="item">2</div>
+      <div slot="item">3</div>
+      <div slot="item">4</div>
+      <div slot="item">5</div>
+    </drag-wrap>
+  </div>
+  <h2>drap-wrao row & column</h2>
+  <div class="wrap">
+    <drag-wrap direction="row" class="a">
+      <div slot="item">
+        <drag-wrap direction="column">
+          <div slot="item">1</div>
+          <div slot="item">2</div>
+        </drag-wrap>
+      </div>
+
+      <div slot="item">
+        <drag-wrap direction="column">
+          <div slot="item">3</div>
+          <div slot="item">4</div>
+        </drag-wrap>
+      </div>
+    </drag-wrap>
+  </div>
+</body>
+
+</html>
