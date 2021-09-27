@@ -11,12 +11,13 @@ const tsconfigPath = path.join(__dirname, "../tsconfig.json")
 const packagePath = path.join(__dirname, "../packages/")
 const { exit } = require("process")
 const { convertCompilerOptionsFromJson } = require("typescript")
+const postcss = require('rollup-plugin-postcss')
 
 /**
  * build component by rollup
  * @param {string} pkgName
  */
-module.exports = async function componentBuilder (pkgName) {
+module.exports = async function monacoEditorBuilder (pkgName) {
   const entry = path.resolve(packagePath, pkgName)
   const packageJSON = require(path.resolve(entry, "package.json"))
   const deps = Object.keys(
@@ -37,6 +38,9 @@ module.exports = async function componentBuilder (pkgName) {
           "__tests__",
         ]
       }),
+      postcss({
+        external: true,
+      }),
       rollupWorker(),
       rollupRaw(),
       rollupUrl(),
@@ -45,6 +49,7 @@ module.exports = async function componentBuilder (pkgName) {
     ],
     external (id) {
       return /^@ui-elements/.test(id)
+        || deps.some(k => new RegExp('^' + k).test(id))
     },
   }).catch(err => {
     console.log(err)

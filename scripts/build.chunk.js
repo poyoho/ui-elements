@@ -45,6 +45,7 @@ module.exports = async function componentBuilder (pkgName) {
     ],
     external (id) {
       return /^@ui-elements/.test(id)
+        || deps.some(k => new RegExp('^' + k).test(id))
     },
   }).catch(err => {
     console.log(err)

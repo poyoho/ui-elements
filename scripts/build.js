@@ -7,6 +7,7 @@ const chalk = require("chalk")
 async function buildComponents () {
   const pkgs = (await getPackages())
     .map(pkg => pkg.name.replace("@ui-elements/", ""))
+    .filter(pkg => pkg === "monaco")
 
   for (const pkgName of pkgs) {
     console.log(chalk.bgBlue("building package"), chalk.green(pkgName))

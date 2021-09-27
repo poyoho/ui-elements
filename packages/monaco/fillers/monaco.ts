@@ -1,5 +1,5 @@
 import { createSinglePromise } from "@ui-elements/utils"
-import monaco from "monaco-editor"
+import * as monaco from "monaco-editor"
 
 type monaco = typeof monaco
 
