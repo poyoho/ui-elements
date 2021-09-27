@@ -49,7 +49,6 @@
     "@rollup/plugin-dynamic-import-vars": "^1.4.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
-    "@web/rollup-plugin-import-meta-assets": "^1.0.7",
     "chalk": "^4.1.0",
     "commitizen": "^4.2.2",
     "conventional-changelog-cli": "^2.1.1",

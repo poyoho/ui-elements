@@ -21,6 +21,11 @@ const viteConfig: UserConfig = {
     },
   },
   base: "/ui-elements/",
+  css: {
+    modules: {
+      scopeBehaviour: "global"
+    }
+  }
 }
 
 export default viteConfig

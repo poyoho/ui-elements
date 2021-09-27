@@ -39,7 +39,6 @@ module.exports = function rollupWebWorker () {
           fileName,
           type: 'asset',
         })
-        console.log(fileName);
         return `export default new URL("./${fileName}", import.meta.url).href`
       }
     },
