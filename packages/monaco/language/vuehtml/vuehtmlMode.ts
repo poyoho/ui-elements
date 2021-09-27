@@ -2,7 +2,7 @@ import { WorkerManager } from './workerManager'
 import type { VueHTMLWorker } from './vuehtmlWorker'
 import type { LanguageServiceDefaultsImpl } from './monaco.contribution'
 import * as languageFeatures from './languageFeatures'
-import languages = monaco.languages
+import { languages } from "monaco-editor"
 type Uri = monaco.Uri
 type IDisposable = monaco.IDisposable
 

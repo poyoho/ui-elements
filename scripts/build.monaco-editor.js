@@ -26,6 +26,9 @@ module.exports = async function monacoEditorBuilder (pkgName) {
   const bundle = await rollup.rollup({
     input: path.resolve(entry, "index.ts"),
     plugins: [
+      postcss({
+        extract: true,
+      }),
       nodeResolve({
         jsnext: true,
         main: true,
@@ -37,9 +40,6 @@ module.exports = async function monacoEditorBuilder (pkgName) {
           "node_modules",
           "__tests__",
         ]
-      }),
-      postcss({
-        external: true,
       }),
       rollupWorker(),
       rollupRaw(),
