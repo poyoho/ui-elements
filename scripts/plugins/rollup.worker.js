@@ -5,6 +5,7 @@ const { createHash } = require('crypto');
 const { nodeResolve } = require('@rollup/plugin-node-resolve')
 const esbuild = require("rollup-plugin-esbuild")
 const commonjs = require('@rollup/plugin-commonjs')
+const chalk = require("chalk")
 
 function getAssetHash(content) {
   return createHash('sha256').update(content).digest('hex').slice(0, 8)
@@ -30,7 +31,7 @@ module.exports = function rollupWebWorker () {
     load (id) {
       const parsedQuery = parseWorkerRequest(id)
       if (parsedQuery && parsedQuery.worker != null) {
-        console.log("[worker]", id)
+        console.log(chalk.blue("[worker]"), id)
         return ''
       }
     },

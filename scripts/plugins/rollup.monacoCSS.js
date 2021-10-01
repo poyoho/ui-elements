@@ -2,6 +2,7 @@ const { parse: parseUrl, URLSearchParams } = require("url")
 const fs = require("fs")
 const path = require("path")
 const { createHash } = require('crypto');
+const chalk = require("chalk")
 
 function getAssetHash(content) {
   return createHash('sha256').update(content).digest('hex').slice(0, 8)
@@ -30,7 +31,7 @@ module.exports = function rollupWebWorker (options) {
     async load (id) {
       const query = parseRequest(id)
       if (query && query.search.virtualMonacoCSS !== undefined) {
-        console.log("[virtualMonacoCSS]", query.path);
+        console.log(chalk.blue("[virtualMonacoCSS]"), query.path);
         return `export default new URL("./${options.extract}", import.meta.url).href`
       }
     },

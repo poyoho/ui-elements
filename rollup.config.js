@@ -1,6 +1,6 @@
 const path = require("path")
 const masterVersion = require('./package.json').version
-
+const { defineConfig } = require("rollup")
 const target = process.env.TARGET
 const packageDir = path.resolve(__dirname, 'packages', target)
 const resolve = p => path.resolve(packageDir, p)
@@ -10,8 +10,9 @@ export default {
   "monaco": () => createMonacoConfig()
 }[target] || (() => createConfig())
 
-function createConfig (options) {
-  return {
+function createConfig (options = {}) {
+  return defineConfig({
+    ...options,
     input: resolve("index.ts"),
     output: {
       format: "es",
@@ -36,24 +37,25 @@ function createConfig (options) {
           "__tests__",
         ]
       }),
-      ...(options.plugins || []),
       require("./scripts/plugins/rollup.worker")(),
       require("./scripts/plugins/rollup.raw")(),
       require("./scripts/plugins/rollup.url")(),
       require("./scripts/plugins/rollup.transform")(),
+      ...(options?.plugins || []),
       require("@rollup/plugin-json")(),
     ],
     external (id) {
       return /^@ui-elements/.test(id)
         || Object.keys(pkg.dependencies || pkg.peerDependencies || {}).some(k => new RegExp('^' + k).test(id))
-        || options.external(id)
+        || options.external && options.external(id)
     },
-  }
+  })
 }
 
-let count = 0
 function createMonacoConfig () {
   const extractCSSName = "monaco-editor.css"
+  const hadMonacoEditor = !!require("fs").existsSync("./libs/monaco/")
+  console.log("[build monaco-editor]", !hadMonacoEditor);
   return createConfig({
     plugins: [
       require("rollup-plugin-postcss")({
@@ -61,11 +63,11 @@ function createMonacoConfig () {
       }),
       require("./scripts/plugins/rollup.monacoCSS")({
         extract: extractCSSName
-      }),
+      })
     ],
     external (id) {
       // for dev
-      return count && Object.keys(pkg.devDependencies || {}).some(k => new RegExp('^' + k).test(id))
+      return hadMonacoEditor && Object.keys(pkg.devDependencies || {}).some(k => new RegExp('^' + k).test(id))
     }
   })
 }

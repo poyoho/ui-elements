@@ -1,4 +1,5 @@
 const execa = require('execa')
+const path = require("path")
 const { targets: allTargets, fuzzyMatchTarget, runParallel } = require('./utils')
 const chalk = require("chalk")
 const args = require('minimist')(process.argv.slice(2))
@@ -36,5 +37,15 @@ async function dev (target) {
 }
 
 async function devAll(targets) {
-  await runParallel(require('os').cpus().length, targets, dev)
+  runParallel(require('os').cpus().length, targets, dev)
+  execa(
+    "vite",
+    [
+
+    ],
+    {
+      stdio: 'inherit',
+      cwd: path.resolve("./playground")
+    }
+  )
 }

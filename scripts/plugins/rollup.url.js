@@ -1,6 +1,7 @@
 const { parse: parseUrl, URLSearchParams } = require("url")
 const fs = require("fs")
 const path = require("path")
+const chalk = require("chalk")
 const { createHash } = require('crypto');
 
 function getAssetHash(content) {
@@ -30,7 +31,7 @@ module.exports = function rollupWebWorker () {
     async load (id) {
       const query = parseRequest(id)
       if (query && query.search.url !== undefined) {
-        console.log("[url]", query.path);
+        console.log(chalk.blue("[url]"), query.path);
         const source = fs.readFileSync(query.path, { encoding: 'utf-8' })
         const basename = path.parse(query.path)
         const sourceHash = getAssetHash(source)

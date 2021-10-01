@@ -1,5 +1,6 @@
 const { parse: parseUrl, URLSearchParams } = require("url")
 const fs = require("fs")
+const chalk = require("chalk")
 
 function parseRequest(id) {
   const { search, href } = parseUrl(id)
@@ -24,7 +25,7 @@ module.exports = function rollupWebWorker () {
     async load (id) {
       const query = parseRequest(id)
       if (query && query.search.raw !== undefined) {
-        console.log("[raw]", query.path)
+        console.log(chalk.blue("[raw]"), query.path)
         return `export default ${JSON.stringify(
           fs.readFileSync(query.path, { encoding: 'utf-8' })
         )}`

@@ -5,11 +5,9 @@
   "description": "web components library",
   "scripts": {
     "bootstrap": "yarn --frozen-lockfile && npx lerna bootstrap",
-    "dev:playground": "cd playground && yarn dev",
-    "dev:packages": "node ./scripts/dev.js",
-    "dev": "npm-run-all --parallel \"serve-playground\" \"dev:packages\"",
+    "dev": "node scripts/dev.js",
     "build": "node scripts/build.js",
-    "build-website": "cd playground && yarn && yarn build",
+    "build-website": "cd playground && vite build",
     "release": "node scripts/release.js",
     "predeploy": "yarn build:website",
     "deploy": "gh-pages -d ./playground/dist",
@@ -59,7 +57,6 @@
     "esbuild": "^0.12.19",
     "express": "^4.17.1",
     "fs-extra": "^10.0.0",
-    "npm-run-all": "^4.1.5",
     "gh-pages": "^3.1.0",
     "lerna": "^4.0.0",
     "postcss": "^8.3.8",
@@ -71,6 +68,7 @@
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.30.0",
     "semver": "^7.3.5",
-    "typescript": "^4.1.2"
+    "typescript": "^4.1.2",
+    "vite": "^2.6.2"
   }
 }

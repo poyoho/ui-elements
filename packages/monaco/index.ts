@@ -23,13 +23,13 @@ export const loadWorkers = createSinglePromise(async () => {
     { default: CSSWorker },
     { default: HTMLWorker },
   ] = await Promise.all([
-    import("./language/vuehtml/monaco.contribution" as any),
-    import('./language/vuehtml/vuehtml.worker.ts?worker' as any),
-    import('monaco-editor/esm/vs/editor/editor.worker?worker' as any),
-    import('monaco-editor/esm/vs/language/json/json.worker?worker' as any),
-    import('monaco-editor/esm/vs/language/typescript/ts.worker?worker' as any),
-    import('monaco-editor/esm/vs/language/css/css.worker?worker' as any),
-    import('monaco-editor/esm/vs/language/html/html.worker?worker' as any),
+    import("./language/vuehtml/monaco.contribution"),
+    import('./language/vuehtml/vuehtml.worker.ts?worker'),
+    import('monaco-editor/esm/vs/editor/editor.worker?worker'),
+    import('monaco-editor/esm/vs/language/json/json.worker?worker'),
+    import('monaco-editor/esm/vs/language/typescript/ts.worker?worker'),
+    import('monaco-editor/esm/vs/language/css/css.worker?worker'),
+    import('monaco-editor/esm/vs/language/html/html.worker?worker'),
   ])
 
   // monaco要求将worker挂载到window上

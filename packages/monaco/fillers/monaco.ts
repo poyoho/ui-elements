@@ -1,6 +1,6 @@
 import { createSinglePromise } from "@ui-elements/utils"
-import * as monaco from "monaco-editor"
 const innerStyle = await import("./virtual-monaco-editor.css?virtualMonacoCSS")
+import * as monacoESM from "monaco-editor"
 
 type monaco = typeof monaco
 
@@ -16,7 +16,7 @@ export const useMonacoEditorMain = createSinglePromise<MonacoEditorImportData>(a
     style.innerHTML = innerStyle.default
 
     return {
-      monaco,
+      monaco: monacoESM as monaco,
       style,
     }
   }
