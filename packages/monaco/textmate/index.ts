@@ -5,7 +5,6 @@ import { loadWASM } from 'onigasm'
 import onigasm from "./token/onigasm.wasm?url"
 
 type monaco = typeof monaco
-
 const loadOnigasm = createSinglePromise(() => loadWASM(onigasm))
 
 // anyscript fork from https://github.com/Nishkalkashyap/monaco-vscode-textmate-theme-converter/blob/master/lib/cjs/index.js

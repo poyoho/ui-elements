@@ -1,5 +1,4 @@
 const { parse: parseUrl, URLSearchParams } = require("url")
-const fs = require("fs")
 const path = require("path")
 const { createHash } = require('crypto');
 const chalk = require("chalk")
