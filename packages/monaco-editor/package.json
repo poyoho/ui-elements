@@ -1,11 +1,5 @@
 {
   "name": "@ui-elements/monaco-editor",
   "version": "0.0.0",
-  "main": "index.ts",
-  "peerDependencies": {
-    "monaco-editor": "^0.28.1",
-    "monaco-editor-textmate": "^3.0.0",
-    "monaco-textmate": "^3.0.1",
-    "onigasm": "^2.2.5"
-  }
+  "main": "index.ts"
 }

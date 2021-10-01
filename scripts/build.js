@@ -1,28 +1,50 @@
-const componentBuilder = require("./build.chunk")
-const dtsBuilder = require("./build.dts")
-const monacoEditorBuilder = require("./build.monaco-editor")
-const { getPackages } = require("@lerna/project")
-const chalk = require("chalk")
+const path = require('path')
+const fs = require('fs-extra')
+const args = require('minimist')(process.argv.slice(2))
+const execa = require('execa')
+const { targets: allTargets, fuzzyMatchTarget, runParallel } = require('./utils')
 
-async function buildComponents () {
-  const pkgs = (await getPackages())
-    .map(pkg => pkg.name.replace("@ui-elements/", ""))
-    .filter(pkg => pkg === "monaco")
+// params
+const targets = args._
+const sourceMap = args.sourcemap || args.s
+const buildAllMatching = args.all || args.a
 
-  for (const pkgName of pkgs) {
-    console.log(chalk.bgBlue("building package"), chalk.green(pkgName))
-    if (pkgName === "monaco") {
-      await monacoEditorBuilder(pkgName)
-    } else {
-      await componentBuilder(pkgName)
-    }
-    console.log(chalk.cyan("builded package", pkgName))
+run()
+
+async function run() {
+  // build bundle
+  if (!targets.length) {
+    await buildAll(allTargets)
+  } else {
+    await buildAll(fuzzyMatchTarget(targets, buildAllMatching))
   }
+  // build dts
+  await execa(
+    "rollup",
+    [
+      "-c",
+      "./rollup.config.dts.js"
+    ],
+    { stdio: 'inherit' }
+  )
+  fs.remove("./libs/index.js")
 }
 
-function main () {
-  // dtsBuilder()
-  buildComponents()
+async function build(target) {
+  await execa(
+    'rollup',
+    [
+      '-c',
+      '--environment',
+      [
+        `TARGET:${target}`,
+        sourceMap ? `SOURCE_MAP:true` : ``
+      ].filter(Boolean).join(',')
+    ],
+    { stdio: 'inherit' }
+  )
 }
 
-main()
+async function buildAll(targets) {
+  await runParallel(require('os').cpus().length, targets, build)
+}
