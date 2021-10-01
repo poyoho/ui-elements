@@ -41,7 +41,8 @@ function calcPostion (
 
 function itemsUserSelect (items: Array<HTMLElement>, enable: boolean) {
   items.forEach(item => {
-    item.style.userSelect = enable ? "auto" : "none"
+    // don't use user-select beauase iframe focus.
+    item.style.pointerEvents = enable ? "auto" : "none"
   })
 }
 
