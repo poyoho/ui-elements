@@ -30,6 +30,7 @@ module.exports = function rollupWebWorker () {
     load (id) {
       const parsedQuery = parseWorkerRequest(id)
       if (parsedQuery && parsedQuery.worker != null) {
+        console.log("[worker]", id)
         return ''
       }
     },

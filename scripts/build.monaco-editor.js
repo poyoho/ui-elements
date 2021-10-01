@@ -6,13 +6,14 @@ const json = require("@rollup/plugin-json")
 const rollupWorker = require("./plugins/rollup.worker")
 const rollupRaw = require("./plugins/rollup.raw")
 const rollupUrl = require("./plugins/rollup.url")
+const rollupMonacoCSS = require("./plugins/rollup.monacoCSS")
 const rollupTransform = require("./plugins/rollup.transform")
 const tsconfigPath = path.join(__dirname, "../tsconfig.json")
 const packagePath = path.join(__dirname, "../packages/")
 const { exit } = require("process")
 const { convertCompilerOptionsFromJson } = require("typescript")
 const postcss = require('rollup-plugin-postcss')
-
+const chalk = require("chalk")
 /**
  * build component by rollup
  * @param {string} pkgName
@@ -27,7 +28,7 @@ module.exports = async function monacoEditorBuilder (pkgName) {
     input: path.resolve(entry, "index.ts"),
     plugins: [
       postcss({
-        extract: true,
+        extract: "monaco-editor.css",
       }),
       nodeResolve({
         jsnext: true,
@@ -41,6 +42,7 @@ module.exports = async function monacoEditorBuilder (pkgName) {
           "__tests__",
         ]
       }),
+      rollupMonacoCSS("monaco-editor.css"),
       rollupWorker(),
       rollupRaw(),
       rollupUrl(),

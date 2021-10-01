@@ -1,5 +1,11 @@
 const { parse: parseUrl, URLSearchParams } = require("url")
 const fs = require("fs")
+const path = require("path")
+const { createHash } = require('crypto');
+
+function getAssetHash(content) {
+  return createHash('sha256').update(content).digest('hex').slice(0, 8)
+}
 
 function parseRequest(id) {
   const { search, href } = parseUrl(id)
@@ -18,16 +24,14 @@ function cleanUrl (url) {
   return url.replace(hashRE, '').replace(queryRE, '')
 }
 
-module.exports = function rollupWebWorker () {
+module.exports = function rollupWebWorker (virtualMonacoCSS) {
   return {
-    name: "raw-loader",
+    name: "monaco-editor-loader",
     async load (id) {
       const query = parseRequest(id)
-      if (query && query.search.raw !== undefined) {
-        console.log("[raw]", query.path)
-        return `export default ${JSON.stringify(
-          fs.readFileSync(query.path, { encoding: 'utf-8' })
-        )}`
+      if (query && query.search.virtualMonacoCSS !== undefined) {
+        console.log("[virtualMonacoCSS]", query.path);
+        return `export default new URL("./${virtualMonacoCSS}", import.meta.url).href`
       }
     },
   }

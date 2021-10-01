@@ -30,6 +30,7 @@ module.exports = function rollupWebWorker () {
     async load (id) {
       const query = parseRequest(id)
       if (query && query.search.url !== undefined) {
+        console.log("[url]", query.path);
         const source = fs.readFileSync(query.path, { encoding: 'utf-8' })
         const basename = path.parse(query.path)
         const sourceHash = getAssetHash(source)
