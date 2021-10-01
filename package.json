@@ -7,7 +7,7 @@
     "bootstrap": "yarn --frozen-lockfile && npx lerna bootstrap",
     "dev": "node scripts/dev.js",
     "build": "node scripts/build.js",
-    "build-website": "cd playground && vite build",
+    "build:website": "cd playground && vite build",
     "release": "node scripts/release.js",
     "predeploy": "yarn build:website",
     "deploy": "gh-pages -d ./playground/dist",
