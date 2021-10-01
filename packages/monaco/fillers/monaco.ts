@@ -13,7 +13,10 @@ export const useMonacoEditorMain = createSinglePromise<MonacoEditorImportData>(a
   if (typeof window !== 'undefined') {
 
     const style = document.createElement("style")
-    style.innerHTML = innerStyle.default
+    style.innerHTML = `@import "${innerStyle.default}"`
+
+    console.log(style);
+
 
     return {
       monaco: monacoESM as monaco,
