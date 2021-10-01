@@ -5,6 +5,7 @@ const { createHash } = require('crypto');
 const { nodeResolve } = require('@rollup/plugin-node-resolve')
 const esbuild = require("rollup-plugin-esbuild")
 const commonjs = require('@rollup/plugin-commonjs')
+const chalk = require("chalk")
 
 function getAssetHash(content) {
   return createHash('sha256').update(content).digest('hex').slice(0, 8)
@@ -30,6 +31,7 @@ module.exports = function rollupWebWorker () {
     load (id) {
       const parsedQuery = parseWorkerRequest(id)
       if (parsedQuery && parsedQuery.worker != null) {
+        console.log(chalk.blue("[worker]"), id)
         return ''
       }
     },
@@ -74,17 +76,17 @@ module.exports = function rollupWebWorker () {
       const contentHash = getAssetHash(content)
       const baseName = `./${basename}.${contentHash}.js`
       const fileName = path.posix.join(baseName)
-
-      this.emitFile({
+      const filePath = this.emitFile({
         fileName,
         type: 'asset',
         source: code
       })
-
       const workerOptions = { type: 'module' }
-      return `export default function WorkerWrapper() {
-        return new Worker(new URL('${baseName}', import.meta.url), ${JSON.stringify(workerOptions)})
-      }`
+      return [
+        `export default function WorkerWrapper() {`,
+        `  return new Worker(new URL("${baseName}", import.meta.url), ${JSON.stringify(workerOptions)})`,
+        `}`
+      ].join("\n")
     }
   }
 }

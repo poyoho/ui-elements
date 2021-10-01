@@ -1,41 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>code-editor</title>
   <script>process = {env: {}}</script>
-  <script type="module" src="./src/main.ts"></script>
-  <script type="module" src="./src/sandbox.ts"></script>
+  <script src="./monaco-editor.ts" type="module"></script>
   <style>
     .wrap {
       width: 80%;
       margin: 0 auto;
     }
-
     .editor {
       height: 500px;
     }
-
-    .head {
-      position: fixed;
-      top: 0;
-      background: red;
-      text-align: center;
-      width: 100%;
-      height: 100px;
-      z-index: 999;
+    .editor2 {
+      height: 500px;
     }
   </style>
 </head>
-
 <body>
   <a href="/">back</a>
   <div class="wrap">
-    <h3>code-sandbox</h3>
-    <iframe-sandbox></iframe-sandbox>
+    <h3>monaco-editor</h3>
+    <h4>vue html</h4>
+    <monaco-editor class="editor2"></monaco-editor>
+    <h4>ts</h4>
+    <monaco-editor class="editor"></monaco-editor>
   </div>
 </body>
 </html>

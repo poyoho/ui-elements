@@ -1,4 +1,5 @@
 import * as mode from './vuehtmlMode'
+import { Emitter, languages } from "monaco-editor"
 
 import vuehtml = monaco.languages.vuehtml
 
@@ -13,7 +14,7 @@ export interface LanguageServiceDefaults {
 // --- HTML configuration and defaults ---------
 
 export class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
-  private _onDidChange = new monaco.Emitter<LanguageServiceDefaults>()
+  private _onDidChange = new Emitter<LanguageServiceDefaults>()
   private _options: vuehtml.Options | undefined
   private _modeConfiguration: vuehtml.ModeConfiguration | undefined
   private _languageId: string
@@ -103,7 +104,7 @@ function createAPI() {
 	}
 }
 
-monaco.languages.vuehtml = createAPI()
+;(languages as any).vuehtml = createAPI()
 
 // --- Registration to monaco editor ---
 
@@ -111,13 +112,13 @@ function getMode(): Promise<typeof mode> {
   return import('./vuehtmlMode')
 }
 
-monaco.languages.register({
+languages.register({
 	id: vuehtmlLanguageId,
 	extensions: ['.vuehtml'],
   aliases: ["vuehtml", "vue-html"],
 })
 
-monaco.languages.onLanguage(vuehtmlLanguageId, () => {
+languages.onLanguage(vuehtmlLanguageId, () => {
   console.log("[setupMode]", vuehtmlLanguageId)
   getMode().then(mode => mode.setupMode(vuehtmlDefaults))
 })

@@ -1,12 +1,11 @@
 ;(async function () {
   Object.keys(
-    (await import.meta.glob("../public/*.html"))
+    (await import.meta.glob("../demos/**/*.html"))
   ).forEach(filename => {
-    const absolutePath = filename.replace("../public/", "./")
+    const absolutePath = filename.replace("../", "./")
     const dom = document.createElement("a")
     dom.href = absolutePath
-    dom.innerHTML = absolutePath.replace("./", "").replace(".html", "")
+    dom.innerHTML = absolutePath.split("/").pop()!.replace("/ui-elements/", "").replace(".html", "")
     document.body.appendChild(dom)
   })
 })()
-

@@ -2,11 +2,10 @@ import { Registry } from 'monaco-textmate'
 import { wireTmGrammars } from 'monaco-editor-textmate'
 import { createSinglePromise } from "@ui-elements/utils"
 import { loadWASM } from 'onigasm'
+import onigasm from "./token/onigasm.wasm?url"
 
 type monaco = typeof monaco
-const onigasm = new URL("./token/onigasm.wasm", import.meta.url)
-
-const loadOnigasm = createSinglePromise(() => loadWASM(onigasm.href))
+const loadOnigasm = createSinglePromise(() => loadWASM(onigasm))
 
 // anyscript fork from https://github.com/Nishkalkashyap/monaco-vscode-textmate-theme-converter/blob/master/lib/cjs/index.js
 function convertTheme(theme: any): any {

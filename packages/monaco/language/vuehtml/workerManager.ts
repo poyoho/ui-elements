@@ -1,5 +1,6 @@
 import type { LanguageServiceDefaultsImpl } from './monaco.contribution'
 import type { VueHTMLWorker } from './vuehtmlWorker'
+import { editor } from "monaco-editor"
 type Uri = monaco.Uri
 type IDisposable = monaco.IDisposable
 
@@ -49,7 +50,7 @@ export class WorkerManager {
     this._lastUsedTime = Date.now()
 
     if (!this._client) {
-      this._worker = monaco.editor.createWebWorker<VueHTMLWorker>({
+      this._worker = editor.createWebWorker<VueHTMLWorker>({
         moduleId: '', // never use it
         // passed in to the create() method
         createData: {

@@ -1,11 +1,7 @@
 import * as ls from 'vscode-languageserver-types'
 import type { LanguageServiceDefaults } from './monaco.contribution'
 import type { VueHTMLWorker } from './vuehtmlWorker'
-import languages = monaco.languages
-import editor = monaco.editor
-import MarkerSeverity = monaco.MarkerSeverity
-import Range = monaco.Range
-import Uri = monaco.Uri
+import { languages, editor, MarkerSeverity, Range, Uri } from "monaco-editor"
 type Position = monaco.Position
 type CancellationToken = monaco.CancellationToken
 type IDisposable = monaco.IDisposable
