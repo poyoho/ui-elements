@@ -1,0 +1,1 @@
+import"./modulepreload-polyfill.b7f2da20.js";import{i as o}from"./index.6173562f.js";import"./index.5a742324.js";import"./index.8e92e12c.js";import"./vendor.6389c943.js";import"./index.c880ee52.js";o();const e=document.querySelector("iframe-sandbox");e.eval(["console.log('asdasd')"]);e.setupDependency({});

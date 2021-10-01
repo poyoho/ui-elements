@@ -1,1 +1,0 @@
-function e(e){let r;return function(){return r||(r=e()),r}}function r(){let e=e=>{},r=()=>{};return{promise:new Promise(((t,n)=>{e=t,r=n})),resolve:e,reject:r}}function t(e,r,n){return e().catch((o=>(r--,console.log("[retry promise]",o,r),0===r?o:new Promise((o=>{n?setTimeout((()=>{o(t(e,r,n))}),n):o(t(e,r,n))})))))}export{r as a,e as c,t};
