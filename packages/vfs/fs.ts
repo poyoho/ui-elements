@@ -1,5 +1,6 @@
-import { BaseFile } from "./baseFile"
 import { EventListen } from "@ui-elements/utils"
+
+import { BaseFile } from "./baseFile"
 
 type FileSystemEventMap<FileType> = {
   update: (file: FileType) => void;

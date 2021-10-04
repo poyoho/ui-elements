@@ -1,4 +1,5 @@
 import * as ls from 'vscode-html-languageservice'
+
 import { vueHTMLPlugin } from './vue'
 import vuehtml = monaco.languages.vuehtml
 
@@ -21,14 +22,14 @@ export class VueHTMLWorker {
     this._languageService = ls.getLanguageService()
   }
 
-  async doValidation(code: string): Promise<ls.Diagnostic[]> {
+  doValidation(code: string): Promise<ls.Diagnostic[]> {
     // not yet suported
     return Promise.resolve([])
   }
 
-  async doComplete(
+  doComplete(
     uri: string,
-    position: ls.Position,
+    position: ls.Position
   ): Promise<ls.CompletionList> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
@@ -37,7 +38,7 @@ export class VueHTMLWorker {
       document,
       position,
       htmlDocument,
-      this._languageSettings && this._languageSettings.suggest,
+      this._languageSettings && this._languageSettings.suggest
     )
 
     return Promise.resolve({
@@ -49,10 +50,10 @@ export class VueHTMLWorker {
     })
   }
 
-  async format(
+  format(
     uri: string,
     range: ls.Range | undefined,
-    options: ls.FormattingOptions,
+    options: ls.FormattingOptions
   ): Promise<ls.TextEdit[]> {
     const document = this._getTextDocument(uri)
     const formattingOptions = { ...this._languageSettings.format, ...options }
@@ -60,7 +61,7 @@ export class VueHTMLWorker {
     return Promise.resolve(textEdits)
   }
 
-  async doHover(uri: string, position: ls.Position): Promise<ls.Hover> {
+  doHover(uri: string, position: ls.Position): Promise<ls.Hover> {
     console.log("doHover")
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
@@ -68,9 +69,9 @@ export class VueHTMLWorker {
     return Promise.resolve(hover!)
   }
 
-  async findDocumentHighlights(
+  findDocumentHighlights(
     uri: string,
-    position: ls.Position,
+    position: ls.Position
   ): Promise<ls.DocumentHighlight[]> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
@@ -78,41 +79,41 @@ export class VueHTMLWorker {
     return Promise.resolve(highlights)
   }
 
-  async findDocumentLinks(uri: string): Promise<ls.DocumentLink[]> {
+  findDocumentLinks(uri: string): Promise<ls.DocumentLink[]> {
     const document = this._getTextDocument(uri)
     const links = this._languageService.findDocumentLinks(document, null!)
     return Promise.resolve(links)
   }
 
-  async findDocumentSymbols(uri: string): Promise<ls.SymbolInformation[]> {
+  findDocumentSymbols(uri: string): Promise<ls.SymbolInformation[]> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
     const symbols = this._languageService.findDocumentSymbols(document, htmlDocument)
     return Promise.resolve(symbols)
   }
 
-  async getFoldingRanges(
+  getFoldingRanges(
     uri: string,
-    context?: { rangeLimit?: number },
+    context?: { rangeLimit?: number }
   ): Promise<ls.FoldingRange[]> {
     const document = this._getTextDocument(uri)
     const ranges = this._languageService.getFoldingRanges(document, context)
     return Promise.resolve(ranges)
   }
 
-  async getSelectionRanges(
+  getSelectionRanges(
     uri: string,
-    positions: ls.Position[],
+    positions: ls.Position[]
   ): Promise<ls.SelectionRange[]> {
     const document = this._getTextDocument(uri)
     const ranges = this._languageService.getSelectionRanges(document, positions)
     return Promise.resolve(ranges)
   }
 
-  async doRename(
+  doRename(
     uri: string,
     position: ls.Position,
-    newName: string,
+    newName: string
   ): Promise<ls.WorkspaceEdit> {
     const document = this._getTextDocument(uri)
     const htmlDocument = this._languageService.parseHTMLDocument(document)
@@ -128,7 +129,7 @@ export class VueHTMLWorker {
           uri,
           this._languageId,
           model.version,
-          model.getValue(),
+          model.getValue()
         )
       }
     }

@@ -1,4 +1,4 @@
-declare module monaco.languages.vuehtml {
+declare namespace monaco.languages.vuehtml {
 
     export interface CompletionConfiguration {
         [provider: string]: boolean;
@@ -98,5 +98,5 @@ declare module monaco.languages.vuehtml {
         setOptions(options: Options): void;
     }
 
-    export var vuehtmlDefaults: LanguageServiceDefaults;
+    export const vuehtmlDefaults: LanguageServiceDefaults
 }

@@ -1,4 +1,5 @@
 import { getShadowHost } from "@ui-elements/utils"
+
 import teamplateElement from "./drag-wrap-element"
 
 type direction = "row" | "column"
@@ -6,7 +7,7 @@ type direction = "row" | "column"
 function calcPostion (
   clickPostion: number,
   items: Array<HTMLElement>,
-  clientSize: (elm: HTMLElement) => number,
+  clientSize: (elm: HTMLElement) => number
 ) {
   const postion = {
     start: 0,
@@ -52,13 +53,13 @@ function mouseDown (e: MouseEvent) {
   const { items, wrap, direction } = hostElement
 
   const clientOffset = (e: MouseEvent) =>
-    direction === "row" ? e.offsetX : e.offsetY
+    (direction === "row" ? e.offsetX : e.offsetY)
   const clientPostion = (e: MouseEvent) =>
-    direction === "row" ? e.clientX : e.clientY
+    (direction === "row" ? e.clientX : e.clientY)
   const clientSize = (elm: HTMLElement) =>
-    direction === "row" ? elm.clientWidth : elm.clientHeight
+    (direction === "row" ? elm.clientWidth : elm.clientHeight)
   const changeSize = (elm: HTMLElement, size: string) =>
-    direction === "row" ? (elm.style.width = size) : (elm.style.height = size)
+    (direction === "row" ? (elm.style.width = size) : (elm.style.height = size))
   const updatePostion = (e: MouseEvent) => {
     const wrapSize = clientSize(wrap)
     const postion = calcPostion(clientOffset(e), items, clientSize)
@@ -77,7 +78,7 @@ function mouseDown (e: MouseEvent) {
   }
 
   itemsUserSelect(items, false)
-  let cItem = updatePostion(e)
+  const cItem = updatePostion(e)
   const mounseMove = (e: MouseEvent) => {
     const startOffsetSize = cItem.startSize + (clientPostion(e) - cItem.startPostion)
     if (startOffsetSize > cItem.maxSize || startOffsetSize < 0) {
@@ -133,9 +134,8 @@ export default class DragWrap extends HTMLElement {
   }
 
   get items (): Array<HTMLElement> {
-    const items = Array.from(this.querySelectorAll(`[data-index='${this.#id}']>[slot='item']`))
+    return Array.from(this.querySelectorAll(`[data-index='${this.#id}']>[slot='item']`))
       .filter(item => !item.hasAttribute("hidden")) as Array<HTMLElement>
-    return items
   }
 
   get wrap (): HTMLElement {
@@ -165,10 +165,14 @@ export default class DragWrap extends HTMLElement {
     const { items, wrap, direction } = this
     const itemSize = (100 / items.length) + "%"
 
-    console.log("[drag-wrap] update item");
+    console.log("[drag-wrap] update item")
     items.forEach((item) => {
       item.style.cursor = "auto"
-      direction === "row" ? (item.style.width = itemSize) : (item.style.height = itemSize)
+      if (direction === "row") {
+        item.style.width = itemSize
+      } else {
+        item.style.height = itemSize
+      }
       item.addEventListener("mousedown", stopPropagation)
     })
     if (items.length > 0) {

@@ -10,19 +10,29 @@ export default class TabContainerElement extends HTMLElement {
 
     this.addEventListener('keydown', (event: KeyboardEvent) => {
       const target = event.target
-      if (!(target instanceof HTMLElement)) return
-      if (target.closest(this.tagName) !== this) return
-      if (target.getAttribute('role') !== 'tab' && !target.closest('[role="tablist"]')) return
+      if (!(target instanceof HTMLElement)) {
+        return
+      }
+      if (target.closest(this.tagName) !== this) {
+        return
+      }
+      if (target.getAttribute('role') !== 'tab' && !target.closest('[role="tablist"]')) {
+        return
+      }
       const tabs = getTabs(this)
       const currentIndex = tabs.indexOf(tabs.find(tab => tab.matches('[aria-selected="true"]'))!)
 
       if (event.code === 'ArrowRight') {
         let index = currentIndex + 1
-        if (index >= tabs.length) index = 0
+        if (index >= tabs.length) {
+          index = 0
+        }
         selectTab(this, index)
       } else if (event.code === 'ArrowLeft') {
         let index = currentIndex - 1
-        if (index < 0) index = tabs.length - 1
+        if (index < 0) {
+          index = tabs.length - 1
+        }
         selectTab(this, index)
       } else if (event.code === 'Home') {
         selectTab(this, 0)
@@ -36,11 +46,17 @@ export default class TabContainerElement extends HTMLElement {
     this.addEventListener('click', (event: MouseEvent) => {
       const tabs = getTabs(this)
 
-      if (!(event.target instanceof Element)) return
-      if (event.target.closest(this.tagName) !== this) return
+      if (!(event.target instanceof Element)) {
+        return
+      }
+      if (event.target.closest(this.tagName) !== this) {
+        return
+      }
 
       const tab = event.target.closest('[role="tab"]')
-      if (!(tab instanceof HTMLElement) || !tab.closest('[role="tablist"]')) return
+      if (!(tab instanceof HTMLElement) || !tab.closest('[role="tablist"]')) {
+        return
+      }
 
       const index = tabs.indexOf(tab)
       selectTab(this, index)
@@ -79,7 +95,9 @@ function selectTab(tabContainer: TabContainerElement, index: number) {
       detail: {relatedTarget: selectedPanel}
     })
   )
-  if (cancelled) return
+  if (cancelled) {
+    return
+  }
 
   for (const tab of tabs) {
     tab.setAttribute('aria-selected', 'false')

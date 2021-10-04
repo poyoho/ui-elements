@@ -1,5 +1,6 @@
-import { Events, Directives } from './meta'
-import type { CompletionItem, TextDocument, HTMLDocument, Position } from 'vscode-html-languageservice'
+import type { CompletionItem, HTMLDocument, Position,TextDocument } from 'vscode-html-languageservice'
+
+import { Directives,Events } from './meta'
 
 export interface HTMLPluginCompletion {
   position: Position
@@ -14,13 +15,14 @@ export const vueHTMLPlugin = {
       end: position,
     })
 
-    if (text.match(/(<\w+\s*)[^>]*$/) !== null) {
-      if (!text.match(/\S+(?=\s*=\s*["']?[^"']*$)/) || text.match(/<\w+\s+$/)) {
-        return [
-          ...Directives,
-          ...Events,
-        ]
-      }
+    if (
+      text.match(/(<\w+\s*)[^>]*$/) !== null &&
+      (!text.match(/\S+(?=\s*=\s*["']?[^"']*$)/) || text.match(/<\w+\s+$/))
+    ) {
+      return [
+        ...Directives,
+        ...Events,
+      ]
     }
 
     return []

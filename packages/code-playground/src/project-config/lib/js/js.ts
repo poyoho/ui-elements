@@ -1,4 +1,5 @@
 import { CompiledFile, FileSystem } from "@ui-elements/vfs"
+
 import boostrap from "./bootstrap/main.js?raw"
 
 function getAppEntry (filesystem: FileSystem<CompiledFile>) {
@@ -17,10 +18,9 @@ export async function getProjectRunableJS (filesystem: FileSystem<CompiledFile>)
   await compileFile(appEntry)
   // const modules = parseFileModules(appEntry, filesystem)
 
-  const scripts = [
+  return [
     'window.__modules__ = {};window.__css__ = \'\'',
     // ...modules.reverse(),
     boostrap,
   ]
-  return scripts
 }

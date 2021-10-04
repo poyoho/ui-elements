@@ -1,6 +1,7 @@
+import { editor } from "monaco-editor"
+
 import type { LanguageServiceDefaultsImpl } from './monaco.contribution'
 import type { VueHTMLWorker } from './vuehtmlWorker'
-import { editor } from "monaco-editor"
 type Uri = monaco.Uri
 type IDisposable = monaco.IDisposable
 
@@ -39,11 +40,15 @@ export class WorkerManager {
 
   private _checkIfIdle(): void {
     if (!this._worker)
+    {
       return
+    }
 
     const timePassedSinceLastUsed = Date.now() - this._lastUsedTime
     if (timePassedSinceLastUsed > STOP_WHEN_IDLE_FOR)
+    {
       this._stopWorker()
+    }
   }
 
   private _getClient(): Promise<VueHTMLWorker> {

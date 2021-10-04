@@ -1,4 +1,4 @@
-;(async function () {
+(async function () {
   Object.keys(
     (await import.meta.glob("../demos/**/*.html"))
   ).forEach(filename => {

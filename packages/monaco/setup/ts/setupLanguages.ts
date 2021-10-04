@@ -39,7 +39,7 @@ export function setupTypescriptLanguageService (monaco: monaco) {
       names.forEach(name => {
         delete packages[name]
       })
-      console.log(packages);
+      console.log(packages)
 
       // monaco.languages.typescript.typescriptDefaults.setExtraLibs(packages)
       // monaco.languages.typescript.javascriptDefaults.setExtraLibs(packages)

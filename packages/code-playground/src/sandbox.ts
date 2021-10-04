@@ -1,4 +1,5 @@
 import type { SandboxEvent } from "@ui-elements/iframe-sandbox"
+
 import CodePlayground from "./code-playground"
 
 export function setupIframesandboxEvent (host: CodePlayground) {

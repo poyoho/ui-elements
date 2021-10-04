@@ -1,6 +1,7 @@
-import CodePlayground from "./code-playground"
-import { resolvePackageTypes, UnpkgChangeEventDetail, SKYPACK_CDN } from "@ui-elements/unpkg"
+import { resolvePackageTypes, SKYPACK_CDN,UnpkgChangeEventDetail } from "@ui-elements/unpkg"
 import { getShadowHost } from "@ui-elements/utils"
+
+import CodePlayground from "./code-playground"
 
 export async function updatePackages (e: CustomEvent<UnpkgChangeEventDetail>) {
   const { item, action } = e.detail
@@ -17,7 +18,7 @@ export async function updatePackages (e: CustomEvent<UnpkgChangeEventDetail>) {
         [item.name]: SKYPACK_CDN(item.name, item.version)
       })
     } else if (action === "delete") {
-
+      //
     }
   }
 }

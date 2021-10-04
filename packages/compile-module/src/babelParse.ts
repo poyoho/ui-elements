@@ -1,4 +1,14 @@
-import { Identifier, Node, Function, ObjectProperty, BlockStatement, Program, isReferenced, walk, ParserPlugin } from "./env"
+import {
+  BlockStatement,
+  Function,
+  Identifier,
+  isReferenced,
+  Node,
+  ObjectProperty,
+  ParserPlugin,
+  Program,
+  walk
+} from "./env"
 
 export function walkIdentifiers(
   root: Node,
@@ -42,7 +52,7 @@ export function walkIdentifiers(
         parent!.type === 'ObjectPattern'
       ) {
         // mark property in destructure pattern
-        ;(node as any).inPattern = true
+        (node as any).inPattern = true
       } else if (isFunctionType(node)) {
         // walk function expressions and add its arguments to known identifiers
         // so that we don't prefix them
@@ -138,7 +148,9 @@ export function walkBlockDeclarations(
 ) {
   for (const stmt of block.body) {
     if (stmt.type === 'VariableDeclaration') {
-      if (stmt.declare) continue
+      if (stmt.declare) {
+        continue
+      }
       for (const decl of stmt.declarations) {
         for (const id of extractIdentifiers(decl.id)) {
           onIdent(id)
@@ -148,7 +160,9 @@ export function walkBlockDeclarations(
       stmt.type === 'FunctionDeclaration' ||
       stmt.type === 'ClassDeclaration'
     ) {
-      if (stmt.declare || !stmt.id) continue
+      if (stmt.declare || !stmt.id) {
+        continue
+      }
       onIdent(stmt.id)
     }
   }
@@ -164,12 +178,14 @@ export function extractIdentifiers(
       break
 
     case 'MemberExpression':
+    {
       let object: any = param
       while (object.type === 'MemberExpression') {
         object = object.object
       }
       nodes.push(object)
       break
+    }
 
     case 'ObjectPattern':
       for (const prop of param.properties) {
@@ -183,7 +199,9 @@ export function extractIdentifiers(
 
     case 'ArrayPattern':
       param.elements.forEach(element => {
-        if (element) extractIdentifiers(element, nodes)
+        if (element) {
+          extractIdentifiers(element, nodes)
+        }
       })
       break
 
@@ -213,7 +231,7 @@ function markScopeIdentifier(
   } else {
     knownIds[name] = 1
   }
-  ;(node.scopeIds || (node.scopeIds = new Set())).add(name)
+  (node.scopeIds || (node.scopeIds = new Set())).add(name)
 }
 
 export const isFunctionType = (node: Node): node is Function => {

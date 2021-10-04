@@ -72,7 +72,9 @@ export class SandboxProxy {
       }
 
       if (action === 'cmd_ok')
+      {
         handler.resolve(cmd_data.args)
+      }
     }
     else {
       console.error('command not found', id, cmd_data, [
@@ -82,7 +84,9 @@ export class SandboxProxy {
   }
 
   handle_repl_message(event: any) {
-    if (event.source !== this.iframe.contentWindow) return
+    if (event.source !== this.iframe.contentWindow) {
+      return
+    }
     const { action, args } = event.data
 
     switch (action) {

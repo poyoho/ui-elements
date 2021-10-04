@@ -1,5 +1,5 @@
-import ENTRY from "./icon/entry.svg?raw"
 import CLOSE from "./icon/close.svg?raw"
+import ENTRY from "./icon/entry.svg?raw"
 import INSTALLED from "./icon/installed.svg?raw"
 import PACKAGE from "./icon/package.svg?raw"
 

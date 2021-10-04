@@ -1,7 +1,7 @@
 import {
-  MagicString, babelParse,
-  babelParserDefaultPlugins
-} from "./env"
+  babelParse,
+  babelParserDefaultPlugins,
+  MagicString} from "./env"
 
 export async function parseSkypackDTSModule (
   filename: string,

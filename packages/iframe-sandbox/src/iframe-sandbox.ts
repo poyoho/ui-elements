@@ -1,5 +1,6 @@
-import { createDefer } from "@ui-elements/utils"
 import { SKYPACK_CDN } from "@ui-elements/unpkg"
+import { createDefer } from "@ui-elements/utils"
+
 import { SandboxHandleData, SandboxProxy } from "./proxy"
 import srcdoc from "./srcdoc.html?raw"
 
@@ -17,7 +18,7 @@ export default class CodeSandbox extends HTMLElement {
     return this.shadowRoot!.querySelector("iframe")!
   }
 
-  async connectedCallback() {
+  connectedCallback() {
     const sandbox = this.ownerDocument.createElement("iframe")
     sandbox.style.width = "inherit"
     sandbox.style.height = "inherit"

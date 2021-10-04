@@ -1,7 +1,8 @@
-import teamplateElement from "./unpkg-manage-element"
-import { getShadowHost, debounce } from "@ui-elements/utils"
-import { resolvePackageData, resolveRecommendPackage } from "../libs/resolvePackage"
 import type { SelectBox } from "@ui-elements/select-box"
+import { debounce,getShadowHost } from "@ui-elements/utils"
+
+import { resolvePackageData, resolveRecommendPackage } from "../libs/resolvePackage"
+import teamplateElement from "./unpkg-manage-element"
 
 export interface UnpkgChangeEventDetail {
   list: PackageMetadata[]
@@ -61,10 +62,12 @@ function renderPackageMetadata (items: PackageMetadata[], container: HTMLElement
     const packageStatus = installed
       ? 'uninstall'
       : installedPackages.has(next.name) ? '✔ installed' : 'install'
+    const titleName = `${next.name}${version ? "@" + version : ""}`
+    const titlehref = `https://www.npmjs.com/package/${next.name}${version ? "/v/" + version : ""}`
     return prev.concat([
       // don't alert it, [function clickInstallPackage] use it.
       `<div class="item">`,
-      `<a class="pkg-title" target="_blank" href="https://www.npmjs.com/package/${next.name}${version ? "/v/" + version : ""}">${next.name}${version ? "@" + version : ""}</a>`,
+      `<a class="pkg-title" target="_blank" href="${titlehref}">${titleName}</a>`,
       `<div class="pkg-desc">${next.description}</div>`,
       `<div class="pkg-ctrl ${packageStatus}">`,
       `<select-box placeholder="pick package"></select-box>`,

@@ -1,13 +1,14 @@
-import teamplateElement from "./code-playground-element"
-import type { IframeSandbox } from "@ui-elements/iframe-sandbox"
 import type { DragWrap } from "@ui-elements/drag-wrap"
-import { FileSystem, CompiledFile } from "@ui-elements/vfs"
+import type { IframeSandbox } from "@ui-elements/iframe-sandbox"
 import { UnpkgManage } from "@ui-elements/unpkg"
+import { CompiledFile,FileSystem } from "@ui-elements/vfs"
+
+import teamplateElement from "./code-playground-element"
+import { clickshowInput, createFileEditor, fileInputBlur, inputFilename } from "./filetab"
 import { createMonacoEditorManager } from "./monacoEditor"
-import { createProjectManager, compileFile } from "./project-config"
-import { setupIframesandboxEvent } from "./sandbox"
-import { createFileEditor, clickshowInput, fileInputBlur, inputFilename } from "./filetab"
 import { updatePackages } from "./packageManage"
+import { compileFile,createProjectManager } from "./project-config"
+import { setupIframesandboxEvent } from "./sandbox"
 
 export default class CodePlayground extends HTMLElement {
   public fs = new FileSystem<CompiledFile>()
@@ -24,7 +25,7 @@ export default class CodePlayground extends HTMLElement {
     shadowRoot.appendChild(wrap)
   }
 
-  async connectedCallback () {
+  connectedCallback () {
     const { addButton, addInput, unpkgManage } = this
     setupIframesandboxEvent(this)
     addButton.addEventListener("click", clickshowInput)

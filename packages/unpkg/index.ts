@@ -1,8 +1,9 @@
-import UnpkgManage from "./element/unpkg-manage"
-import type { PackageMetadata, UnpkgChangeEventDetail } from "./element/unpkg-manage"
 import * as SelectBox from "@ui-elements/select-box"
+
+import type { PackageMetadata, UnpkgChangeEventDetail } from "./element/unpkg-manage"
+import UnpkgManage from "./element/unpkg-manage"
 export * from "./libs"
-export { UnpkgManage, PackageMetadata, UnpkgChangeEventDetail }
+export { PackageMetadata, UnpkgChangeEventDetail,UnpkgManage }
 
 declare global {
   interface Window {

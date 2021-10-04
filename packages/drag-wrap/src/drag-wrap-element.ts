@@ -1,5 +1,5 @@
 function html(...args: any) {
-  return args
+  return (args[0] as Array<string>).map((str, idx) => str + (args[1 + idx] || "")).join("")
 }
 
 export default html`

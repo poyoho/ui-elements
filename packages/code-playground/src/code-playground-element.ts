@@ -1,5 +1,7 @@
+import iconadd from "./icon/icon-add.svg?raw"
+
 function html(...args: any) {
-  return args
+  return (args[0] as Array<string>).map((str, idx) => str + (args[1 + idx] || "")).join("")
 }
 
 export default html`
@@ -11,7 +13,7 @@ export default html`
     <div id="tab">
 
       <input type="text" id="filename-input" />
-      <svg t="1631454598719" class="icon-add" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2150" width="14" height="14"><path d="M512 170.666667a42.666667 42.666667 0 0 1 42.666667 42.666666v256h256a42.666667 42.666667 0 1 1 0 85.333334h-256v256a42.666667 42.666667 0 1 1-85.333334 0v-256H213.333333a42.666667 42.666667 0 1 1 0-85.333334h256V213.333333a42.666667 42.666667 0 0 1 42.666667-42.666666z" fill="#e1e1e1" p-id="2151"></path></svg>
+      ${iconadd}
     </div>
     <drag-wrap direction="column" id="editor-wrap">
       <div slot="item" id="spacehold" hidden></div>

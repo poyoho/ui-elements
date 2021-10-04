@@ -1,16 +1,17 @@
-import { Registry } from 'monaco-textmate'
-import { wireTmGrammars } from 'monaco-editor-textmate'
 import { createSinglePromise } from "@ui-elements/utils"
+import { wireTmGrammars } from 'monaco-editor-textmate'
+import { Registry } from 'monaco-textmate'
 import { loadWASM } from 'onigasm'
+
 import onigasm from "./token/onigasm.wasm?url"
 
 type monaco = typeof monaco
 const loadOnigasm = createSinglePromise(() => loadWASM(onigasm))
 
-// anyscript fork from https://github.com/Nishkalkashyap/monaco-vscode-textmate-theme-converter/blob/master/lib/cjs/index.js
+// fork from https://github.com/Nishkalkashyap/monaco-vscode-textmate-theme-converter/blob/master/lib/cjs/index.js
 function convertTheme(theme: any): any {
-  let monacoThemeRule: any[] = []
-  let returnTheme = {
+  const monacoThemeRule: any[] = []
+  const returnTheme = {
     inherit: true,
     base: 'vs-dark',
     colors: theme.colors,
@@ -21,9 +22,9 @@ function convertTheme(theme: any): any {
     console.log(theme.include)
   }
 
-  theme.tokenColors.map(function (color: any) {
-    if (typeof color.scope == 'string') {
-      let split = color.scope.split(',')
+  theme.tokenColors.forEach((color: any) => {
+    if (typeof color.scope === 'string') {
+      const split = color.scope.split(',')
       if (split.length > 1) {
         color.scope = split
         evalAsArray()
@@ -37,10 +38,10 @@ function convertTheme(theme: any): any {
     evalAsArray()
     function evalAsArray() {
       if (color.scope) {
-        color.scope.map(function (scope: any) {
-            monacoThemeRule.push(Object.assign({}, color.settings, {
-              token: scope
-            }))
+        color.scope.forEach((scope: any) => {
+          monacoThemeRule.push(Object.assign({}, color.settings, {
+            token: scope
+          }))
         })
       }
     }

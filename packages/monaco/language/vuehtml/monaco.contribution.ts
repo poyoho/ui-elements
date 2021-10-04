@@ -1,5 +1,6 @@
-import * as mode from './vuehtmlMode'
 import { Emitter, languages } from "monaco-editor"
+
+import * as mode from './vuehtmlMode'
 
 import vuehtml = monaco.languages.vuehtml
 
@@ -56,6 +57,7 @@ const formatDefaults: Required<vuehtml.HTMLFormatConfiguration> = {
   tabSize: 2,
   insertSpaces: false,
   wrapLineLength: 120,
+  // eslint-disable-next-line max-len
   unformatted: 'default": "a, abbr, acronym, b, bdo, big, br, button, cite, code, dfn, em, i, img, input, kbd, label, map, object, q, samp, select, small, span, strong, sub, sup, textarea, tt, var',
   contentUnformatted: 'pre',
   indentInnerHtml: false,
@@ -94,17 +96,17 @@ const vuehtmlLanguageId = 'vuehtml'
 export const vuehtmlDefaults = new LanguageServiceDefaultsImpl(
   vuehtmlLanguageId,
   htmlOptionsDefault,
-  getConfigurationDefault(vuehtmlLanguageId),
+  getConfigurationDefault(vuehtmlLanguageId)
 )
 
 // export to the global based API
 function createAPI() {
-	return {
-		vuehtmlDefaults
-	}
+  return {
+    vuehtmlDefaults
+  }
 }
 
-;(languages as any).vuehtml = createAPI()
+(languages as any).vuehtml = createAPI()
 
 // --- Registration to monaco editor ---
 
@@ -113,8 +115,8 @@ function getMode(): Promise<typeof mode> {
 }
 
 languages.register({
-	id: vuehtmlLanguageId,
-	extensions: ['.vuehtml'],
+  id: vuehtmlLanguageId,
+  extensions: ['.vuehtml'],
   aliases: ["vuehtml", "vue-html"],
 })
 

@@ -1,4 +1,4 @@
-import type { MonacoEditorChangeEvent, MonacoEditor } from "@ui-elements/monaco-editor"
+import type { MonacoEditor,MonacoEditorChangeEvent } from "@ui-elements/monaco-editor"
 import { install } from "@ui-elements/monaco-editor"
 
 install()

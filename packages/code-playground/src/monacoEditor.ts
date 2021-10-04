@@ -1,8 +1,9 @@
-import CodePlayground from "./code-playground"
 import { MonacoEditor } from "@ui-elements/monaco-editor"
-import { CompiledFile, FileSystem } from "@ui-elements/vfs"
-import { MonacoEditorItem, SupportEditorType } from "./types"
 import { debounce } from "@ui-elements/utils"
+import { CompiledFile, FileSystem } from "@ui-elements/vfs"
+
+import CodePlayground from "./code-playground"
+import { MonacoEditorItem, SupportEditorType } from "./types"
 
 type EditorManage = ReturnType<typeof createMonacoEditorManager>
 
@@ -48,7 +49,7 @@ export function createMonacoEditorManager (host: CodePlayground) {
 
     getActive: () => {
       const result = []
-      for (let key in editors) {
+      for (const key in editors) {
         const editor = editors[key]
         if (editor.status) {
           result.push(editor)
@@ -79,7 +80,13 @@ export function createMonacoEditorManager (host: CodePlayground) {
   return manager
 }
 
-async function createOrGetModel (editor: MonacoEditor, type: SupportEditorType, filename: string, code: string, isNotExistFile: boolean) {
+async function createOrGetModel (
+  editor: MonacoEditor,
+  type: SupportEditorType,
+  filename: string,
+  code: string,
+  isNotExistFile: boolean
+) {
   let model
   if (isNotExistFile) {
     model = await editor.createModel(type, filename, code)
@@ -110,7 +117,13 @@ export async function activeMonacoEditor (
   if (filename.endsWith(".vue")) {
     const [vuehtmlEditor, tsEditor] = editorManage.active(["vuehtml", "ts"])
 
-    const vuehtmlModel = await createOrGetModel(vuehtmlEditor.editor, "vuehtml", filename+".vuehtml", code.vuehtml || "", isNotExistFile)
+    const vuehtmlModel = await createOrGetModel(
+      vuehtmlEditor.editor,
+      "vuehtml",
+      filename+".vuehtml",
+      code.vuehtml || "",
+      isNotExistFile
+    )
     vuehtmlEditor.editor.setModel(vuehtmlModel)
     const tsModel = await createOrGetModel(tsEditor.editor, "ts", filename+".ts", code.ts || "", isNotExistFile)
     tsEditor.editor.setModel(tsModel)
@@ -128,7 +141,7 @@ export async function activeMonacoEditor (
         cache.html = vuehtmlModel.getValue()
         fs.writeFile(file, getContent())
       }))
-      tsModel.onDidChangeContent(debounce(async () => {
+      tsModel.onDidChangeContent(debounce(() => {
         cache.ts = tsModel.getValue()
         fs.writeFile(file, getContent())
       }))
@@ -141,7 +154,7 @@ export async function activeMonacoEditor (
 
     if (isNotExistFile) {
       const file = createOrGetFile(fs, filename, code.ts || "", isNotExistFile)
-      tsModel.onDidChangeContent(debounce(async () => {
+      tsModel.onDidChangeContent(debounce(() => {
         fs.writeFile(file, tsModel.getValue())
       }))
     }
@@ -152,7 +165,7 @@ export async function activeMonacoEditor (
 
 export function removeMonacoEditorModel (editorManage: EditorManage) {
   const activeEditor = editorManage.getActive()
-  activeEditor.forEach(async editorState => {
+  activeEditor.forEach(editorState => {
     editorState.editor.removeModel()
   })
 }

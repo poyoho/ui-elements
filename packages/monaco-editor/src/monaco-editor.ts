@@ -1,4 +1,4 @@
-import { setupMonaco, SupportLanguage, setupTheme } from "@ui-elements/monaco"
+import { setupMonaco, setupTheme,SupportLanguage } from "@ui-elements/monaco"
 import { createDefer, debounce, tryPromise } from "@ui-elements/utils"
 
 export type MonacoEditorChangeEvent = Event & {
@@ -30,7 +30,7 @@ export default class MonacoEditor extends HTMLElement {
     const { monaco, style } = await this.monacoAccessor
     const { container } = this
 
-		// move all CSS inside the shadow root, pick only link tags relevant to the editor
+    // move all CSS inside the shadow root, pick only link tags relevant to the editor
     this.shadowRoot!.appendChild(style.cloneNode(true))
 
     const editor = monaco.editor.create(container, {
@@ -54,7 +54,7 @@ export default class MonacoEditor extends HTMLElement {
         return
       }
       console.log("[monaco-editor] change model")
-      model.onDidChangeContent(debounce(async () => {
+      model.onDidChangeContent(debounce(() => {
         // model.uri.path
         const event = document.createEvent("events") as MonacoEditorChangeEvent
         event.initEvent("code-change", false, false)
@@ -99,7 +99,7 @@ export default class MonacoEditor extends HTMLElement {
 
   removeModel () {
     this.editor.promise.then(editor => {
-     editor.getModel()?.dispose()
+      editor.getModel()?.dispose()
     })
   }
 }

@@ -1,4 +1,5 @@
 import * as worker from 'monaco-editor/esm/vs/editor/editor.worker'
+
 import { VueHTMLWorker } from './vuehtmlWorker'
 
 console.log("[vuehtml worker] load")

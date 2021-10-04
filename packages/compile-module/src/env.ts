@@ -1,6 +1,6 @@
 export { babelParserDefaultPlugins, walkIdentifiers } from "./babelParse"
+export type { BlockStatement, ExportSpecifier,Function, Identifier, Node, ObjectProperty, Program } from "@babel/types"
 export { default as MagicString } from 'magic-string'
-export type { Identifier, Node, Function, ObjectProperty, BlockStatement, Program, ExportSpecifier } from "@babel/types"
 
 export const modulesKey = '__modules__'
 export const exportKey = '__export__'

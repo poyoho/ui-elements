@@ -1,4 +1,4 @@
-import { CompletionItemKind, CompletionItem } from 'vscode-html-languageservice'
+import { CompletionItem,CompletionItemKind } from 'vscode-html-languageservice'
 
 export const Directives: CompletionItem[] = [
   {

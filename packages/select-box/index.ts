@@ -1,5 +1,5 @@
-import SelectBox from "./src/select"
 import OptionBox from "./src/option"
+import SelectBox from "./src/select"
 
 declare global {
   interface Window {
@@ -21,4 +21,4 @@ export function install() {
   }
 }
 
-export type {SelectBox, OptionBox}
+export type {OptionBox,SelectBox}

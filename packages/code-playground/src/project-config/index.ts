@@ -18,7 +18,10 @@ export interface ProjectManager {
 
 type CompilerType = "vue"
 
-export async function createProjectManager (type: CompilerType, filesystem: FileSystem<CompiledFile>): Promise<ProjectManager> {
+export async function createProjectManager (
+  type: CompilerType,
+  filesystem: FileSystem<CompiledFile>
+): Promise<ProjectManager> {
   switch (type) {
     case "vue": {
       return (await import("./lib/vue/vue")).createVueProject(filesystem)

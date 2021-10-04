@@ -1,8 +1,9 @@
-import { COMP_IDENTIFIER, SFCFile } from "./env"
 import {
-  SFCDescriptor, BindingMetadata,
-  parse, compileStyle, compileTemplate, rewriteDefault, compileScript
-} from "@vue/compiler-sfc"
+  BindingMetadata,
+  compileScript,
+  compileStyle, compileTemplate,   parse, rewriteDefault,   SFCDescriptor} from "@vue/compiler-sfc"
+
+import { COMP_IDENTIFIER, SFCFile } from "./env"
 
 export async function compileVueSFCFile(
   file: SFCFile
@@ -70,7 +71,7 @@ export async function compileVueSFCFile(
       descriptor,
       id,
       bindings,
-      false,
+      false
     )
     if (!clientTemplateResult) {
       return []
@@ -88,14 +89,14 @@ export async function compileVueSFCFile(
 
   if (hasScoped) {
     appendSharedCode(
-      `\n${COMP_IDENTIFIER}.__scopeId = ${JSON.stringify(`data-v-${id}`)}`,
+      `\n${COMP_IDENTIFIER}.__scopeId = ${JSON.stringify(`data-v-${id}`)}`
     )
   }
 
   if (clientCode || ssrCode) {
     appendSharedCode(
       `\n${COMP_IDENTIFIER}.__file = ${JSON.stringify(file.filename)}`
-        + `\nexport default ${COMP_IDENTIFIER}`,
+        + `\nexport default ${COMP_IDENTIFIER}`
     )
     file.compiled.js = clientCode.trimStart()
     file.compiled.ssr = ssrCode.trimStart()
@@ -108,7 +109,7 @@ export async function compileVueSFCFile(
 function doCompileScript(
   descriptor: SFCDescriptor,
   id: string,
-  ssr: boolean,
+  ssr: boolean
 ): [string, BindingMetadata | undefined] | undefined {
 
   if (descriptor.script || descriptor.scriptSetup) {
@@ -127,7 +128,7 @@ function doCompileScript(
         code += `\n/* Analyzed bindings: ${JSON.stringify(
           compiledScript.bindings,
           null,
-          2,
+          2
         )} */`
       }
       code
@@ -147,7 +148,7 @@ function doCompileTemplate(
   descriptor: SFCDescriptor,
   id: string,
   bindingMetadata: BindingMetadata | undefined,
-  ssr: boolean,
+  ssr: boolean
 ) {
   const templateResult = compileTemplate({
     source: descriptor.template!.content,
@@ -171,7 +172,7 @@ function doCompileTemplate(
   return (
     `\n${templateResult.code.replace(
       /\nexport (function|const) (render|ssrRender)/,
-      `$1 ${fnName}`,
+      `$1 ${fnName}`
     )}` + `\n${COMP_IDENTIFIER}.${fnName} = ${fnName}`
   )
 }

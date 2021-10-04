@@ -19,6 +19,12 @@ module.exports = {
     "max-params": "off",
     "@typescript-eslint/ban-types": "off",
     "@typescript-eslint/no-explicit-any": "off",
-    "complexity": "off"
+    "complexity": "off",
+    "sonarjs/no-duplicate-string": "off",
+    "sonarjs/no-small-switch": "off",
+    "no-nested-ternary": "off",
+    "@typescript-eslint/triple-slash-reference": "off",
+    "max-nested-callbacks": "off",
+    "max-depth": ["error", 5],
   }
 }

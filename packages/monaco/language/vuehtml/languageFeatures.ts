@@ -1,7 +1,8 @@
+import { editor, languages, MarkerSeverity, Range, Uri } from "monaco-editor"
 import * as ls from 'vscode-languageserver-types'
+
 import type { LanguageServiceDefaults } from './monaco.contribution'
 import type { VueHTMLWorker } from './vuehtmlWorker'
-import { languages, editor, MarkerSeverity, Range, Uri } from "monaco-editor"
 type Position = monaco.Position
 type CancellationToken = monaco.CancellationToken
 type IDisposable = monaco.IDisposable
@@ -18,12 +19,14 @@ export class DiagnosticsAdapter {
   constructor(
     private _languageId: string,
     private _worker: WorkerAccessor,
-    defaults: LanguageServiceDefaults,
+    defaults: LanguageServiceDefaults
   ) {
     const onModelAdd = (model: editor.IModel): void => {
       const modeId = model.getModeId()
       if (modeId !== this._languageId)
+      {
         return
+      }
 
       let handle: number
       this._listener[model.uri.toString()] = model.onDidChangeContent(() => {
@@ -48,13 +51,13 @@ export class DiagnosticsAdapter {
     this._disposables.push(
       editor.onWillDisposeModel((model) => {
         onModelRemoved(model)
-      }),
+      })
     )
     this._disposables.push(
       editor.onDidChangeModelLanguage((event) => {
         onModelRemoved(event.model)
         onModelAdd(event.model)
-      }),
+      })
     )
 
     this._disposables.push(
@@ -65,13 +68,15 @@ export class DiagnosticsAdapter {
             onModelAdd(model)
           }
         })
-      }),
+      })
     )
 
     this._disposables.push({
       dispose: () => {
         for (const key in this._listener)
+        {
           this._listener[key].dispose()
+        }
       },
     })
 
@@ -90,7 +95,9 @@ export class DiagnosticsAdapter {
           const markers = diagnostics.map(d => toDiagnostics(resource, d))
           const model = editor.getModel(resource)
           if (model && model.getModeId() === languageId)
+          {
             editor.setModelMarkers(model, languageId, markers)
+          }
         })
       })
       .then(undefined, (err) => {
@@ -154,7 +161,7 @@ function toRange(range: ls.Range): Range {
     range.start.line + 1,
     range.start.character + 1,
     range.end.line + 1,
-    range.end.character + 1,
+    range.end.character + 1
   )
 }
 
@@ -210,7 +217,7 @@ function toCompletionItemKind(kind?: number): languages.CompletionItemKind {
 }
 
 function fromCompletionItemKind(
-  kind: languages.CompletionItemKind,
+  kind: languages.CompletionItemKind
 ): ls.CompletionItemKind {
   const mItemKind = languages.CompletionItemKind
 
@@ -266,7 +273,7 @@ export class CompletionAdapter implements languages.CompletionItemProvider {
     model: editor.IReadOnlyModel,
     position: Position,
     context: languages.CompletionContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<languages.CompletionList> {
     const resource = model.uri
 
@@ -306,10 +313,14 @@ export class CompletionAdapter implements languages.CompletionItemProvider {
         item.insertText = entry.textEdit.newText
       }
       if (entry.additionalTextEdits)
+      {
         item.additionalTextEdits = entry.additionalTextEdits.map(toTextEdit)
+      }
 
       if (entry.insertTextFormat === ls.InsertTextFormat.Snippet)
+      {
         item.insertTextRules = languages.CompletionItemInsertTextRule.InsertAsSnippet
+      }
 
       return item
     })
@@ -331,7 +342,7 @@ function isMarkupContent(thing: any): thing is ls.MarkupContent {
 }
 
 function toMarkdownString(
-  entry: ls.MarkupContent | ls.MarkedString,
+  entry: ls.MarkupContent | ls.MarkedString
 ): IMarkdownString {
   if (typeof entry === 'string') {
     return {
@@ -353,13 +364,15 @@ function toMarkdownString(
 }
 
 function toMarkedStringArray(
-  contents: ls.MarkupContent | ls.MarkedString | ls.MarkedString[],
+  contents: ls.MarkupContent | ls.MarkedString | ls.MarkedString[]
 ): IMarkdownString[] {
   if (!contents) {
     return []
   }
   if (Array.isArray(contents))
+  {
     return contents.map(toMarkdownString)
+  }
 
   return [toMarkdownString(contents)]
 }
@@ -370,7 +383,7 @@ export class HoverAdapter implements languages.HoverProvider {
   async provideHover(
     model: editor.IReadOnlyModel,
     position: Position,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<languages.Hover> {
     const resource = model.uri
 
@@ -409,7 +422,7 @@ export class DocumentHighlightAdapter implements languages.DocumentHighlightProv
   public async provideDocumentHighlights(
     model: editor.IReadOnlyModel,
     position: Position,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<languages.DocumentHighlight[]> {
     const resource = model.uri
 
@@ -476,7 +489,7 @@ export class DocumentSymbolAdapter implements languages.DocumentSymbolProvider {
 
   public async provideDocumentSymbols(
     model: editor.IReadOnlyModel,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<languages.DocumentSymbol[]> {
     const resource = model.uri
 
@@ -502,7 +515,7 @@ export class DocumentLinkAdapter implements languages.LinkProvider {
 
   public async provideLinks(
     model: editor.IReadOnlyModel,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<languages.ILinksList> {
     const resource = model.uri
 
@@ -521,7 +534,7 @@ export class DocumentLinkAdapter implements languages.LinkProvider {
 }
 
 function fromFormattingOptions(
-  options: languages.FormattingOptions,
+  options: languages.FormattingOptions
 ): ls.FormattingOptions {
   return {
     tabSize: options.tabSize,
@@ -535,7 +548,7 @@ export class DocumentFormattingEditProvider implements languages.DocumentFormatt
   public async provideDocumentFormattingEdits(
     model: editor.IReadOnlyModel,
     options: languages.FormattingOptions,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<TextEdit[]> {
     const resource = model.uri
 
@@ -556,7 +569,7 @@ implements languages.DocumentRangeFormattingEditProvider {
     model: editor.IReadOnlyModel,
     range: Range,
     options: languages.FormattingOptions,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<TextEdit[]> {
     const resource = model.uri
 
@@ -577,7 +590,7 @@ export class RenameAdapter implements languages.RenameProvider {
     model: editor.IReadOnlyModel,
     position: Position,
     newName: string,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<languages.WorkspaceEdit> {
     const resource = model.uri
 
@@ -616,7 +629,7 @@ export class FoldingRangeAdapter implements languages.FoldingRangeProvider {
   public async provideFoldingRanges(
     model: editor.IReadOnlyModel,
     context: languages.FoldingContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<languages.FoldingRange[]> {
     const resource = model.uri
 
@@ -631,7 +644,9 @@ export class FoldingRangeAdapter implements languages.FoldingRangeProvider {
         end: range.endLine + 1,
       }
       if (typeof range.kind !== 'undefined')
+      {
         result.kind = toFoldingRangeKind(<ls.FoldingRangeKind>range.kind)
+      }
 
       return result
     })
@@ -655,7 +670,7 @@ export class SelectionRangeAdapter implements languages.SelectionRangeProvider {
   public async provideSelectionRanges(
     model: editor.IReadOnlyModel,
     positions: Position[],
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<languages.SelectionRange[][]> {
     const resource = model.uri
 

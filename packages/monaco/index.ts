@@ -1,8 +1,8 @@
 import { createSinglePromise } from "@ui-elements/utils"
 
 export * from "./textmate"
-import { setupTypescriptLanguageService } from "./setup"
 import { useMonacoEditorMain } from "./fillers/monaco"
+import { setupTypescriptLanguageService } from "./setup"
 
 export const SupportLanguage = {
   "vuehtml": "vuehtml",
@@ -15,7 +15,7 @@ export const SupportLanguage = {
 
 export const loadWorkers = createSinglePromise(async () => {
   const [
-    {},
+    _, // just import it
     { default: VueHTMLWorker },
     { default: EditorWorker },
     { default: JSONWorker },

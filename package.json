@@ -11,7 +11,9 @@
     "release": "node scripts/release.js",
     "predeploy": "yarn build:website",
     "deploy": "gh-pages -d ./playground/dist",
-    "preview": "node ./scripts/preview.js"
+    "preview": "node ./scripts/preview.js",
+    "lint": "eslint .",
+    "lint-fix": "eslint . --fix"
   },
   "author": "poyoho",
   "license": "MIT",
@@ -50,6 +52,7 @@
     "@rollup/plugin-dynamic-import-vars": "^1.4.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
+    "@typescript-eslint/parser": "^4.32.0",
     "chalk": "^4.1.0",
     "commitizen": "^4.2.2",
     "conventional-changelog-cli": "^2.1.1",

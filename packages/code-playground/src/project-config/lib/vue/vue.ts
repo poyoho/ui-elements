@@ -1,8 +1,9 @@
-import boostrap from "./bootstrap/main.js?raw"
-import indexDTS from "./bootstrap/index.d.ts?raw"
-import { CompiledFile, FileSystem } from "@ui-elements/vfs"
 import { parseFileModules } from "@ui-elements/compile-module"
 import { resolvePackageTypes } from "@ui-elements/unpkg"
+import { CompiledFile, FileSystem } from "@ui-elements/vfs"
+
+import indexDTS from "./bootstrap/index.d.ts?raw"
+import boostrap from "./bootstrap/main.js?raw"
 
 export async function createVueProject(filesystem: FileSystem<CompiledFile>) {
   const dts = await resolvePackageTypes("vue", "3.2.6")

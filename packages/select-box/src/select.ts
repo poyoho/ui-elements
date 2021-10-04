@@ -1,6 +1,7 @@
-import teamplateElement from "./select-element"
 import { getShadowHost } from "@ui-elements/utils"
+
 import type OptionBox from "./option"
+import teamplateElement from "./select-element"
 
 function toggleDrag (e: MouseEvent) {
   const target = e.target as HTMLElement

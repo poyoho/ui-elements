@@ -28,19 +28,19 @@ export function createDefer<T = any>() {
 
 export function tryPromise<T> (promise: () => Promise<T>, times: number, delay?: number): Promise<T> {
   return promise().catch(err => {
-      times--
-      console.log("[retry promise]", err, times)
-      if (times === 0) {
-        return err
-      }
-      return new Promise((resolveRetry) => {
-        if (delay) {
-          setTimeout(() => {
-            resolveRetry(tryPromise(promise, times, delay))
-          }, delay)
-        } else {
+    times--
+    console.log("[retry promise]", err, times)
+    if (times === 0) {
+      return err
+    }
+    return new Promise((resolveRetry) => {
+      if (delay) {
+        setTimeout(() => {
           resolveRetry(tryPromise(promise, times, delay))
-        }
-      })
+        }, delay)
+      } else {
+        resolveRetry(tryPromise(promise, times, delay))
+      }
     })
+  })
 }

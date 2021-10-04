@@ -1,9 +1,9 @@
 import {
-  modulesKey, exportKey, dynamicImportKey, moduleKey, globalCSS,
-  babelParse, babelParserDefaultPlugins, walkIdentifiers, MagicString,
-  ExportSpecifier, Identifier, Node, ObjectProperty, walk, ParserPlugin,
-  CompiledFile, FileSystem
-} from "./env"
+  babelParse, babelParserDefaultPlugins,   CompiledFile, dynamicImportKey, exportKey,   ExportSpecifier, FileSystem,
+  globalCSS,
+  Identifier, MagicString,
+  moduleKey,   modulesKey, Node, ObjectProperty, ParserPlugin,
+  walk, walkIdentifiers} from "./env"
 
 
 export const isStaticProperty = (node: Node): node is ObjectProperty => {
@@ -13,7 +13,7 @@ export const isStaticProperty = (node: Node): node is ObjectProperty => {
 export function procssCSSModule (
   filename: string,
   css: string | undefined,
-  filesystem: FileSystem,) {
+  filesystem: FileSystem) {
   return {
     code: css ? `\n${globalCSS} += ${JSON.stringify(css)}` : '',
   }
@@ -53,7 +53,7 @@ export function processJavaScriptModule (
     importToIdMap.set(filename, id)
     s.appendLeft(
       node.start!,
-      `const ${id} = ${modulesKey}[${JSON.stringify(filename)}]\n`,
+      `const ${id} = ${modulesKey}[${JSON.stringify(filename)}]\n`
     )
     return id
   }
@@ -65,8 +65,8 @@ export function processJavaScriptModule (
   // 0. instantiate module
   s.prepend(
     `const ${moduleKey} = __modules__[${JSON.stringify(
-      filename,
-    )}] = { [Symbol.toStringTag]: "Module" }\n\n`,
+      filename
+    )}] = { [Symbol.toStringTag]: "Module" }\n\n`
   )
 
   // 1. check all import statements and record id -> importName map
@@ -74,26 +74,28 @@ export function processJavaScriptModule (
     // import foo from 'foo' --> foo -> __import_foo__.default
     // import { baz } from 'foo' --> baz -> __import_foo__.baz
     // import * as ok from 'foo' --> ok -> __import_foo__
-    if (node.type === 'ImportDeclaration') {
-      const source = node.source.value
-      if (source.startsWith('./')) {
-        const importId = defineImport(node, node.source.value)
-        for (const spec of node.specifiers) {
-          if (spec.type === 'ImportSpecifier') {
-            idToImportMap.set(
-              spec.local.name,
-              `${importId}.${(spec.imported as Identifier).name}`,
-            )
-          } else if (spec.type === 'ImportDefaultSpecifier') {
-            idToImportMap.set(spec.local.name, `${importId}.default`)
-          } else {
-            // namespace specifier
-            idToImportMap.set(spec.local.name, importId)
-          }
-        }
-        s.remove(node.start!, node.end!)
+    if (node.type !== 'ImportDeclaration') {
+      continue
+    }
+    const source = node.source.value
+    if (!source.startsWith('./')) {
+      continue
+    }
+    const importId = defineImport(node, node.source.value)
+    for (const spec of node.specifiers) {
+      if (spec.type === 'ImportSpecifier') {
+        idToImportMap.set(
+          spec.local.name,
+          `${importId}.${(spec.imported as Identifier).name}`
+        )
+      } else if (spec.type === 'ImportDefaultSpecifier') {
+        idToImportMap.set(spec.local.name, `${importId}.default`)
+      } else {
+        // namespace specifier
+        idToImportMap.set(spec.local.name, importId)
       }
     }
+    s.remove(node.start!, node.end!)
   }
 
   // 2. check all export statements and define exports
@@ -123,7 +125,7 @@ export function processJavaScriptModule (
         for (const spec of node.specifiers) {
           defineExport(
             (spec.exported as Identifier).name,
-            `${importId}.${(spec as ExportSpecifier).local.name}`,
+            `${importId}.${(spec as ExportSpecifier).local.name}`
           )
         }
         s.remove(node.start!, node.end!)
@@ -202,7 +204,7 @@ export function processJavaScriptModule (
           s.overwrite(
             arg.start!,
             arg.end!,
-            JSON.stringify(arg.value.replace(/^\.\/+/, '')),
+            JSON.stringify(arg.value.replace(/^\.\/+/, ''))
           )
         }
       }
@@ -244,7 +246,7 @@ export function extractNames(param: Node): string[] {
 
 function extractIdentifiers(
   param: Node,
-  nodes: Identifier[] = [],
+  nodes: Identifier[] = []
 ): Identifier[] {
   switch (param.type) {
     case 'Identifier':
